@@ -71,3 +71,8 @@ HEK_Nterm_deg_ratio <- read_csv(
   'data_source/degradation_ratio/HEK_Nterm_deg_ratio.csv'
 )
 
+#curve fitting
+HEK_Nterm_curve_fitting_combined <- read_csv(
+  'data_source/curve_fitting/HEK_Nterm_curve_fitting_combined.csv'
+)
+
