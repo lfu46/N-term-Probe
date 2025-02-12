@@ -56,3 +56,18 @@ HEK_Nterm_2_irs <- read_csv(
 HEK_Nterm_3_irs <- read_csv(
   'data_source/normalized_data/HEK_Nterm_3_irs.csv'
 )
+
+#degradation ratio
+HEK_Nterm_1_deg_ratio <- read_csv(
+  'data_source/degradation_ratio/HEK_Nterm_1_deg_ratio.csv'
+)
+HEK_Nterm_2_deg_ratio <- read_csv(
+  'data_source/degradation_ratio/HEK_Nterm_2_deg_ratio.csv'
+)
+HEK_Nterm_3_deg_ratio <- read_csv(
+  'data_source/degradation_ratio/HEK_Nterm_3_deg_ratio.csv'
+)
+HEK_Nterm_deg_ratio <- read_csv(
+  'data_source/degradation_ratio/HEK_Nterm_deg_ratio.csv'
+)
+
