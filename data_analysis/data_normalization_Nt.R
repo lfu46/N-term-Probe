@@ -305,6 +305,6 @@ boxplot_cv_overlap_Nterm <- cv_overlap_Nterm |>
 ggsave(
   filename = 'figures/boxplot_cv_overlap_Nterm.png',
   plot = boxplot_cv_overlap_Nterm,
-  height = 640, width = 640, units = 'px'
+  height = 640, width = 640, dpi = 300, units = 'px'
 )
  
