@@ -1,5 +1,5 @@
 #import packages
-packages_names <- c("tidyverse", "readxl", "writexl", 'rstatix')
+packages_names <- c("tidyverse", "readxl", "writexl", 'rstatix', 'showtext')
 lapply(packages_names, require, character.only = TRUE)
 
 #linear model
@@ -69,24 +69,48 @@ cell_double_rate_kinetic <- bind_rows(
 
 K_cd <- mean(cell_double_rate_kinetic$Kd)
 
-#calculate half life
-HEK_Nt_Kd_half_life <- HEK_Nterm_curve_fitting_combined |> 
+#calculate half life for Nterm
+HEK_Nterm_Kd_half_life <- HEK_Nterm_curve_fitting_combined |> 
   filter(parameters %in% c('Kd', 'RSS')) |> 
   pivot_wider(names_from = `parameters`, values_from = `values`) |> 
   mutate(
     half_life = log(2)/(Kd - K_cd)
   ) |> 
   filter(half_life > 0) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, Kd, half_life, RSS) |> 
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, Kd, half_life, RSS) |> 
   mutate(
     Percentile = percent_rank(half_life)
   ) |> 
   arrange(Percentile)
 
-HEK_Nt_Kd_half_life |> 
-  ggplot() +
-  geom_histogram(aes(x = half_life), bins = 50) +
-  xlim(0, 100)
+write_csv(HEK_Nterm_Kd_half_life, file = 'data_source/Kd_half_life/HEK_Nterm_Kd_half_life.csv')
 
-HEK_Nt_Kd_half_life |> 
-  get_summary_stats(half_life)
+#histogram for Nterm half life
+font_add(family = 'arial', regular = 'arial.ttf')
+showtext_auto()
+
+Nterm_half_life_median <- HEK_Nterm_Kd_half_life |> 
+  get_summary_stats(half_life, type = 'median') |> 
+  pull(median)
+
+histogram_Nterm_half_life <- HEK_Nterm_Kd_half_life |> 
+  ggplot() +
+  geom_histogram(aes(x = half_life), color = 'black', fill = color_1) +
+  geom_vline(xintercept = Nterm_half_life_median, linetype = 'dashed', color = 'gray') +
+  annotate(
+    'text', label = paste(round(Nterm_half_life_median, digits = 1), ' hr'),
+    x = 23, y = 1200, size = 3, color = 'black', 
+  ) +
+  xlim(0, 100) +
+  labs(x = 'Half life (hr)', y = 'Count') +
+  theme(
+    axis.title = element_text(size = 10),
+    axis.text = element_text(size = 8)
+  )
+
+ggsave(
+  'figures/figure3/histogram_Nterm_half_life.eps',
+  plot = histogram_Nterm_half_life,
+  height = 1.5, width = 2, units = 'in'
+)
+

@@ -2,6 +2,14 @@
 packages_names <- c("tidyverse", "readxl", "writexl")
 lapply(packages_names, require, character.only = TRUE)
 
+#define color
+color_1 <- '#4b1978'
+color_2 <- '#18647c'
+color_3 <- '#0164c9'
+color_4 <- '#00b32d'
+color_5 <- '#c73001'
+color_6 <- '#ffb042'
+
 #psm 
 HEK_Nt_1_psm <- read_csv(
   'data_source/psm/HEK_Nt_1_psm.csv'
@@ -75,4 +83,11 @@ HEK_Nterm_deg_ratio <- read_csv(
 HEK_Nterm_curve_fitting_combined <- read_csv(
   'data_source/curve_fitting/HEK_Nterm_curve_fitting_combined.csv'
 )
+
+#half life for Nterm
+HEK_Nterm_Kd_half_life <- read_csv(
+  'data_source/Kd_half_life/HEK_Nterm_Kd_half_life.csv'
+)
+
+#half life for WP
 

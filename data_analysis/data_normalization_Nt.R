@@ -67,7 +67,7 @@ write_csv(HEK_Nt_3_psm_TMTi_light_N_term, file = 'data_source/normalized_data/HE
 #group by N-term index
 #HEK_Nt_1
 HEK_Nterm_1 <- HEK_Nt_1_psm_TMTi_light_N_term |> 
-  group_by(Index, UniProt_Accession, Gene, Entry.Name) |> 
+  group_by(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name) |> 
   summarise(
     deg_126_0h_TMTi = sum(deg_126_0h_TMTi),
     deg_127_3h_TMTi = sum(deg_127_3h_TMTi),
@@ -82,7 +82,7 @@ write_csv(HEK_Nterm_1, file = 'data_source/normalized_data/HEK_Nterm_1.csv')
 
 #HEK_Nt_2
 HEK_Nterm_2 <- HEK_Nt_2_psm_TMTi_light_N_term |> 
-  group_by(Index, UniProt_Accession, Gene, Entry.Name) |> 
+  group_by(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name) |> 
   summarise(
     deg_126_0h_TMTi = sum(deg_126_0h_TMTi),
     deg_127_3h_TMTi = sum(deg_127_3h_TMTi),
@@ -97,7 +97,7 @@ write_csv(HEK_Nterm_2, file = 'data_source/normalized_data/HEK_Nterm_2.csv')
 
 #HEK_Nt_3
 HEK_Nterm_3 <- HEK_Nt_3_psm_TMTi_light_N_term |> 
-  group_by(Index, UniProt_Accession, Gene, Entry.Name) |> 
+  group_by(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name) |> 
   summarise(
     deg_126_0h_TMTi = sum(deg_126_0h_TMTi),
     deg_127_3h_TMTi = sum(deg_127_3h_TMTi),
@@ -307,4 +307,3 @@ ggsave(
   plot = boxplot_cv_overlap_Nterm,
   height = 640, width = 640, dpi = 300, units = 'px'
 )
- 

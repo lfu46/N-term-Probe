@@ -13,10 +13,10 @@ HEK_Nterm_1_deg_ratio <- HEK_Nterm_1_irs |>
     ratio_12 = deg_130_12h_TMTi_irs/deg_126_0h_TMTi_irs,
     ratio_24 = deg_131_24h_TMTi_irs/deg_126_0h_TMTi_irs
   ) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, starts_with("ratio")) |> 
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, starts_with("ratio")) |> 
   pivot_longer(cols = starts_with("ratio"), names_to = 'deg_timepoint', values_to = 'deg_ratio') |> 
   separate(col = deg_timepoint, sep = "_", into = c('ratio', 'timepoint'), convert = TRUE) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, timepoint, deg_ratio)
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, timepoint, deg_ratio)
 
 write_csv(HEK_Nterm_1_deg_ratio, file = 'data_source/degradation_ratio/HEK_Nterm_1_deg_ratio.csv')
 
@@ -30,10 +30,10 @@ HEK_Nterm_2_deg_ratio <- HEK_Nterm_2_irs |>
     ratio_12 = deg_130_12h_TMTi_irs/deg_126_0h_TMTi_irs,
     ratio_24 = deg_131_24h_TMTi_irs/deg_126_0h_TMTi_irs
   ) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, starts_with("ratio")) |> 
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, starts_with("ratio")) |> 
   pivot_longer(cols = starts_with("ratio"), names_to = 'deg_timepoint', values_to = 'deg_ratio') |> 
   separate(col = deg_timepoint, sep = "_", into = c('ratio', 'timepoint'), convert = TRUE) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, timepoint, deg_ratio)
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, timepoint, deg_ratio)
 
 write_csv(HEK_Nterm_2_deg_ratio, file = 'data_source/degradation_ratio/HEK_Nterm_2_deg_ratio.csv')
 
@@ -47,10 +47,10 @@ HEK_Nterm_3_deg_ratio <- HEK_Nterm_3_irs |>
     ratio_12 = deg_130_12h_TMTi_irs/deg_126_0h_TMTi_irs,
     ratio_24 = deg_131_24h_TMTi_irs/deg_126_0h_TMTi_irs
   ) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, starts_with("ratio")) |> 
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, starts_with("ratio")) |> 
   pivot_longer(cols = starts_with("ratio"), names_to = 'deg_timepoint', values_to = 'deg_ratio') |> 
   separate(col = deg_timepoint, sep = "_", into = c('ratio', 'timepoint'), convert = TRUE) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, timepoint, deg_ratio)
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, timepoint, deg_ratio)
 
 write_csv(HEK_Nterm_3_deg_ratio, file = 'data_source/degradation_ratio/HEK_Nterm_3_deg_ratio.csv')
 
@@ -84,56 +84,56 @@ overlap_Nterm_deg_ratio <- HEK_Nterm_1_deg_ratio |>
   filter(Index %in% overlap_Nterm) |> 
   left_join(
     HEK_Nterm_2_deg_ratio |> filter(Index %in% overlap_Nterm),
-    by = c('Index', 'UniProt_Accession', 'Gene', 'Entry.Name', 'timepoint'),
+    by = c('Index', 'UniProt_Accession', 'Protein.Start', 'Gene', 'Entry.Name', 'timepoint'),
     suffix = c('.Nt_1', '.Nt_2')
   ) |> 
   left_join(
     HEK_Nterm_3_deg_ratio |> filter(Index %in% overlap_Nterm),
-    by = c('Index', 'UniProt_Accession', 'Gene', 'Entry.Name', 'timepoint')
+    by = c('Index', 'UniProt_Accession', 'Protein.Start', 'Gene', 'Entry.Name', 'timepoint')
   ) |> 
   mutate(
     deg_ratio_avg = (deg_ratio.Nt_1 + deg_ratio.Nt_2 + deg_ratio)/3
   ) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, timepoint, deg_ratio_avg)
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, timepoint, deg_ratio_avg)
 
 #overlap in HEK_Nt_1 and HKE_Nt_2
 overlap_1_2_deg_ratio <- HEK_Nterm_1_deg_ratio |> 
   filter(Index %in% overlap_1_2) |> 
   left_join(
     HEK_Nterm_2_deg_ratio |> filter(Index %in% overlap_1_2),
-    by = c('Index', 'UniProt_Accession', 'Gene', 'Entry.Name', 'timepoint'),
+    by = c('Index', 'UniProt_Accession', 'Protein.Start', 'Gene', 'Entry.Name', 'timepoint'),
     suffix = c('.Nt_1', '.Nt_2')
   ) |> 
   mutate(
     deg_ratio_avg = (deg_ratio.Nt_1 + deg_ratio.Nt_2)/2
   ) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, timepoint, deg_ratio_avg)
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, timepoint, deg_ratio_avg)
 
 #overlap in HEK_Nt_2 and HEK_Nt_3
 overlap_2_3_deg_ratio <- HEK_Nterm_2_deg_ratio |> 
   filter(Index %in% overlap_2_3) |> 
   left_join(
     HEK_Nterm_3_deg_ratio |> filter(Index %in% overlap_2_3),
-    by = c('Index', 'UniProt_Accession', 'Gene', 'Entry.Name', 'timepoint'),
+    by = c('Index', 'UniProt_Accession', 'Protein.Start', 'Gene', 'Entry.Name', 'timepoint'),
     suffix = c('.Nt_2', '.Nt_3')
   ) |> 
   mutate(
     deg_ratio_avg = (deg_ratio.Nt_2 + deg_ratio.Nt_3)/2
   ) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, timepoint, deg_ratio_avg)
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, timepoint, deg_ratio_avg)
 
 #overlap in HEK_Nt_3 and HEK_Nt_1
 overlap_3_1_deg_ratio <- HEK_Nterm_3_deg_ratio |> 
   filter(Index %in% overlap_3_1) |> 
   left_join(
     HEK_Nterm_1_deg_ratio |> filter(Index %in% overlap_3_1),
-    by = c('Index', 'UniProt_Accession', 'Gene', 'Entry.Name', 'timepoint'),
+    by = c('Index', 'UniProt_Accession', 'Protein.Start', 'Gene', 'Entry.Name', 'timepoint'),
     suffix = c('.Nt_3', '.Nt_1')
   ) |> 
   mutate(
     deg_ratio_avg = (deg_ratio.Nt_3 + deg_ratio.Nt_1)/2
   ) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, timepoint, deg_ratio_avg)
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, timepoint, deg_ratio_avg)
 
 #unique in HEK_Nt_1
 unique_1_deg_ratio <- HEK_Nterm_1_deg_ratio |> 
@@ -141,7 +141,7 @@ unique_1_deg_ratio <- HEK_Nterm_1_deg_ratio |>
   mutate(
     deg_ratio_avg = deg_ratio
   ) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, timepoint, deg_ratio_avg)
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, timepoint, deg_ratio_avg)
 
 #unique in HEK_Nt_2
 unique_2_deg_ratio <- HEK_Nterm_2_deg_ratio |> 
@@ -149,7 +149,7 @@ unique_2_deg_ratio <- HEK_Nterm_2_deg_ratio |>
   mutate(
     deg_ratio_avg = deg_ratio
   ) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, timepoint, deg_ratio_avg)
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, timepoint, deg_ratio_avg)
 
 #unique in HEK_Nt_3
 unique_3_deg_ratio <- HEK_Nterm_3_deg_ratio |> 
@@ -157,7 +157,7 @@ unique_3_deg_ratio <- HEK_Nterm_3_deg_ratio |>
   mutate(
     deg_ratio_avg = deg_ratio
   ) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, timepoint, deg_ratio_avg)
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, timepoint, deg_ratio_avg)
 
 #combine results from three replicates
 HEK_Nterm_deg_ratio <- bind_rows(
@@ -229,13 +229,13 @@ linear_model <- function(df) {
 ##curve fitting
 #non-linear model fitting
 HEK_Nterm_curve_fitting_result_1 <- HEK_Nterm_deg_ratio %>%
-  group_by(Index, UniProt_Accession, Gene, Entry.Name) |> 
+  group_by(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name) |> 
   group_modify(~ non_linear_model(.x)) |> 
   ungroup()
 
 HEK_Nterm_nonlinear_fitting <- HEK_Nterm_curve_fitting_result_1 |> 
   filter(RSS < 0.05) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, A:RSS) |> 
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, A:RSS) |> 
   pivot_longer(cols = A:RSS, names_to = 'parameters', values_to = 'values') |> 
   mutate(
     model = 'nonlinear fitting'
@@ -246,18 +246,18 @@ write_csv(HEK_Nterm_nonlinear_fitting, file = 'data_source/curve_fitting/HEK_Nte
 #linear model fitting
 HEK_Nterm_curve_fitting_result_2 <- HEK_Nterm_curve_fitting_result_1 |> 
   filter(is.na(A) | RSS >= 0.05) |> 
-  left_join(HEK_Nterm_deg_ratio, by = c('Index', 'UniProt_Accession', 'Gene', 'Entry.Name')) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, timepoint, deg_ratio_avg) |> 
+  left_join(HEK_Nterm_deg_ratio, by = c('Index', 'UniProt_Accession', 'Protein.Start', 'Gene', 'Entry.Name')) |> 
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, timepoint, deg_ratio_avg) |> 
   mutate(
     ln_deg_ratio_avg = log(deg_ratio_avg)
   ) |> 
-  group_by(Index, UniProt_Accession, Gene, Entry.Name) |> 
+  group_by(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name) |> 
   group_modify(~ linear_model(.x)) |> 
   ungroup()
 
 HEK_Nterm_linear_fitting <- HEK_Nterm_curve_fitting_result_2 |> 
   filter(RSS < 0.05) |> 
-  select(Index, UniProt_Accession, Gene, Entry.Name, lnA:RSS) |> 
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, lnA:RSS) |> 
   pivot_longer(cols = lnA:RSS, names_to = 'parameters', values_to = 'values') |> 
   mutate(
     model = 'linear fitting'
