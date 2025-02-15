@@ -1,5 +1,5 @@
 #import packages
-packages_names <- c("tidyverse", "readxl", "writexl")
+packages_names <- c("tidyverse")
 lapply(packages_names, require, character.only = TRUE)
 
 #define color
