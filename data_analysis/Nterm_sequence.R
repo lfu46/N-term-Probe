@@ -24,14 +24,9 @@ human_fasta_tibble <- tibble(
 HEK_Nterm_Kd_half_life_sequence <- HEK_Nterm_Kd_half_life |> 
   left_join(human_fasta_tibble, by = 'UniProt_Accession') |> 
   mutate(
-    Nterm_sequence = substr(Sequence, start = Protein.Start, end = Full_Protein_Length),
-    Nterm_31mer = substr(Sequence, start = Protein.Start, end = Protein.Start + 30),
-    Nterm_terminus = substr(Sequence, start = Protein.Start, end = Protein.Start)
+    Nterm_sequence = substr(Sequence, start = Protein.Start, stop = Full_Protein_Length),
+    Nterm_31mer = substr(Sequence, start = Protein.Start, stop = Protein.Start + 30),
+    Nterm_terminus = substr(Sequence, start = Protein.Start, stop = Protein.Start)
   )
 
 write_csv(HEK_Nterm_Kd_half_life_sequence, file = 'data_source/Nterm_sequence/HEK_Nterm_Kd_half_life_sequence.csv')
-
-
-  
-
-

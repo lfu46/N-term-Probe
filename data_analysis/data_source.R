@@ -91,3 +91,8 @@ HEK_Nterm_Kd_half_life <- read_csv(
 
 #half life for WP
 
+#Nterm sequence
+HEK_Nterm_Kd_half_life_sequence <- read_csv(
+  'data_source/Nterm_sequence/HEK_Nterm_Kd_half_life_sequence.csv'
+)
+
