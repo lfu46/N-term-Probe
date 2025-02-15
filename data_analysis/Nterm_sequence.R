@@ -7,3 +7,31 @@ human_fasta <- readAAStringSet(
   'data_source/uniprotkb_reviewed_true_AND_model_organ_2025_02_15.fasta'
 )
 
+#build tibble using human fasta
+human_fasta_tibble <- tibble(
+  Name = names(human_fasta),
+  Sequence = as.character(human_fasta),
+  Length = width(human_fasta)
+) |> 
+  mutate(
+    Name = sub(' .*', '', Name),
+    Full_Protein_Length = as.numeric(Length)
+  ) |> 
+  separate(Name, into = c('sp', 'UniProt_Accession', 'name'), sep = '\\|') |> 
+  select(UniProt_Accession, Sequence, Full_Protein_Length)
+
+#generate Nterm sequence
+HEK_Nterm_Kd_half_life_sequence <- HEK_Nterm_Kd_half_life |> 
+  left_join(human_fasta_tibble, by = 'UniProt_Accession') |> 
+  mutate(
+    Nterm_sequence = substr(Sequence, start = Protein.Start, end = Full_Protein_Length),
+    Nterm_31mer = substr(Sequence, start = Protein.Start, end = Protein.Start + 30),
+    Nterm_terminus = substr(Sequence, start = Protein.Start, end = Protein.Start)
+  )
+
+write_csv(HEK_Nterm_Kd_half_life_sequence, file = 'data_source/Nterm_sequence/HEK_Nterm_Kd_half_life_sequence.csv')
+
+
+  
+
+
