@@ -208,5 +208,32 @@ ggsave(
 )
 
 ##figure 3B, 
+quantification_filter <- tibble(
+  Level = c('cell doubling time normalization', 'filter criteria', 'quantification'),
+  Number = c(4317, 8942-4317, 14912-8942)
+)
 
+quantification_filter$fraction <- quantification_filter$Number/sum(quantification_filter$Number)
+
+quantification_filter$ymax <- cumsum(quantification_filter$fraction)
+
+quantification_filter$ymin = c(0, head(quantification_filter$ymax, n=-1))
+
+quantification_filter_plot <- quantification_filter |>
+  ggplot(aes(
+    x = 1, ymin = ymin, ymax = ymax, 
+    fill = factor(Level, levels = rev(Level))
+  )) +
+  geom_rect(aes(xmin = 3, xmax = 4), color = "white") +
+  coord_polar(theta = "y") +
+  xlim(c(2, 4)) +
+  scale_fill_manual(values = c('gray', color_2, color_1)) +
+  theme_void() +
+  theme(legend.position = "none")
+
+ggsave(
+  filename = 'figures/figure3/quantification_filter_plot.eps',
+  plot = quantification_filter_plot,
+  height = 2, width = 2, units = 'in'
+)
 
