@@ -68,3 +68,6 @@ rsconnect/
 *.cdxml
 *.cds
 
+#Ignore PPTX files
+*.pptx
+
