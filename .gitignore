@@ -48,16 +48,18 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 
-#Ignore CSV, TSV, XLSX files
+#Ignore CSV, TSV, XLSX, TXT files
 *.csv
 *.tsv
 *.xlsx
+*.txt
 
 #Ignore FASTA files
 *.fasta
 
-#Ignore PNG, TIFF, EPS files
+#Ignore PNG, TIFF, EPS, SVG files
 *.png
 *.tiff
 *.eps
+*.svg
 
