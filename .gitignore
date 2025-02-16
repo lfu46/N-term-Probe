@@ -64,3 +64,6 @@ rsconnect/
 *.svg
 *.ai
 
+#Ignore CDXML files
+*.cdxml
+
