@@ -103,7 +103,7 @@ subcellular_half_life_wilcox_test <- HEK_Nterm_Kd_half_life_subcellular_adj |>
   add_significance('p') |> 
   filter(p.signif != 'ns')
 
-# point plot
+# point boxplot
 font_add(family = 'arial', regular = 'arial.ttf')
 showtext_auto()
 
