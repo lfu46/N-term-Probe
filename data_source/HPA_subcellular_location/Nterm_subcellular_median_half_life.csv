@@ -1,3 +1,29 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:de6bb04a826bda0560327c31737de1410c180d1e1285170d21ed5452d0e33bfb
-size 972
+Main.location,variable,n,median
+Lipid droplets,half_life,2,24.752
+Centriolar satellite,half_life,4,16.677
+Golgi apparatus,half_life,49,10.265
+Nucleoli rim,half_life,15,9.354
+Cytoplasmic bodies,half_life,10,8.977
+Intermediate filaments,half_life,26,8.666
+Cell Junctions,half_life,16,8.61
+Peroxisomes,half_life,8,7.624
+Nuclear membrane,half_life,81,7.559
+Microtubules,half_life,19,7.424
+Plasma membrane,half_life,94,7.322
+Nucleoli,half_life,34,7.143
+Nucleoplasm,half_life,968,6.835
+Nuclear bodies,half_life,10,6.608
+Centrosome,half_life,4,6.58
+Vesicles,half_life,111,6.434
+Endoplasmic reticulum,half_life,172,6.343
+Cytosol,half_life,744,6.33
+Nuclear speckles,half_life,120,6.293
+Mitochondria,half_life,314,6.004
+Focal adhesion sites,half_life,12,5.075
+Endosomes,half_life,2,5.006
+Nucleoli fibrillar center,half_life,25,4.865
+Mid piece,half_life,11,4.597
+Actin filaments,half_life,13,4.548
+Midbody ring,half_life,2,3.981
+Lysosomes,half_life,1,3.669
+Midbody,half_life,1,0.381
