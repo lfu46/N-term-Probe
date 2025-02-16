@@ -59,6 +59,7 @@ rsconnect/
 
 #Ignore PNG, TIFF, EPS, SVG, AI files
 *.png
+*.tif
 *.tiff
 *.eps
 *.svg
