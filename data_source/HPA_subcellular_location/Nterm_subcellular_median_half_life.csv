@@ -1,29 +1,30 @@
 Main.location,variable,n,median
-Lipid droplets,half_life,2,24.752
+Microtubule ends,half_life,1,200
+Lipid droplets,half_life,4,112.737
+Cytoplasmic bodies,half_life,17,31.484
+Golgi apparatus,half_life,83,23.439
+Nuclear bodies,half_life,17,21.02
+Nucleoli rim,half_life,22,18.299
+Cell Junctions,half_life,22,18.2
+Peroxisomes,half_life,13,17.918
+Vesicles,half_life,192,17.807
 Centriolar satellite,half_life,4,16.677
-Golgi apparatus,half_life,49,10.265
-Nucleoli rim,half_life,15,9.354
-Cytoplasmic bodies,half_life,10,8.977
-Intermediate filaments,half_life,26,8.666
-Cell Junctions,half_life,16,8.61
-Peroxisomes,half_life,8,7.624
-Nuclear membrane,half_life,81,7.559
-Microtubules,half_life,19,7.424
-Plasma membrane,half_life,94,7.322
-Nucleoli,half_life,34,7.143
-Nucleoplasm,half_life,968,6.835
-Nuclear bodies,half_life,10,6.608
-Centrosome,half_life,4,6.58
-Vesicles,half_life,111,6.434
-Endoplasmic reticulum,half_life,172,6.343
-Cytosol,half_life,744,6.33
-Nuclear speckles,half_life,120,6.293
-Mitochondria,half_life,314,6.004
-Focal adhesion sites,half_life,12,5.075
-Endosomes,half_life,2,5.006
-Nucleoli fibrillar center,half_life,25,4.865
-Mid piece,half_life,11,4.597
-Actin filaments,half_life,13,4.548
-Midbody ring,half_life,2,3.981
+Intermediate filaments,half_life,40,15.78
+Mitochondria,half_life,509,15.393
+Actin filaments,half_life,22,12.778
+Nucleoli,half_life,50,12.602
+Nuclear membrane,half_life,114,12.543
+Nucleoplasm,half_life,1432,12.071
+Mid piece,half_life,18,11.987
+Nuclear speckles,half_life,185,11.805
+Cytosol,half_life,1104,11.709
+Endoplasmic reticulum,half_life,255,11.093
+Centrosome,half_life,5,11.013
+Plasma membrane,half_life,129,10.867
+Microtubules,half_life,28,9.973
+Focal adhesion sites,half_life,21,8.727
+Nucleoli fibrillar center,half_life,35,8.293
+Endosomes,half_life,3,8.246
+Midbody ring,half_life,3,5.809
 Lysosomes,half_life,1,3.669
 Midbody,half_life,1,0.381

@@ -1,8 +1,8 @@
-#import packages
+# import packages
 packages_names <- c("tidyverse", "rstatix")
 lapply(packages_names, require, character.only = TRUE)
 
-#ELM N-degron
+# ELM N-degron
 HEK_Nterm_ELM_N_degron <- HEK_Nterm_Kd_half_life_sequence |> 
   mutate(
     ELM_N_degron = case_when(
@@ -18,7 +18,7 @@ HEK_Nterm_ELM_N_degron <- HEK_Nterm_Kd_half_life_sequence |>
     ELM_N_degron = ifelse(is.na(ELM_N_degron), 'Others', ELM_N_degron)
   )
 
-#ELM N-degron half life median
+# ELM N-degron half life median
 ELM_N_degron_half_life_median <- HEK_Nterm_ELM_N_degron |> 
   group_by(ELM_N_degron) |> 
   get_summary_stats(half_life, type = 'median') |> 
@@ -26,7 +26,7 @@ ELM_N_degron_half_life_median <- HEK_Nterm_ELM_N_degron |>
 
 write_csv(ELM_N_degron_half_life_median, file = 'data_source/ELM_degron/ELM_N_degron_half_life_median.csv')
 
-#Wilcoxon rank-sum test
+# Wilcoxon rank-sum test
 HEK_Nterm_ELM_N_degron |>
   wilcox_test(half_life ~ ELM_N_degron) |> 
   filter(p < 0.05)

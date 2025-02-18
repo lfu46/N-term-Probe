@@ -1,28 +1,28 @@
-#import packages
+# import packages
 packages_names <- c('tidyverse', 'clusterProfiler', 'org.Hs.eg.db')
 lapply(packages_names, require, character.only = TRUE)
 
-#Nterm Top 25%, short half life
-Nterm_short_half_life_protein <- HEK_Nterm_Kd_half_life |> 
-  filter(Percentile <= 0.25) |> 
+# Nterm, Fast turnover
+Nterm_fast_turnover_protein <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
+  filter(category == 'Fast turnover') |> 
   distinct(UniProt_Accession) |> 
   pull()
 
-#Nterm Bottom 25%, long half life
-Nterm_long_half_life_protein <- HEK_Nterm_Kd_half_life |> 
-  filter(Percentile >= 0.75) |> 
+# Nterm, Stable
+Nterm_stable_protein <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
+  filter(category == 'Stable') |> 
   distinct(UniProt_Accession) |> 
   pull()
 
-#Nterm total protein
-Nterm_protein_total <- HEK_Nterm_Kd_half_life |> 
+# Nterm total protein
+Nterm_protein_total <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
   distinct(UniProt_Accession) |> 
   pull()
 
-##Gene Ontology analysis
-#Top 25%, short half life
-Nterm_short_half_life_GO <- enrichGO(
-  gene = Nterm_short_half_life_protein,
+## Gene Ontology analysis
+# Fast turnover
+Nterm_fast_turnover_GO <- enrichGO(
+  gene = Nterm_fast_turnover_protein,
   OrgDb = org.Hs.eg.db,
   universe = Nterm_protein_total,
   keyType = 'UNIPROT',
@@ -32,12 +32,12 @@ Nterm_short_half_life_GO <- enrichGO(
 )
 
 write_csv(
-  Nterm_short_half_life_GO@result, file = 'data_source/GO_KEGG_analysis/Nterm_short_half_life_GO.csv'
+  Nterm_fast_turnover_GO@result, file = 'data_source/GO_KEGG_analysis/Nterm_fast_turnover_GO.csv'
 )
 
-#Bottom 25%, long half life
-Nterm_long_half_life_GO <- enrichGO(
-  gene = Nterm_long_half_life_protein,
+# Stable
+Nterm_stable_GO <- enrichGO(
+  gene = Nterm_stable_protein,
   OrgDb = org.Hs.eg.db,
   universe = Nterm_protein_total,
   keyType = 'UNIPROT',
@@ -47,13 +47,13 @@ Nterm_long_half_life_GO <- enrichGO(
 )
 
 write_csv(
-  Nterm_long_half_life_GO@result, file = 'data_source/GO_KEGG_analysis/Nterm_long_half_life_GO.csv'
+  Nterm_stable_GO@result, file = 'data_source/GO_KEGG_analysis/Nterm_stable_GO.csv'
 )
 
-##KEGG analysis
-#Top 25%, short half life
-Nterm_short_half_life_KEGG <- enrichKEGG(
-  gene = Nterm_short_half_life_protein,
+## KEGG analysis
+# Fast turnover
+Nterm_fast_turnover_KEGG <- enrichKEGG(
+  gene = Nterm_fast_turnover_protein,
   organism = 'hsa',
   keyType = 'uniprot',
   universe = Nterm_protein_total,
@@ -62,12 +62,12 @@ Nterm_short_half_life_KEGG <- enrichKEGG(
 )
 
 write_csv(
-  Nterm_short_half_life_KEGG@result, file = 'data_source/GO_KEGG_analysis/Nterm_short_half_life_KEGG.csv'
+  Nterm_fast_turnover_KEGG@result, file = 'data_source/GO_KEGG_analysis/Nterm_fast_turnover_KEGG.csv'
 )
 
-#Bottom 25%, long half life
-Nterm_long_half_life_KEGG <- enrichKEGG(
-  gene = Nterm_long_half_life_protein,
+# Stable
+Nterm_stable_KEGG <- enrichKEGG(
+  gene = Nterm_stable_protein,
   organism = 'hsa',
   keyType = 'uniprot',
   universe = Nterm_protein_total,
@@ -76,5 +76,5 @@ Nterm_long_half_life_KEGG <- enrichKEGG(
 )
 
 write_csv(
-  Nterm_long_half_life_KEGG@result, file = 'data_source/GO_KEGG_analysis/Nterm_long_half_life_KEGG.csv'
+  Nterm_stable_KEGG@result, file = 'data_source/GO_KEGG_analysis/Nterm_stable_KEGG.csv'
 )

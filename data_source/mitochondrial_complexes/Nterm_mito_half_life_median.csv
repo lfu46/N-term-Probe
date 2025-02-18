@@ -1,3 +1,44 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:e1905dfc1967edc475d128bca31350e1b52cefcd1171769f2d84f472d0d15146
-size 2897
+complex_name,variable,n,median
+"TIM23 subcomplex (TIMM17A, TIMM23, TIMM44), mitochondrial",half_life,1,2.79
+"TIM23 subcomplex (TIMM17B, TIMM23, TIMM44), mitochondrial",half_life,1,2.79
+"Respiratory chain complex I (gamma subunit), mitochondrial",half_life,1,3.899
+"Isocitrate dehydrogenase (NADP), mitochondrial",half_life,1,4.251
+"Respiratory chain complex I (early intermediate NDUFAF1 assembly), mitochondrial",half_life,4,4.5
+"TIM23(sort) complex (ROMO1, TIMM17A, TIMM21, TIMM23, TIMM50), mitochondrial",half_life,3,6.697
+"TIM23(sort) complex (ROMO1, TIMM17B, TIMM21, TIMM23, TIMM50), mitochondrial",half_life,3,6.697
+"TIM23(sort) subcomplex (TIMM23, TIMM50), mitochondrial",half_life,3,6.697
+"TIM23(motor) subcomplex (GRPEL1, GRPEL2), mitochondrial",half_life,1,7.074
+"prohibitin 2 complex, mitochondrial",half_life,15,7.246
+"Respiratory chain complex I (beta subunit), mitochondrial",half_life,6,7.553
+"F1F0-ATPase, mitochondrial",half_life,49,7.564
+"Respiratory chain complex I (holoenzyme), mitochondrial",half_life,20,7.849
+"TIM23(motor) subcomplex (GRPEL1, GRPEL2, HSPA9, TIMM44), mitochondrial",half_life,23,9.037
+mitochondrial permeability  transition pore (PTP) complex (PPIF-SPG7-VDAC1),half_life,8,9.752
+"MIB complex, mitochondrial",half_life,11,9.965
+"MICOS complex, mitochondrial",half_life,11,9.965
+"Mitofilin complex, mitochondrial",half_life,11,9.965
+"MICOS subcomplex (APOO, IMMT), mitochondrial",half_life,10,10.024
+"MICOS subcomplex (CHCHD3, IMMT, MICOS10), mitochondrial",half_life,10,10.024
+"COA3-HSPA9-TIMM44-TIM23(sort) complex, mitochondrial",half_life,26,10.369
+"PRKN-TOMM70 subcomplex, mitochondrial",half_life,8,10.614
+"28S ribosomal subunit, mitochondrial",half_life,15,10.726
+"55S ribosome, mitochondrial",half_life,33,11.573
+"TOM complex (TOMM5, TOMM6, TOMM7, TOMM20, TOMM22, TOMM40, TOMM70), mitochondrial",half_life,10,11.677
+"TIM23(motor) subcomplex (GRPEL1, GRPEL2, HSPA9), mitochondrial",half_life,22,12.053
+"TIM23(motor) subcomplex (GRPEL1, HSPA9), mitochondrial",half_life,22,12.053
+"MITRAC complex, mitochondrial",half_life,12,12.425
+"Respiratory chain complex I (incomplete intermediate), mitochondrial",half_life,13,12.584
+"Respiratory chain complex I (lambda subunit), mitochondrial",half_life,13,12.584
+"TIM23(motor) subcomplex (GRPEL2, HSPA9), mitochondrial",half_life,21,15.069
+"Respiratory chain complex I (intermediate), mitochondrial",half_life,9,19.278
+"TIMM8A-TIMM13 complex, mitochondrial",half_life,4,23.996
+"Respiratory chain complex I (intermediate II/230kD), mitochondrial",half_life,8,30.287
+"Respiratory chain complex I (intermediate VII/650kD), mitochondrial",half_life,8,30.287
+"MIA complex (AIFM1, CHCHD4), mitochondrial",half_life,6,44.019
+"TIM22 core complex (AGK, TIMM22, TIMM29), mitochondrial",half_life,4,105.348
+"TIM22 holo-complex (AGK, TIMM9, TIMM10, TIMM10B, TIMM22, TIMM29), mitochondrial",half_life,4,105.348
+"39S ribosomal subunit, mitochondrial",half_life,18,113.086
+"APP-TOMM40 complex, mitochondrial",half_life,1,200
+"PRKN-TOMM40 subcomplex, mitochondrial",half_life,1,200
+"TOM subcomplex (TOMM20, TOMM22), mitochondrial",half_life,1,200
+"TOM subcomplex (TOMM7, TOMM22, TOMM40), mitochondrial",half_life,2,200

@@ -1,13 +1,13 @@
-#import packages
+# import packages
 packages_names <- c("tidyverse", 'Biostrings')
 lapply(packages_names, require, character.only = TRUE)
 
-#import human fasta downloaded from UniProt (https://www.uniprot.org/)
+# import human fasta downloaded from UniProt (https://www.uniprot.org/)
 human_fasta <- readAAStringSet(
   'data_source/uniprotkb_reviewed_true_AND_model_organ_2025_02_15.fasta'
 )
 
-#build tibble using human fasta
+# build tibble using human fasta
 human_fasta_tibble <- tibble(
   Name = names(human_fasta),
   Sequence = as.character(human_fasta),
@@ -20,8 +20,8 @@ human_fasta_tibble <- tibble(
   separate(Name, into = c('sp', 'UniProt_Accession', 'name'), sep = '\\|') |> 
   select(UniProt_Accession, Sequence, Full_Protein_Length)
 
-#generate Nterm sequence
-HEK_Nterm_Kd_half_life_sequence <- HEK_Nterm_Kd_half_life |> 
+# generate Nterm sequence
+HEK_Nterm_Kd_half_life_sequence <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
   left_join(human_fasta_tibble, by = 'UniProt_Accession') |> 
   mutate(
     Nterm_sequence = substr(Sequence, start = Protein.Start, stop = Full_Protein_Length),
