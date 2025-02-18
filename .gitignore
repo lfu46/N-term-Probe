@@ -75,3 +75,8 @@ rsconnect/
 #Ignore PPTX files
 *.pptx
 
+#Ingore DOCX, DOTX files
+*.docx
+*.dotx
+
+
