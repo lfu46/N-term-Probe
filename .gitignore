@@ -79,4 +79,6 @@ rsconnect/
 *.docx
 *.dotx
 
+#Ingore ENS files
+*.ens
 
