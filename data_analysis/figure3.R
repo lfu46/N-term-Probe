@@ -1,8 +1,8 @@
 #import packages
-packages_names <- c("tidyverse")
+packages_names <- c("tidyverse", 'showtext')
 lapply(packages_names, require, character.only = TRUE)
 
-## figure3A, workflow
+### figure3A, workflow
 # medium exchange 3h
 data_0h <- tibble(
   Medium = c('Heavy', 'Light'),
@@ -148,24 +148,27 @@ ggsave(
 )
 
 # MS2 spectrum 
-MS2_spectrum_Nt1_17_spectrum_20109 <- read_csv(
-  'figures/figure3/E_LF_Nterm_Deg_HEK_Nt_1_17_01162025_MS2_20109.csv',
+MS2_spectrum_Nt1_15_spectrum_09260 <- read_csv(
+  'figures/figure3/E_LF_Nterm_Deg_HEK_Nt_1_15_01162025_MS2_09260.csv',
   skip = 7,
   col_names = TRUE,
   name_repair = 'universal'
 )
 
-MS2_spectrum <- MS2_spectrum_Nt1_17_spectrum_20109 |> 
+MS2_spectrum <- MS2_spectrum_Nt1_15_spectrum_09260 |> 
+  mutate(
+    rel_intensity = Intensity/max(Intensity)
+  ) |> 
   ggplot() +
   geom_bar(
     aes(
       x = Mass,
-      y = Intensity
+      y = rel_intensity
     ), stat = 'identity', color = 'black' 
   ) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_continuous(expand = c(0, 0)) +
-  coord_cartesian(xlim = c(0, 1200)) +
+  coord_cartesian(xlim = c(0, 1700)) +
   theme_classic() +
   theme(
     axis.text = element_blank(),
@@ -182,7 +185,7 @@ ggsave(
 MS2_spectrum_TMT_intensity <- read_tsv(
   'data_source/raw_data/HEK_Nt_1_psm.tsv'
 ) |> 
-  filter(Spectrum == 'E_LF_Nterm_Deg_HEK_Nt_1_17_01162025.20109.20109.3') |> 
+  filter(Spectrum == 'E_LF_Nterm_Deg_HEK_Nt_1_15_01162025.09260.09260.3') |> 
   select(`126_0h`:`131_24h`) |> 
   pivot_longer(cols = `126_0h`:`131_24h`, names_to = 'TMT_report_ion', values_to = 'Intensity')
 
@@ -207,10 +210,189 @@ ggsave(
   height = 2, width = 0.6, units = 'in'
 )
 
-##figure 3B, 
+### figure 3B, quantification, curve fitting and filtering
+## TMT report ion triplicates
+Nterm_P07737_47_TMT_rep1 <- HEK_Nterm_1_deg_ratio |> 
+  filter(Index == 'P07737_47') |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = factor(timepoint),
+      y = deg_ratio
+    ), stat = 'identity', color = 'transparent', fill = 'black', width = 0.1
+  ) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme(
+    axis.text = element_blank(),
+    axis.ticks = element_line(linewidth = 0),
+    axis.title = element_blank()
+  )
+
+ggsave(
+  filename = 'figures/figure3/Nterm_P07737_47_TMT_rep1.eps',
+  plot = Nterm_P07737_47_TMT_rep1,
+  height = 0.5, width = 1, units = 'in'
+)
+
+Nterm_P07737_47_TMT_rep2 <- HEK_Nterm_2_deg_ratio |> 
+  filter(Index == 'P07737_47') |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = factor(timepoint),
+      y = deg_ratio
+    ), stat = 'identity', color = 'transparent', fill = 'black', width = 0.1
+  ) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme(
+    axis.text = element_blank(),
+    axis.ticks = element_line(linewidth = 0),
+    axis.title = element_blank()
+  )
+
+ggsave(
+  filename = 'figures/figure3/Nterm_P07737_47_TMT_rep2.eps',
+  plot = Nterm_P07737_47_TMT_rep2,
+  height = 0.5, width = 1, units = 'in'
+)
+
+Nterm_P07737_47_TMT_rep3 <- HEK_Nterm_3_deg_ratio |> 
+  filter(Index == 'P07737_47') |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = factor(timepoint),
+      y = deg_ratio
+    ), stat = 'identity', color = 'transparent', fill = 'black', width = 0.1
+  ) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme(
+    axis.text = element_blank(),
+    axis.ticks = element_line(linewidth = 0),
+    axis.title = element_blank()
+  )
+
+ggsave(
+  filename = 'figures/figure3/Nterm_P07737_47_TMT_rep3.eps',
+  plot = Nterm_P07737_47_TMT_rep3,
+  height = 0.5, width = 1, units = 'in'
+)
+
+## non-lineaer curve fitting and linear curve fitting
+# P07737_47, non-linear curve fitting
+Nterm_P07737_47_deg_ratio <- bind_rows(
+  HEK_Nterm_1_deg_ratio |> 
+    filter(Index == 'P07737_47'),
+  HEK_Nterm_2_deg_ratio |> 
+    filter(Index == 'P07737_47'),
+  HEK_Nterm_3_deg_ratio |> 
+    filter(Index == 'P07737_47')
+)
+
+Nterm_P07737_47_nonlinear_model <- HEK_Nterm_curve_fitting_combined |> 
+  filter(Index == 'P07737_47') |> 
+  pivot_wider(names_from = parameters, values_from = values)
+
+time_series <- seq(0, 24, length.out = 100)
+Nterm_P07737_47_nonlinear_fitting <- (Nterm_P07737_47_nonlinear_model$A - Nterm_P07737_47_nonlinear_model$B)*exp(-Nterm_P07737_47_nonlinear_model$Kd*time_series) + Nterm_P07737_47_nonlinear_model$B
+
+Nterm_P07737_47_nonlinear_fitting_line <- tibble(
+  timepoint = time_series,
+  deg_ratio = Nterm_P07737_47_nonlinear_fitting
+)
+
+font_add(family = 'arial', regular = 'arial.ttf')
+showtext_auto()
+
+Nterm_P07737_47_nonlinear_example <- ggplot() +
+  geom_point(
+    data = Nterm_P07737_47_deg_ratio,
+    aes(
+      x = timepoint,
+      y = deg_ratio
+    ),
+    shape = 21, fill = color_1, color = 'transparent', size = 0.8
+  ) +
+  geom_line(
+    data = Nterm_P07737_47_nonlinear_fitting_line,
+    aes(
+      x = timepoint,
+      y = deg_ratio
+    )
+  ) +
+  labs(x = NULL, y = NULL) +
+  coord_cartesian(ylim = c(0, 1)) +
+  theme(
+    axis.text = element_text(size = 5),
+    axis.ticks = element_line(linewidth = 0.2),
+    axis.ticks.length = unit(0.03, 'in')
+  )
+
+ggsave(
+  filename = 'figures/figure3/Nterm_P07737_47_nonlinear_example.eps',
+  plot = Nterm_P07737_47_nonlinear_example,
+  height = 0.8, width = 1.2, units = 'in'
+)
+
+# Q16204_29, linear curve fitting
+Nterm_Q16204_29_deg_ratio <- bind_rows(
+  HEK_Nterm_1_deg_ratio |> 
+    filter(Index == 'Q16204_29'),
+  HEK_Nterm_2_deg_ratio |> 
+    filter(Index == 'Q16204_29'),
+  HEK_Nterm_3_deg_ratio |> 
+    filter(Index == 'Q16204_29')
+)
+
+Nterm_Q16204_29_linear_model <- HEK_Nterm_curve_fitting_combined |> 
+  filter(Index == 'Q16204_29') |> 
+  pivot_wider(names_from = parameters, values_from = values)
+
+time_series <- seq(0, 24, length.out = 100)
+Nterm_Q16204_29_linear_fitting <- exp(Nterm_Q16204_29_linear_model$lnA - Nterm_Q16204_29_linear_model$Kd * time_series)
+
+Nterm_Q16204_29_linear_fitting_line <- tibble(
+  timepoint = time_series,
+  deg_ratio = Nterm_Q16204_29_linear_fitting
+)
+
+font_add(family = 'arial', regular = 'arial.ttf')
+showtext_auto()
+
+Nterm_Q16204_29_linear_example <- ggplot() +
+  geom_point(
+    data = Nterm_Q16204_29_deg_ratio,
+    aes(
+      x = timepoint,
+      y = deg_ratio
+    ),
+    shape = 21, fill = color_2, color = 'transparent', size = 0.8
+  ) +
+  geom_line(
+    data = Nterm_Q16204_29_linear_fitting_line,
+    aes(
+      x = timepoint,
+      y = deg_ratio
+    )
+  ) +
+  labs(x = NULL, y = NULL) +
+  coord_cartesian(ylim = c(0, 1)) +
+  theme(
+    axis.text = element_text(size = 5),
+    axis.ticks = element_line(linewidth = 0.2),
+    axis.ticks.length = unit(0.03, 'in')
+  )
+
+ggsave(
+  filename = 'figures/figure3/Nterm_Q16204_29_linear_example.eps',
+  plot = Nterm_Q16204_29_linear_example,
+  height = 0.8, width = 1.2, units = 'in'
+)
+
+# filtering criteria
 quantification_filter <- tibble(
-  Level = c('cell doubling time normalization', 'filter criteria', 'quantification'),
-  Number = c(4317, 8942-4317, 14912-8942)
+  Level = c('Filtering', 'quantification'),
+  Number = c(6484, 14912-6484)
 )
 
 quantification_filter$fraction <- quantification_filter$Number/sum(quantification_filter$Number)
@@ -227,7 +409,7 @@ quantification_filter_plot <- quantification_filter |>
   geom_rect(aes(xmin = 3, xmax = 4), color = "white") +
   coord_polar(theta = "y") +
   xlim(c(2, 4)) +
-  scale_fill_manual(values = c('gray', color_2, color_1)) +
+  scale_fill_manual(values = c('gray', color_3)) +
   theme_void() +
   theme(legend.position = "none")
 
