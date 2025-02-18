@@ -31,4 +31,3 @@ HEK_Nterm_ELM_N_degron |>
   wilcox_test(half_life ~ ELM_N_degron) |> 
   filter(p < 0.05)
 
-
