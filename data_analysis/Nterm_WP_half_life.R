@@ -1,8 +1,8 @@
-#import packages
-packages_names <- c("tidyverse", "readxl", "writexl", 'rstatix')
+# import packages
+packages_names <- c("tidyverse", 'rstatix')
 lapply(packages_names, require, character.only = TRUE)
 
-#linear model
+# linear model
 linear_model <- function(df) {
   tryCatch({
     # Fit the model
@@ -28,7 +28,7 @@ linear_model <- function(df) {
   })
 }
 
-#calculate cell doubling rate according to BCA result
+# calculate cell doubling rate according to BCA result
 Rep1_BCA <- tribble(
   ~ Exp, ~ timepoint, ~ concentration, ~ ratio,
   'Rep1', 0, 3.73, 3.73/3.73,
@@ -69,20 +69,54 @@ cell_double_rate_kinetic <- bind_rows(
 
 K_cd <- mean(cell_double_rate_kinetic$Kd)
 
-#calculate half life for Nterm
-HEK_Nterm_Kd_half_life <- HEK_Nterm_curve_fitting_combined |> 
+# Nterm half life by cell doubling normalization
+HEK_Nterm_Kd_half_life_cell_doubling <- HEK_Nterm_curve_fitting_combined |> 
   filter(parameters %in% c('Kd', 'RSS')) |> 
   pivot_wider(names_from = `parameters`, values_from = `values`) |> 
   mutate(
     half_life = log(2)/(Kd - K_cd)
+  )
+
+# calculate normalization factor using half life of Lamin B and T-complex
+HEK_Nterm_LaminB_half_life <- HEK_Nterm_Kd_half_life_cell_doubling |> 
+  filter(UniProt_Accession %in% c(
+    'P20700', #	Lamin-B1
+    'Q03252' # Lamin-B2
+  ))
+
+HEK_Nterm_Tcomplex_half_life <- HEK_Nterm_Kd_half_life_cell_doubling |> 
+  filter(UniProt_Accession %in% c(
+    'P48643', # T-complex protein 1 subunit epsilon
+    'P78371', # T-complex protein 1 subunit beta
+    'Q99832', # T-complex protein 1 subunit eta
+    'P49368', # T-complex protein 1 subunit gamma
+    'P17987', # T-complex protein 1 subunit alpha
+    'P50991', # T-complex protein 1 subunit delta
+    'P50990', # T-complex protein 1 subunit theta
+    'P40227', # T-complex protein 1 subunit zeta
+    'Q92526' # T-complex protein 1 subunit zeta-2
+  ))
+
+Nerm_LaminB_Tcomplex_combined <- bind_rows(
+  HEK_Nterm_LaminB_half_life, 
+  HEK_Nterm_Tcomplex_half_life
+)
+
+Nterm_LaminB_Tcomplex_half_life_filter_criteria <- Nerm_LaminB_Tcomplex_combined |> 
+  filter(half_life < 0) |> 
+  get_summary_stats(half_life, type = 'median')
+
+# Nterm half life normalization by Lamin B and T-complex
+HEK_Nterm_Kd_half_life_LaminB_Tcomplex <- HEK_Nterm_Kd_half_life_cell_doubling |> 
+  filter(half_life > Nterm_LaminB_Tcomplex_half_life_filter_criteria |> pull(median)) |> 
+  mutate(
+    half_life = ifelse(half_life < 0 | half_life > 200, 200, half_life)
   ) |> 
-  filter(half_life > 0) |> 
+  # get_summary_stats(half_life) |>
   select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, Kd, half_life, RSS) |> 
   mutate(
     Percentile = percent_rank(half_life)
   ) |> 
   arrange(Percentile)
 
-write_csv(HEK_Nterm_Kd_half_life, file = 'data_source/Kd_half_life/HEK_Nterm_Kd_half_life.csv')
-
-
+write_csv(HEK_Nterm_Kd_half_life_LaminB_Tcomplex, file = 'data_source/Kd_half_life/HEK_Nterm_Kd_half_life_LaminB_Tcomplex.csv')

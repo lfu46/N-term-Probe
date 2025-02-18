@@ -85,8 +85,8 @@ HEK_Nterm_curve_fitting_combined <- read_csv(
 )
 
 #half life for Nterm
-HEK_Nterm_Kd_half_life <- read_csv(
-  'data_source/Kd_half_life/HEK_Nterm_Kd_half_life.csv'
+HEK_Nterm_Kd_half_life_LaminB_Tcomplex <- read_csv(
+  'data_source/Kd_half_life/HEK_Nterm_Kd_half_life_LaminB_Tcomplex.csv'
 )
 
 #half life for WP
