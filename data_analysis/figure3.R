@@ -1,5 +1,5 @@
 #import packages
-packages_names <- c("tidyverse", 'showtext')
+packages_names <- c("tidyverse", 'showtext', 'rstatix')
 lapply(packages_names, require, character.only = TRUE)
 
 ### figure3A, workflow
@@ -420,25 +420,23 @@ ggsave(
 )
 
 ### figure 3D, half life distribution
-## Nterm 
-# histogram
+# Nterm histogram
 font_add(family = 'arial', regular = 'arial.ttf')
 showtext_auto()
 
-Nterm_half_life_median <- HEK_Nterm_Kd_half_life |> 
+Nterm_half_life_median <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
   get_summary_stats(half_life, type = 'median') |> 
   pull(median)
 
-histogram_Nterm_half_life <- HEK_Nterm_Kd_half_life |> 
+histogram_Nterm_half_life <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
   ggplot() +
-  geom_histogram(aes(x = half_life), color = 'black', fill = color_1) +
+  geom_histogram(aes(x = half_life), color = 'black', fill = color_1, bins = 20) +
   geom_vline(xintercept = Nterm_half_life_median, linetype = 'dashed', color = 'gray') +
   annotate(
     'text', label = paste(round(Nterm_half_life_median, digits = 1), ' hr'),
-    x = 23, y = 1200, size = 3, color = 'black', 
+    x = 50, y = 2200, size = 3, color = 'black', 
   ) +
-  xlim(0, 100) +
-  labs(x = 'Half life (hr)', y = 'Count') +
+  labs(x = 'Half-life (hr)', y = 'Count') +
   theme(
     axis.title = element_text(size = 10),
     axis.text = element_text(size = 8)
@@ -449,4 +447,6 @@ ggsave(
   plot = histogram_Nterm_half_life,
   height = 1.5, width = 2, units = 'in'
 )
+
+# Whole proteome histogram
 
