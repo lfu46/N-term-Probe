@@ -80,6 +80,9 @@ rsconnect/
 *.docx
 *.dotx
 
-#Ingore ENS files
+#Ingore ENS, ENI, ENL files
 *.ens
+*.eni
+*.enl
+
 
