@@ -1,6 +1,4 @@
-# import packages
-packages_names <- c('tidyverse', 'showtext', 'rstatix', 'ggpubr', 'ComplexHeatmap', 'circlize')
-lapply(packages_names, require, character.only = TRUE)
+library(tidyverse)
 
 ### figure 4A, GO and KEGG analysis
 ## import GO and KEGG results
@@ -97,12 +95,16 @@ HEK_Nterm_Kd_half_life_subcellular_adj <- HEK_Nterm_Kd_half_life_subcellular |>
   ))
 
 # Wilcoxon rank-sum test
+library(rstatix)
 subcellular_half_life_wilcox_test <- HEK_Nterm_Kd_half_life_subcellular_adj |> 
   wilcox_test(half_life ~ Main.location) |> 
   add_significance('p') |> 
   filter(p.signif != 'ns')
 
-# point boxplot
+# point range plot
+library(showtext)
+library(ggpubr)
+
 font_add(family = 'arial', regular = 'arial.ttf')
 showtext_auto()
 
@@ -161,6 +163,8 @@ ggsave(
 
 ### figure 4C, cycle cell heatmap
 # cell cycle diagram
+library(circlize)
+
 cell_cycle_df = data.frame(
   phase = factor(c("G1", "S", "G2", "M"), levels = c("G1", "S", "G2", "M")),
   hour = c(11, 8, 4, 1)
@@ -183,6 +187,8 @@ circos.track(ylim = c(0, 1), panel.fun = function(x, y) {
 circos.clear()
 
 # heatmap
+library(ComplexHeatmap)
+
 Nterm_cell_cycle_example <- HEK_Nterm_deg_ratio |> 
   filter(Index %in% c(
     'Q9NXR7_207',
@@ -233,6 +239,8 @@ Heatmap(
 
 ### figure 4D, mitochondrial complexes
 # Wilcoxon rank-sum test
+library(rstatix)
+
 Nterm_mito_complex_wilcoxon_test <- Nterm_mito_half_life |> 
   filter(
     str_detect(complex_name, 'MICOS|ribosom|TIM23|Respiratory')
@@ -250,6 +258,9 @@ Nterm_mito_complex_wilcoxon_test <- Nterm_mito_half_life |>
   filter(p < 0.05)
 
 # violin boxplot
+library(showtext)
+library(ggpubr)
+
 font_add(family = 'arial', regular = 'arial.ttf')
 showtext_auto()
 
@@ -294,6 +305,8 @@ ggsave(
 
 ### figure 4E, nucleolus complexes
 # Wilcoxon rank-sum test
+library(rstatix)
+
 Nterm_nucleolus_localization_wilcoxon_test <- Nterm_nucleolus_localization_half_life |> 
   filter(Localization %in% c(
     'DFC', 'PDFC', 'GC', 'GC (aggregation)', 'NR'
@@ -302,7 +315,10 @@ Nterm_nucleolus_localization_wilcoxon_test <- Nterm_nucleolus_localization_half_
   add_significance('p') |> 
   filter(p < 0.05)
 
-# violin boxplot
+# point range plot
+library(showtext)
+library(ggpubr)
+
 font_add(family = 'arial', regular = 'arial.ttf')
 showtext_auto()
 
@@ -311,19 +327,27 @@ violin_boxplot_nucleolus_complex <- Nterm_nucleolus_localization_half_life |>
     'DFC', 'PDFC', 'GC', 'GC (aggregation)', 'NR'
   )) |> 
   ggplot() +
-  geom_violin(
-    aes(x = Localization, y = half_life), fill = color_2, color = 'transparent'
+  geom_point(
+    aes(
+      x = Localization,
+      y = half_life
+    ),
+    position = position_jitter(width = 0.3),
+    color = 'black',
+    alpha = 0.3
   ) +
-  geom_boxplot(
-    aes(x = Localization, y = half_life), width = 0.15
+  stat_summary(
+    aes(
+      x = Localization, 
+      y = half_life
+    ),
+    fun.data = 'mean_cl_boot', color = color_4, linewidth = 0.2, size = 0.5
   ) +
   stat_pvalue_manual(
     data = Nterm_nucleolus_localization_wilcoxon_test, label = 'p.signif',
-    tip.length = 0, y.position = c(38, 42, 46, 50), label.size = 6
+    tip.length = 0, y.position = c(180, 170), label.size = 6
   ) +
-  coord_cartesian(ylim = c(0, 50)) +
   labs(x = '', y = '') +
-  theme_bw() +
   theme(
     panel.grid.major = element_line(color = 'gray', linewidth = 0.2),
     panel.grid.minor = element_line(color = 'gray', linewidth = 0.1),
@@ -333,64 +357,127 @@ violin_boxplot_nucleolus_complex <- Nterm_nucleolus_localization_half_life |>
 
 ggsave(
   filename = 'figures/figure4/violin_boxplot_nucleolus_complex.eps',
+  device = cairo_ps,
   plot = violin_boxplot_nucleolus_complex,
-  height = 2, width = 2, units = 'in'
+  height = 2, width = 2, units = 'in',
+  fallback_resolution = 1200
 )
 
-### figure 4F, Nterm nucleolus proteoforms heatmap
-# PDFC, 35 proteoforms
-Nterm_PDFC <- Nterm_nucleolus_localization_half_life |> 
-  filter(Localization == 'PDFC') |> 
-  select(Index, half_life) |> 
-  arrange(desc(half_life))
-
-Nterm_PDFC_matrix <- data.matrix(Nterm_PDFC)
-rownames(Nterm_PDFC_matrix) <- Nterm_PDFC$Index
-
-mat_col <- colorRamp2(
-  breaks = c(0, 25, 50), colors = c('blue', 'white', 'red')
+### figure 4F, protein interaction network of nucleoli, stress granule, processing body and cajal body
+# combine nucleolus and cytoplasmic body proteins
+nucleolus_cytoplasmic_body_protein <- bind_rows(
+  Nterm_nucleolus_localization_half_life |> 
+    select(UniProt_Accession, category, half_life) |> 
+    distinct(),
+  
+  Nterm_cytoplasmic_body_half_life |> 
+    select(UniProt_Accession, category, half_life) |> 
+    distinct()
 )
 
-Heatmap(
-  matrix = Nterm_PDFC_matrix[,2],
-  col = mat_col,
-  cluster_rows = FALSE
+# only keep the proteins with unique localization
+nucleolus_cytoplasmic_body_protein_unique_localization <- nucleolus_cytoplasmic_body_protein |> 
+  group_by(UniProt_Accession) |> 
+  filter(n() == 1) |> 
+  ungroup()
+
+write_csv(
+  nucleolus_cytoplasmic_body_protein_unique_localization,
+  file = 'figures/figure4/nucleolus_cytoplasmic_body_protein_unique_localization.csv'
 )
 
-# DFC, 10 proteoforms
-Nterm_DFC <- Nterm_nucleolus_localization_half_life |> 
-  filter(Localization == 'DFC') |> 
-  select(Index, half_life) |> 
-  arrange(desc(half_life))
+# Wilcoxon rank-sum test
+library(rstatix)
 
-Nterm_DFC_matrix <- data.matrix(Nterm_DFC)
-rownames(Nterm_DFC_matrix) <- Nterm_DFC$Index
+nucleolus_cytoplasmic_body_protein_unique_localization_wilcoxon_test <- nucleolus_cytoplasmic_body_protein_unique_localization |> 
+  wilcox_test(half_life ~ category) |> 
+  add_significance('p') |> 
+  filter(p < 0.05)
 
-mat_col <- colorRamp2(
-  breaks = c(0, 25, 50), colors = c('blue', 'white', 'red')
+# point range plot
+library(showtext)
+library(ggpubr)
+
+font_add(family = 'arial', regular = 'arial.ttf')
+showtext_auto()
+
+point_range_plot_Nterm_nucleolus_cytoplasmic_body <- nucleolus_cytoplasmic_body_protein_unique_localization |> 
+  ggplot() +
+  geom_point(
+    aes(
+      x = category,
+      y = half_life
+    ),
+    position = position_jitter(width = 0.3),
+    color = 'black',
+    alpha = 0.3
+  ) +
+  stat_summary(
+    aes(
+      x = category, 
+      y = half_life
+    ),
+    fun.data = 'mean_cl_boot', color = color_1, linewidth = 0.2, size = 0.5
+  ) +
+  stat_pvalue_manual(
+    data = nucleolus_cytoplasmic_body_protein_unique_localization_wilcoxon_test, label = 'p.signif',
+    tip.length = 0, y.position = c(180, 170), label.size = 6, coord.flip = TRUE
+  ) +
+  labs(x = '', y = '') +
+  coord_flip() +
+  theme(
+    panel.grid.major = element_line(color = 'gray', linewidth = 0.2),
+    panel.grid.minor = element_line(color = 'gray', linewidth = 0.1),
+    axis.text.x = element_text(color = 'black', size = 9),
+    axis.text.y = element_blank()
+  )
+
+ggsave(
+  filename = 'figures/figure4/point_range_plot_Nterm_nucleolus_cytoplasmic_body.eps',
+  device = cairo_ps,
+  height = 2, width = 2, units = 'in',
+  fallback_resolution = 1200
 )
 
-Heatmap(
-  matrix = Nterm_DFC_matrix[,2],
-  col = mat_col,
-  cluster_rows = FALSE
+# extract unique protein list
+library(tidyverse)
+
+nucleolus_cytoplasmic_body_protein_unique_localization <- read_csv(
+  'figures/figure4/nucleolus_cytoplasmic_body_protein_unique_localization.csv'
 )
 
-# NR, 23 proteoforms
-Nterm_NR <- Nterm_nucleolus_localization_half_life |> 
-  filter(Localization == 'NR') |> 
-  select(Index, half_life) |> 
-  arrange(desc(half_life))
+unique_protein_list <- nucleolus_cytoplasmic_body_protein_unique_localization |> 
+  distinct(UniProt_Accession) |> 
+  pull()
 
-Nterm_NR_matrix <- data.matrix(Nterm_NR)
-rownames(Nterm_NR_matrix) <- Nterm_NR$Index
+# convert to STRING compatible format
+protein_query <- paste(unique_protein_list, collapse = ",")
 
-mat_col <- colorRamp2(
-  breaks = c(0, 25, 50), colors = c('blue', 'white', 'red')
+# ensure the connection with Cytoscape
+library(RCy3)
+
+cytoscapePing()
+
+# query STRING database via Cytoscape
+# Tip 1: run 'help string' in Cytoscape command line or commandsHelp('string') in R to check all the available commands
+# Tip 2: run 'help string protein query' in Cytoscape command line or run commandsHelp('string protein query') in R to check the available parameters
+commandsRun(paste(
+  'string protein query query="', 
+  protein_query, 
+  '" species="Homo sapiens" limit=0 newNetName="nucleolus_cytoplasmic_body_network"', 
+  sep = ""
+))
+
+# annotate Node Table with the protein category
+loadTableData(
+  nucleolus_cytoplasmic_body_protein_unique_localization, 
+  data.key.column = "UniProt_Accession",
+  table = "node",
+  table.key.column = "query term"
 )
 
-Heatmap(
-  matrix = Nterm_NR_matrix[,2],
-  col = mat_col,
-  cluster_rows = FALSE
-)
+# STRING functional enrichment
+commandsRun('string retrieve enrichment background="genome" selectedNodesOnly=false')
+
+# delte Cytoscape network
+deleteAllNetworks()

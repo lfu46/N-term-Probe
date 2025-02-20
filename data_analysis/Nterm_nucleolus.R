@@ -15,7 +15,8 @@ nucleolus_localization <- read_xlsx(
 # Nterm nucleolus half life
 Nterm_nucleolus_localization_half_life <- nucleolus_localization |> 
   left_join(HEK_Nterm_Kd_half_life_LaminB_Tcomplex, by = join_by('Gene.Symbol' == 'Gene'), relationship = 'many-to-many') |> 
-  filter(!is.na(half_life))
+  filter(!is.na(half_life)) |> 
+  mutate(category = 'nucleolus')
 
 # Wilcoxon rank-sum test
 Nterm_nucleolus_localization_half_life |> 
