@@ -85,4 +85,8 @@ rsconnect/
 *.eni
 *.enl
 
+#Ingore CYS files
+*.cys
+
+
 
