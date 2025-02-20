@@ -481,3 +481,51 @@ commandsRun('string retrieve enrichment background="genome" selectedNodesOnly=fa
 
 # delte Cytoscape network
 deleteAllNetworks()
+
+# heatmap of example Nterm proteoforms half-life
+library(ComplexHeatmap)
+library(circlize)
+
+protein_list <- c(
+  # nucleolus
+  'Q14137',
+  'O15160',
+  'P0DPB6',
+  'Q3B726',
+  'Q9P1U0',
+  # stress granule
+  'Q9UN86',
+  'Q14671',
+  'Q13347',
+  'P78344',
+  'Q9Y6M1',
+  # P-body
+  'O15116',
+  'Q8NDV7',
+  'O00165',
+  'Q9UKM9',
+  'Q92540',
+  # cajal body
+  'Q8WWY3',
+  'P08621',
+  'P09012',
+  'Q01081'
+)
+
+Nterm_example_half_life <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
+  filter(UniProt_Accession %in% protein_list) |> 
+  select(Index, half_life)
+
+Nterm_example_half_life_matrix <- data.matrix(Nterm_example_half_life)
+rownames(Nterm_example_half_life_matrix) <- Nterm_example_half_life$Index
+
+mat_col <- colorRamp2(
+  breaks = c(0, 25, 50),
+  colors = c('blue', 'yellow', 'red')
+)
+
+Heatmap(
+  matrix = Nterm_example_half_life_matrix[,-1],
+  col = mat_col,
+  cluster_rows = FALSE
+)
