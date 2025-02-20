@@ -2,50 +2,49 @@
 packages_names <- c('tidyverse', 'showtext', 'rstatix', 'ggpubr', 'ComplexHeatmap', 'circlize')
 lapply(packages_names, require, character.only = TRUE)
 
-### figure 4A
+### figure 4A, GO and KEGG analysis
 ## import GO and KEGG results
-# Nterm short half life, top 25%
-Nterm_short_half_life_GO <- read_csv(
-  'data_source/GO_KEGG_analysis/Nterm_short_half_life_GO.csv'
+# Nterm, Fast turnover, half-life < 7 h
+Nterm_fast_turnover_GO <- read_csv(
+  'data_source/GO_KEGG_analysis/Nterm_fast_turnover_GO.csv'
 )
-# Nterm long half life, bottom 25%
-Nterm_long_half_life_GO <- read_csv(
-  'data_source/GO_KEGG_analysis/Nterm_long_half_life_GO.csv'
+# Nterm, Stable, half-life = 200 h
+Nterm_stable_GO <- read_csv(
+  'data_source/GO_KEGG_analysis/Nterm_stable_GO.csv'
 )
 
 # combine selected terms
 Nterm_GO_KEGG <- bind_rows(
-  Nterm_short_half_life_GO |> 
-    select(Description, Count, p.adjust) |> 
+  Nterm_fast_turnover_GO |> 
+    select(Description, Count, pvalue) |> 
     filter(
       Description %in% c(
-        'Extracellular space',
-        'DNA biosynthetic process',
-        'DNA helicase activity',
+        'Spindle organization',
+        'Sister chromatid segregation',
+        'Nuclear chromosome segregation',
+        'Unfolded protein binding',
+        'Non-membrane-bounded organelle assembly',
+        'Lyase activity',
         'ATP-dependent protein folding chaperone',
-        'ATP-dependent activity',
-        'ATP hydrolysis activity',
-        'Small molecule metabolic process',
-        'Unfolded protein binding'
+        'ATP binding',
+        'Aminoacyl-tRNA ligase activity',
+        'Intramolecular oxidoreductase activity',
+        'DNA helicase activity',
+        'ATP hydrolysis activity'
       )
     ) |> 
-    mutate(category = 'Top 25%'),
-  Nterm_long_half_life_GO |> 
-    select(Description, Count, p.adjust) |> 
+    mutate(Category = 'Fast turnover'),
+  Nterm_stable_GO |> 
+    select(Description, Count, pvalue) |> 
     filter(
       Description %in% c(
-        'Cytoplasmic stress granule',
-        'Ribonucleoprotein granule',
-        'Cell surface',
-        'mRNA binding',
-        'miRNA binding',
-        'Regulation of protein import into nucleus',
-        'Regulation of cytoplasmic translation',
-        'Positive regulation of translation',
-        'Regulation of protein metabolic process'
+        'Cell junction',
+        'Anchoring junction',
+        'Focal adhesion',
+        'Cell-substrate junction'
       )
     ) |> 
-    mutate(category = 'Bottom 25%')
+    mutate(Category = 'Stable')
 )
 
 # dot plot
@@ -53,16 +52,16 @@ font_add(family = 'arial', regular = 'arial.ttf')
 showtext_auto()
 
 dot_plot_Nterm_GO_KEGG <- Nterm_GO_KEGG |> 
-  ggplot(aes(x = factor(category, levels = c('Top 25%', 'Bottom 25%')), 
+  ggplot(aes(x = factor(Category, levels = c('Fast turnover', 'Stable')), 
              y = factor(Description, levels = Nterm_GO_KEGG |> pull(Description)))) +
-  geom_point(aes(fill = category, size = Count, alpha = p.adjust), shape = 21) +
+  geom_point(aes(fill = Category, size = Count, alpha = pvalue), shape = 21) +
   scale_y_discrete(labels = function(x) str_wrap(x, width = 40), position = "left") +
-  scale_size(range = c(3, 7), breaks = c(50, 125, 200)) +
-  scale_alpha_binned(range = c(1, 0.2), breaks = c(0.01, 0.02, 0.03, 0.04)) +
+  scale_size(range = c(3, 7), breaks = c(50, 150, 250)) +
+  scale_alpha_binned(range = c(1, 0.2), breaks = c(0.001, 0.002, 0.003, 0.004)) +
   scale_fill_manual(
     values = c(
-      'Top 25%' = color_1,
-      'Bottom 25%' = color_2
+      'Fast turnover' = color_1,
+      'Stable' = color_2
     )
   ) +
   theme_bw() +
@@ -71,30 +70,30 @@ dot_plot_Nterm_GO_KEGG <- Nterm_GO_KEGG |>
     panel.grid.minor = element_line(color = "gray", linewidth = 0.1),
     axis.title = element_blank(),
     axis.text.x = element_blank(),
-    axis.text.y = element_text(size = 90, color = "black", lineheight = 0.05),
-    legend.text = element_text(size = 90),
-    legend.title = element_text(size = 90, color = "black"),
+    axis.text.y = element_text(size = 9, color = "black", lineheight = 0.05),
+    legend.text = element_text(size = 9),
+    legend.title = element_text(size = 9, color = "black"),
     legend.frame = element_rect(color = "black", linewidth = 0.2),
     legend.ticks = element_line(color = "black", linewidth = 0.2),
     legend.key.size = unit(0.1, "in")
   )
 
 ggsave(
-  'figures/figure4/dot_plot_Nterm_GO_KEGG.tiff',
+  'figures/figure4/dot_plot_Nterm_GO_KEGG.eps',
+  device = cairo_ps,
   plot = dot_plot_Nterm_GO_KEGG,
-  height = 3.5, width = 4, units = 'in',
-  dpi = 1200
+  height = 3.5, width = 4.5, units = 'in',
+  fallback_resolution = 1200
 )
 
-### figure 4B
+### figure 4B, sub-cellular location analysis
 # selected sub-cellular location
 HEK_Nterm_Kd_half_life_subcellular_adj <- HEK_Nterm_Kd_half_life_subcellular |> 
   filter(Main.location %in% c(
-    'Focal adhesion sites', 
-    'Nucleoplasm', 'Nuclear speckles', 'Nucleoli', 'Nucleoli rim', 'Nucleoli fibrillar center', 
-    'Peroxisomes',  'Endosomes', 'Lysosomes',
-    'Golgi apparatus', 'Endoplasmic reticulum', 'Mitochondria', 'Cytosol',
-    'Cytoplasmic bodies'
+    'Midbody', 'Midbody ring', 'Centrosome',
+    'Nuclear speckles', 'Nucleoli', 'Nucleoli rim', 'Nucleoli fibrillar center', 'Nucleoplasm',
+    'Golgi apparatus', 'Endoplasmic reticulum', 'Mitochondrion', 'Cell Junctions', 'Cytoplasmic bodies',
+    'Peroxisomes',  'Endosomes', 'Lysosomes'
   ))
 
 # Wilcoxon rank-sum test
@@ -110,105 +109,127 @@ showtext_auto()
 point_boxplot_Nterm_subcellular <- HEK_Nterm_Kd_half_life_subcellular_adj |> 
   ggplot() +
   geom_point(
-    aes(x = fct_reorder(Main.location, half_life), y = half_life), 
+    aes(
+      x = factor(Main.location, levels = c(
+        'Midbody', 'Midbody ring', 'Centrosome',
+        'Nuclear speckles', 'Nucleoli', 'Nucleoli rim', 'Nucleoli fibrillar center', 'Nucleoplasm',
+        'Golgi apparatus', 'Endoplasmic reticulum', 'Mitochondrion', 'Cell Junctions', 'Cytoplasmic bodies',
+        'Peroxisomes',  'Endosomes', 'Lysosomes'
+      )), 
+      y = half_life
+    ), 
     position = position_jitter(width = 0.3),
     color = 'black',
     alpha = 0.3
   ) +
-  geom_boxplot(
-    aes(x = fct_reorder(Main.location, half_life), y = half_life),
-    color = color_1, fill = 'transparent', outliers = FALSE
+  stat_summary(
+    aes(
+      x = factor(Main.location, levels = c(
+        'Midbody', 'Midbody ring', 'Centrosome',
+        'Nuclear speckles', 'Nucleoli', 'Nucleoli rim', 'Nucleoli fibrillar center', 'Nucleoplasm',
+        'Golgi apparatus', 'Endoplasmic reticulum', 'Mitochondrion', 'Cell Junctions', 'Cytoplasmic bodies',
+        'Peroxisomes',  'Endosomes', 'Lysosomes'
+      )), 
+      y = half_life
+    ),
+    fun.data = 'mean_cl_boot', color = color_3, linewidth = 0.2, size = 0.5
   ) +
   labs(x = '', y = '') +
-  # stat_pvalue_manual(
-  #   data = subcellular_half_life_wilcox_test,
-  #   label = 'p.signif',
-  #   y.position = c(42, 46, 50, 38), 
-  #   tip.length = 0, 
-  #   coord.flip = TRUE,
-  #   label.size = 60
-  # ) +
-  coord_flip(ylim = c(0, 40)) +
-  theme_bw() +
+  stat_pvalue_manual(
+    data = subcellular_half_life_wilcox_test,
+    label = 'p.signif',
+    y.position = c(170, 180, 160),
+    tip.length = 0,
+    coord.flip = TRUE,
+    label.size = 6
+  ) +
+  coord_flip() +
   theme(
     panel.grid.major = element_line(color = 'gray', linewidth = 0.2),
     panel.grid.minor = element_line(color = 'gray', linewidth = 0.1),
-    axis.text.x = element_text(color = 'black', size = 100),
-    axis.text.y = element_text(color = 'black', size = 90)
+    axis.text.x = element_text(color = 'black', size = 10),
+    axis.text.y = element_text(color = 'black', size = 9)
   )
 
 ggsave(
-  filename = 'figures/figure4/point_boxplot_Nterm_subcellular.tiff',
+  filename = 'figures/figure4/point_boxplot_Nterm_subcellular.eps',
+  device = cairo_ps,
   plot = point_boxplot_Nterm_subcellular,
   height = 3.5, width = 3, units = 'in',
-  dpi = 1200
+  fallback_resolution = 1200
 )
 
-### figure 4C
-## import GSEA enrichment results
-# descending Kd
-Nterm_protein_functional_enrichment_des_Kd <- read_csv(
-  'data_source/Enzyme_Motif_Domain_Complex_analysis/Nterm_protein_functional_property_GSEA_des_Kd.csv'
-) |> 
-  filter(pvalue < 0.05) |> 
-  mutate(
-    NES = 0-NES
-  ) |> 
-  select(Description, setSize, NES, pvalue)
-
-# descending half life
-Nterm_protein_functional_enrichment_des_half_life <- read_csv(
-  'data_source/Enzyme_Motif_Domain_Complex_analysis/Nterm_protein_functional_property_GSEA_des_half_life.csv'
-) |> 
-  filter(pvalue < 0.05) |> 
-  select(Description, setSize, NES, pvalue)
-
-# combine descending Kd and descending half life result
-Nterm_protein_functional_enrichment_combined <- bind_rows(
-  Nterm_protein_functional_enrichment_des_Kd,
-  Nterm_protein_functional_enrichment_des_half_life
+### figure 4C, cycle cell heatmap
+# cell cycle diagram
+cell_cycle_df = data.frame(
+  phase = factor(c("G1", "S", "G2", "M"), levels = c("G1", "S", "G2", "M")),
+  hour = c(11, 8, 4, 1)
 )
 
-# dot plot
-font_add(family = 'arial', regular = 'arial.ttf')
-showtext_auto()
+cell_cycle_color = c(color_1, color_2, color_3, color_4)
 
-dot_plot_Nterm_protein_functional_enrichment <- Nterm_protein_functional_enrichment_combined |> 
-  mutate(
-    log_pvalue = -log10(pvalue),
-    category = case_when(
-      str_detect(Description, 'PF') ~ 'PFAM',
-      str_detect(Description, 'PS') ~ 'PROSITE',
-      str_detect(Description, 'ENZYME') ~ 'ENZYME'
-    )
-  ) |> 
-  ggplot() +
-  geom_point(
-    aes(x = NES, y = log_pvalue, size = setSize, fill = category), shape = 21
-  ) +
-  scale_fill_manual(
-    name = '',
-    values = c(
-      'PFAM' = color_1, 
-      'PROSITE' = color_2,
-      'ENZYME' = color_3
-    ),
-    guide = 'none'
-  ) +
-  scale_size(range = c(4, 7)) +
-  labs(x = '', y = '') +
-  theme_bw() +
-  theme(
-    panel.grid = element_blank(),
-    axis.text = element_text(color = 'black', size = 9)
-  )
+circos.par(start.degree = 90)
 
-ggsave(
-  filename = 'figures/figure4/dot_plot_Nterm_protein_functional_enrichment.eps',
-  plot = dot_plot_Nterm_protein_functional_enrichment,
-  height = 2, width = 3, units = 'in'
+circos.initialize(cell_cycle_df$phase, xlim = cbind(rep(0, 4), cell_cycle_df$hour))
+
+circos.track(ylim = c(0, 1), panel.fun = function(x, y) {
+  circos.arrow(CELL_META$xlim[1], CELL_META$xlim[2], 
+               arrow.head.width = CELL_META$yrange*0.8, arrow.head.length = cm_x(0.5),
+               col = cell_cycle_color[CELL_META$sector.numeric.index])
+  circos.text(CELL_META$xcenter, CELL_META$ycenter, CELL_META$sector.index,
+              cex = 1, col = 'white', facing = "downward")
+}, bg.border = NA, track.height = 0.6)
+
+circos.clear()
+
+# heatmap
+Nterm_cell_cycle_example <- HEK_Nterm_deg_ratio |> 
+  filter(Index %in% c(
+    'Q9NXR7_207',
+    'Q8IYL3_28',
+    'P20248_174',
+    'P20248_23',
+    'P20248_20',
+    'P20248_21',
+    'P14635_153',
+    'P14635_155',
+    'Q02224_230',
+    'Q02224_627',
+    'Q02224_612',
+    'Q9HAW4_873',
+    'O00273_105',
+    'O00273_108',
+    'O75496_90',
+    'P62805_68',
+    'P62805_61',
+    'P62805_69',
+    'P17096_1',
+    'P17096_8',
+    'Q96EA4_535',
+    'Q9Y6A5_7',
+    'Q9Y6A5_479',
+    'Q9UNY4_893',
+    'Q16763_138',
+    'Q16763_123',
+    'P17028_128'
+  )) |> 
+  select(Index, timepoint, deg_ratio_avg) |> 
+  pivot_wider(names_from = timepoint, values_from = deg_ratio_avg)
+
+Nterm_cell_cycle_example_matrix <- data.matrix(Nterm_cell_cycle_example)
+rownames(Nterm_cell_cycle_example_matrix) <- Nterm_cell_cycle_example$Index
+
+mat_col <- colorRamp2(
+  breaks = c(1.0, 0.75, 0.5),
+  colors = c('red', 'yellow', 'blue')
 )
 
+Heatmap(
+  matrix = Nterm_cell_cycle_example_matrix[,-1],
+  col = mat_col,
+  cluster_rows = FALSE, 
+  cluster_columns = FALSE
+)
 
 ### figure 4D, mitochondrial complexes
 # Wilcoxon rank-sum test
