@@ -4,7 +4,7 @@ lapply(packages_names, require, character.only = TRUE)
 
 # import human fasta downloaded from UniProt (https://www.uniprot.org/)
 human_fasta <- readAAStringSet(
-  'data_source/uniprotkb_reviewed_true_AND_model_organ_2025_02_15.fasta'
+  'data_source/fasta_file/uniprotkb_reviewed_true_AND_model_organ_2025_02_15.fasta'
 )
 
 # build tibble using human fasta
@@ -25,7 +25,7 @@ HEK_Nterm_Kd_half_life_sequence <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |>
   left_join(human_fasta_tibble, by = 'UniProt_Accession') |> 
   mutate(
     Nterm_sequence = substr(Sequence, start = Protein.Start, stop = Full_Protein_Length),
-    Nterm_31mer = substr(Sequence, start = Protein.Start, stop = Protein.Start + 30),
+    Nterm_13mer = substr(Sequence, start = Protein.Start, stop = Protein.Start + 12),
     Nterm_terminus = substr(Sequence, start = Protein.Start, stop = Protein.Start)
   )
 

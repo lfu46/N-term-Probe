@@ -1,6 +1,4 @@
-# import packages
-packages_names <- c("tidyverse")
-lapply(packages_names, require, character.only = TRUE)
+library(tidyverse)
 
 # define color
 color_1 <- '#4b1978'
