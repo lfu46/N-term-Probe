@@ -1,6 +1,4 @@
-#import packages
-packages_names <- c("tidyverse", 'showtext', 'rstatix')
-lapply(packages_names, require, character.only = TRUE)
+library(tidyverse)
 
 ### figure3A, workflow
 # medium exchange 3h
