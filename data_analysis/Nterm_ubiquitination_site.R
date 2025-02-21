@@ -1,6 +1,7 @@
 library(tidyverse)
 
-# import ubiquitination dataset from PhosphoSitePlus v6.7.7 (https://www.phosphosite.org/homeAction, 'Downloads/Ubiquitination_site_dataset.gz')
+# import ubiquitination dataset from PhosphoSitePlus v6.7.7 
+# (https://www.phosphosite.org/homeAction, 'Downloads/Ubiquitination_site_dataset.gz')
 ubiquitination_site_human <- read_delim(
   'data_source/ubiquitination_site/Ubiquitination_site_dataset',
   skip = 3, 
@@ -20,7 +21,7 @@ ubiquitination_site_human <- read_delim(
   distinct()
 
 # integrate the Nterm half life results with ubiquitination site dataset
-Nterm_ubiquitination_site_occupancy <- ubiquitination_site_human |> 
+Nterm_ubiquitination_site_occurrence <- ubiquitination_site_human |> 
   left_join(HEK_Nterm_Kd_half_life_sequence, by = 'UniProt_Accession', relationship = 'many-to-many') |> 
   mutate(
     start = Protein.Start,
@@ -38,10 +39,10 @@ Nterm_ubiquitination_site_occupancy <- ubiquitination_site_human |>
 # Wilcoxon rank-sum test
 library(rstatix)
 
-Nterm_ubiquitination_site_occupancy |> 
-  group_by(category) |> 
-  get_summary_stats(n)
+Nterm_ubiquitination_site_occurrence |> 
+  wilcox_test(n ~ category)
 
+# Spearman correlation test
 cor.test(
   Nterm_ubiquitination_site_occupancy$half_life,
   Nterm_ubiquitination_site_occupancy$n,
