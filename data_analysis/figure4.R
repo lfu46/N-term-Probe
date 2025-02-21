@@ -237,73 +237,7 @@ Heatmap(
   cluster_columns = FALSE
 )
 
-### figure 4D, mitochondrial complexes
-# Wilcoxon rank-sum test
-library(rstatix)
-
-Nterm_mito_complex_wilcoxon_test <- Nterm_mito_half_life |> 
-  filter(
-    str_detect(complex_name, 'MICOS|ribosom|TIM23|Respiratory')
-  ) |> 
-  mutate(
-    complex_name = case_when(
-      str_detect(complex_name, 'MICOS') ~ 'MICOS complex related',
-      str_detect(complex_name, 'ribosom') ~ 'Mitochondrial ribosome related',
-      str_detect(complex_name, 'TIM23') ~ 'TIM23 complex related',
-      str_detect(complex_name, 'Respiratory chain complex') ~ 'Respiratory chain complex I'
-    )
-  ) |> 
-  wilcox_test(half_life ~ complex_name) |> 
-  add_significance('p') |> 
-  filter(p < 0.05)
-
-# violin boxplot
-library(showtext)
-library(ggpubr)
-
-font_add(family = 'arial', regular = 'arial.ttf')
-showtext_auto()
-
-violin_boxplot_mito_complex <- Nterm_mito_half_life |> 
-  filter(
-    str_detect(complex_name, 'MICOS|ribosom|TIM23|Respiratory')
-  ) |> 
-  mutate(
-    complex_name = case_when(
-      str_detect(complex_name, 'MICOS') ~ 'MICOS complex related',
-      str_detect(complex_name, 'ribosom') ~ 'Mitochondrial ribosome related',
-      str_detect(complex_name, 'TIM23') ~ 'TIM23 complex related',
-      str_detect(complex_name, 'Respiratory chain complex') ~ 'Respiratory chain complex I'
-    )
-  ) |> 
-  ggplot() +
-  geom_violin(
-    aes(x = complex_name, y = half_life), fill = color_1, color = 'transparent'
-  ) +
-  geom_boxplot(
-    aes(x = complex_name, y = half_life), width = 0.15
-  ) +
-  stat_pvalue_manual(
-    data = Nterm_mito_complex_wilcoxon_test, label = 'p.signif',
-    tip.length = 0, y.position = c(42, 46), label.size = 6
-  ) +
-  coord_cartesian(ylim = c(0, 50)) +
-  labs(x = '', y = '') +
-  theme_bw() +
-  theme(
-    panel.grid.major = element_line(color = 'gray', linewidth = 0.2),
-    panel.grid.minor = element_line(color = 'gray', linewidth = 0.1),
-    axis.text.x = element_blank(),
-    axis.text.y = element_text(color = 'black', size = 9)
-  )
-
-ggsave(
-  filename = 'figures/figure4/violin_boxplot_mito_complex.eps',
-  plot = violin_boxplot_mito_complex,
-  height = 2, width = 2, units = 'in'
-)
-
-### figure 4E, nucleolus complexes
+### figure 4D, nucleolus complexes
 # Wilcoxon rank-sum test
 library(rstatix)
 
@@ -363,7 +297,7 @@ ggsave(
   fallback_resolution = 1200
 )
 
-### figure 4F, protein interaction network of nucleoli, stress granule, processing body and cajal body
+### figure 4E, protein interaction network of nucleoli, stress granule, processing body and cajal body
 # combine nucleolus and cytoplasmic body proteins
 nucleolus_cytoplasmic_body_protein <- bind_rows(
   Nterm_nucleolus_localization_half_life |> 
