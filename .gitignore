@@ -88,5 +88,9 @@ rsconnect/
 #Ingore CYS files
 *.cys
 
+#Ingore CIF files
+*.cif
+
+
 
 
