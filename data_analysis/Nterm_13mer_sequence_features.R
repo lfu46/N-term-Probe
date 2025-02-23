@@ -34,7 +34,7 @@ Nterm_13mer_sequence_features |>
 
 # isoelectric point
 Nterm_13mer_sequence_features |> 
-  wilcox_test(isoelectri_point ~ category)
+  wilcox_test(isoelectric_point ~ category)
 
 # kappa
 Nterm_13mer_sequence_features |> 

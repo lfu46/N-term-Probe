@@ -1,6 +1,6 @@
 library(tidyverse)
 
-# import ubiquitination dataset from PhosphoSitePlus v6.7.7 
+# import phosphorylation dataset from PhosphoSitePlus v6.7.7 
 # (https://www.phosphosite.org/homeAction, 'Downloads/Phosphorylation_site_dataset.gz')
 phosphorylation_site_human <- read_delim(
   'data_source/phosphorylation_site/Phosphorylation_site_dataset',

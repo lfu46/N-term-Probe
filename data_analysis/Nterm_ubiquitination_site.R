@@ -44,8 +44,8 @@ Nterm_ubiquitination_site_occurrence |>
 
 # Spearman correlation test
 cor.test(
-  Nterm_ubiquitination_site_occupancy$half_life,
-  Nterm_ubiquitination_site_occupancy$n,
+  Nterm_ubiquitination_site_occurrence$half_life,
+  Nterm_ubiquitination_site_occurrence$n,
   method = 'spearman'
 )
 

@@ -3,7 +3,8 @@ import numpy as np
 
 # import strucutremap functions as instructed by tutorial 
 # (https://github.com/MannLabs/structuremap/blob/main/nbs/tutorial.ipynb)
-# original paper ()
+# original paper: The structural context of posttranslational modifications at a proteome-wide scale
+# (https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001636#sec009)
 import structuremap.utils
 structuremap.utils.set_logger()
 from structuremap.processing import download_alphafold_cif, download_alphafold_pae, format_alphafold_data, annotate_accessibility, get_smooth_score, annotate_proteins_with_idr_pattern, get_extended_flexible_pattern, get_proximity_pvals, perform_enrichment_analysis, perform_enrichment_analysis_per_protein, evaluate_ptm_colocalization, extract_motifs_in_proteome
@@ -16,7 +17,7 @@ HEK_Nterm_Kd_half_life_sequence = pd.read_csv(
   index_col = None
 )
 
-Nterm_protein_list = HEK_Nterm_Kd_half_life_sequence["UniProt_Accession"].unique().tolist()
+Nterm_degradation_protein_list = HEK_Nterm_Kd_half_life_sequence["UniProt_Accession"].unique().tolist()
 
 ## download AlphaFold data
 # crystallographic information file
@@ -34,7 +35,7 @@ Nterm_protein_list = HEK_Nterm_Kd_half_life_sequence["UniProt_Accession"].unique
 # format AlphaFold data input
 Nterm_alphafold_annotation = format_alphafold_data(
   directory = "data_source/Nterm_structuremap/Nterm_degradation_cif",
-  protein_ids = Nterm_protein_list
+  protein_ids = Nterm_degradation_protein_list
 )
 
 # annotate prediction-aware part-sphere exposure (pPSE) values
