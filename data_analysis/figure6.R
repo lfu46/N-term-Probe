@@ -43,7 +43,7 @@ point_range_Nterm_degron <- HEK_Nterm_ELM_N_degron |>
   )
 
 ggsave(
-  filename = 'figures/figure5/point_range_Nterm_degron.eps',
+  filename = 'figures/figure6/point_range_Nterm_degron.eps',
   plot = point_range_Nterm_degron,
   device = cairo_ps,
   height = 2, width = 2.5, units = 'in',
@@ -161,7 +161,7 @@ ranking_plot_Nterm_Kd <- ggplot() +
   )
 
 ggsave(
-  filename = 'figures/figure5/ranking_plot_Nterm_Kd.eps',
+  filename = 'figures/figure6/ranking_plot_Nterm_Kd.eps',
   plot = ranking_plot_Nterm_Kd,
   height = 1.5, width = 3, units = 'in'
 )
@@ -187,7 +187,7 @@ protein_example_without_motif <- ggplot() +
   )
 
 ggsave(
-  filename = 'figures/figure5/protein_example_without_motif.eps',
+  filename = 'figures/figure6/protein_example_without_motif.eps',
   plot = protein_example_without_motif,
   height = 1, width = 4, units = 'in'
 )
@@ -235,7 +235,7 @@ protein_example_with_motif <- ggplot() +
   )
 
 ggsave(
-  filename = 'figures/figure5/protein_example_with_motif.eps',
+  filename = 'figures/figure6/protein_example_with_motif.eps',
   plot = protein_example_with_motif,
   height = 1, width = 4, units = 'in'
 )
@@ -244,59 +244,280 @@ ggsave(
 # Wilcoxon rank-sum test
 library(rstatix)
 
-HEK_Nterm_sequence_ELM_motif_wilcoxon_test <- HEK_Nterm_sequence_ELM_motif |> 
-  filter(str_detect(matched_motifs, 'degron')) |> 
-  filter(matched_motifs != 'N-degron') |> 
+HEK_Nterm_sequence_ELM_motif_degron_wilcoxon_test <- HEK_Nterm_sequence_ELM_motif |> 
+  filter(str_detect(matched_motifs, 'DEG')) |> 
   wilcox_test(half_life ~ matched_motifs) |> 
   add_significance('p') |> 
   filter(p < 0.05)
 
-# boxplot
-font_add(family = 'arial', regular = 'arial.ttf')
-showtext_auto()
+# point range plot
+library(ggpubr)
 
-boxplot_Nterm_ELM_motifs <- HEK_Nterm_sequence_ELM_motif |> 
+point_range_Nterm_ELM_motifs_degron <- HEK_Nterm_sequence_ELM_motif |> 
   filter(
     matched_motifs %in% c(
-      'APC/C_Apc2-docking motif', 
-      'LEDGF/P75 IBD binding site', 
-      'Trans-Golgi Network-Endosome-Lysosome-sorting signals',
-      'Corepressor nuclear receptor box',
-      'FBP Nbox motif',
-      'Gamma-adaptin ear interaction motif',
-      'KLHDC2 C-terminal GG degrons',
-      'CRL4-Cdt2 binding PIP degron',
-      'CASK CaMK domain binding ligand motif',
-      'DCAF12 C-terminal diGlu degrons'
+      'DEG_APCC_KENBOX_2',
+      'DEG_Cend_FEM1B_2',
+      'DEG_Cend_KLHDC2_1',
+      'DEG_APCC_DBOX_1',
+      'DEG_COP1_1',
+      'DEG_Kelch_Keap1_1',
+      'DEG_Kelch_KLHL12_1',
+      'DEG_APCC_DBOX_1',
+      'DEG_ODPH_VHL_1',
+      'DEG_CRBN_cyclicCter_1',
+      'DEG_SCF_FBW7_1'
     )
   ) |> 
   ggplot() +
-  geom_boxplot(
+  stat_summary(
     aes(
-      x = fct_reorder(matched_motifs, half_life),
+      x = matched_motifs,
       y = half_life
     ),
-    color = color_2, outliers = FALSE
+    fun.data = 'mean_cl_boot', 
+    color = color_2, 
+    linewidth = 0.2, 
+    size = 0.5
   ) +
   stat_pvalue_manual(
-    data = HEK_Nterm_sequence_ELM_motif_wilcoxon_test, label = 'p.signif', label.size = 6, 
-    tip.length = 0, y.position = c(23, 26, 29)
+    data = HEK_Nterm_sequence_ELM_motif_degron_wilcoxon_test |> slice(3, 14, 16), 
+    label = 'p.signif', label.size = 6, 
+    tip.length = 0, y.position = c(170, 190, 160), coord.flip = TRUE
   ) +
   labs(x = '', y = '') +
-  coord_cartesian(ylim = c(0, 30)) +
-  theme_bw() +
+  coord_flip(ylim = c(0, 200)) +
   theme(
-    panel.grid.major = element_line(color = 'gray', linewidth = 0.2),
-    panel.grid.minor = element_line(color = 'gray', linewidth = 0.1),
-    axis.text.x = element_blank(),
-    axis.text.y = element_text(color = 'black', size = 9)
+    axis.text.x = element_text(color = 'black', size = 8, family = 'arial'),
+    axis.text.y = element_text(color = 'black', size = 8, family = 'arial')
   )
 
 ggsave(
-  filename = 'figures/figure5/boxplot_Nterm_ELM_motifs.eps',
-  plot = boxplot_Nterm_ELM_motifs,
-  height = 1.5, width = 3.5, units = 'in'
+  filename = 'figures/figure6/point_range_Nterm_ELM_motifs_degron.eps',
+  plot = point_range_Nterm_ELM_motifs_degron,
+  height = 3, width = 2.7, units = 'in'
 )
+
+### figure 6D, docking-related ELM motif
+# Wilcoxon rank-sum test
+library(rstatix)
+
+HEK_Nterm_sequence_ELM_motif_docking_wilcoxon_test <- HEK_Nterm_sequence_ELM_motif |> 
+  filter(str_detect(matched_motifs, 'DOC')) |> 
+  wilcox_test(half_life ~ matched_motifs) |> 
+  add_significance('p') |> 
+  filter(p < 0.05)
+
+# point range plot
+library(ggpubr)
+
+point_range_Nterm_ELM_motifs_docking <- HEK_Nterm_sequence_ELM_motif |> 
+  filter(
+    matched_motifs %in% c(
+      'DOC_MIT_MIM_1',
+      'DOC_MAPK_gen_1',
+      'DOC_PP2B_LxvP_1',
+      'DOC_USP7_MATH_1',
+      'DOC_USP7_MATH_2',
+      'DOC_PP1_RVXF_1',
+      'DOC_CKS1_1',
+      'DOC_CYCLIN_RxL_1',
+      'DOC_PP4_MxPP_1',
+      'DOC_RSK_DDVF_1'
+    )
+  ) |> 
+  ggplot() +
+  stat_summary(
+    aes(
+      x = matched_motifs,
+      y = half_life
+    ),
+    fun.data = 'mean_cl_boot', 
+    color = color_3, 
+    linewidth = 0.2, 
+    size = 0.5
+  ) +
+  stat_pvalue_manual(
+    data = HEK_Nterm_sequence_ELM_motif_docking_wilcoxon_test |> slice(2, 4, 6), 
+    label = 'p.signif', label.size = 6, 
+    tip.length = 0, y.position = c(100, 110, 120), coord.flip = TRUE
+  ) +
+  labs(x = '', y = '') +
+  coord_flip(ylim = c(0, 130)) +
+  theme(
+    axis.text.x = element_text(color = 'black', size = 8, family = 'arial'),
+    axis.text.y = element_text(color = 'black', size = 8, family = 'arial')
+  )
+
+ggsave(
+  filename = 'figures/figure6/point_range_Nterm_ELM_motifs_docking.eps',
+  plot = point_range_Nterm_ELM_motifs_docking,
+  height = 3, width = 2.5, units = 'in'
+)
+
+### figure 6E, targeting-related ELM motif
+# Wilcoxon rank-sum test
+library(rstatix)
+
+HEK_Nterm_sequence_ELM_motif_targeting_wilcoxon_test <- HEK_Nterm_sequence_ELM_motif |> 
+  filter(str_detect(matched_motifs, 'TRG')) |> 
+  wilcox_test(half_life ~ matched_motifs) |> 
+  add_significance('p') |> 
+  filter(p < 0.05)
+
+# point range plot
+library(ggpubr)
+
+point_range_Nterm_ELM_motifs_targeting <- HEK_Nterm_sequence_ELM_motif |> 
+  filter(
+    matched_motifs %in% c(
+      'TRG_ER_diArg_1',
+      'TRG_NLS_Bipartite_1',
+      'TRG_PTS1',
+      'TRG_ENDOCYTIC_2',
+      'TRG_ER_diLys_1',
+      'TRG_ER_FFAT_1',
+      'TRG_ER_KDEL_1',
+      'TRG_NES_CRM1_1',
+      'TRG_NLS_MonoCore_2',
+      'TRG_NLS_MonoExtC_3',
+      'TRG_NLS_MonoExtN_4'
+    )
+  ) |>
+  ggplot() +
+  stat_summary(
+    aes(
+      x = matched_motifs,
+      y = half_life
+    ),
+    fun.data = 'mean_cl_boot', 
+    color = color_4, 
+    linewidth = 0.2, 
+    size = 0.5
+  ) +
+  stat_pvalue_manual(
+    data = HEK_Nterm_sequence_ELM_motif_targeting_wilcoxon_test |> slice(12, 19, 20, 21, 22), 
+    label = 'p.signif', label.size = 6, 
+    tip.length = 0, y.position = c(160, 120, 130, 140, 150), coord.flip = TRUE
+  ) +
+  labs(x = '', y = '') +
+  coord_flip(ylim = c(0, 170)) +
+  theme(
+    axis.text.x = element_text(color = 'black', size = 8, family = 'arial'),
+    axis.text.y = element_text(color = 'black', size = 8, family = 'arial')
+  )
+
+ggsave(
+  filename = 'figures/figure6/point_range_Nterm_ELM_motifs_targeting.eps',
+  plot = point_range_Nterm_ELM_motifs_targeting,
+  height = 3.2, width = 2.6, units = 'in'
+)
+
+### figure 6F, binding-related ELM motif
+# Wilcoxon rank-sum test
+library(rstatix)
+
+HEK_Nterm_sequence_ELM_motif_binding_wilcoxon_test <- HEK_Nterm_sequence_ELM_motif |> 
+  filter(
+    matched_motifs %in% c(
+      'LIG_APCC_Cbox_2',
+      'LIG_AP_GAE_1',
+      'LIG_G3BP_FGDF_1',
+      'LIG_PTB_Phospho_1',
+      'LIG_NBox_RRM_1',
+      'LIG_RRM_PRI_1',
+      'LIG_14-3-3_CterR_2',
+      'LIG_eIF4E_2',
+      'LIG_UBA3_1',
+      'LIG_CNOT1_NIM_1'
+    )
+  ) |> 
+  wilcox_test(half_life ~ matched_motifs) |> 
+  add_significance('p') |> 
+  filter(p < 0.05)
+
+# point range plot
+library(ggpubr)
+
+point_range_Nterm_ELM_motifs_binding <- HEK_Nterm_sequence_ELM_motif |> 
+  filter(
+    matched_motifs %in% c(
+      'LIG_APCC_Cbox_2',
+      'LIG_AP_GAE_1',
+      'LIG_G3BP_FGDF_1',
+      'LIG_PTB_Phospho_1',
+      'LIG_NBox_RRM_1',
+      'LIG_RRM_PRI_1',
+      'LIG_14-3-3_CterR_2',
+      'LIG_eIF4E_2',
+      'LIG_UBA3_1',
+      'LIG_CNOT1_NIM_1'
+    )
+  ) |>
+  ggplot() +
+  stat_summary(
+    aes(
+      x = matched_motifs,
+      y = half_life
+    ),
+    fun.data = 'mean_cl_boot', 
+    color = color_1, 
+    linewidth = 0.2, 
+    size = 0.5
+  ) +
+  stat_pvalue_manual(
+    data = HEK_Nterm_sequence_ELM_motif_binding_wilcoxon_test |> slice(3, 4, 7), 
+    label = 'p.signif', label.size = 6, 
+    tip.length = 0, y.position = c(170, 180, 190), coord.flip = TRUE
+  ) +
+  labs(x = '', y = '') +
+  coord_flip(ylim = c(0, 200)) +
+  theme(
+    axis.text.x = element_text(color = 'black', size = 8, family = 'arial'),
+    axis.text.y = element_text(color = 'black', size = 8, family = 'arial')
+  )
+
+ggsave(
+  filename = 'figures/figure6/point_range_Nterm_ELM_motifs_binding.eps',
+  plot = point_range_Nterm_ELM_motifs_binding,
+  height = 3, width = 2.6, units = 'in'
+)
+
+
+HEK_Nterm_sequence_ELM_motif |> 
+  filter(
+    matched_motifs %in% c(
+      'MOD_NMyristoyl',
+      'MOD_OFUCOSY',
+      'MOD_Cter_Amidation',
+      'MOD_N-GLC_1',
+      'MOD_N-GLC_2',
+      'MOD_LOK_YxT_1',
+      'MOD_NEK2_1',
+      'MOD_CMANNOS',
+      'MOD_TYR_CSK',
+      'MOD_SUMO_for_1'
+    )
+  ) |> 
+  mutate(
+    matched_motifs = case_when(
+      matched_motifs %in% c(
+        'MOD_NMyristoyl',
+        'MOD_OFUCOSY',
+        'MOD_Cter_Amidation',
+        'MOD_N-GLC_1',
+        'MOD_N-GLC_2',
+        'MOD_LOK_YxT_1',
+        'MOD_NEK2_1',
+        'MOD_CMANNOS',
+        'MOD_TYR_CSK',
+        'MOD_SUMO_for_1'
+      ) ~ matched_motifs,
+      matched_motifs %in% not_mod_list ~ 'Others'
+    )
+  ) |> 
+  group_by(matched_motifs) |> 
+  get_summary_stats(half_life, type = 'mean')
 
 ### figure 5C
 ## get 7mer of N-terminal sequence

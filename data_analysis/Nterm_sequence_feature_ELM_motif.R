@@ -17,7 +17,7 @@ HEK_Nterm_sequence_ELM_motif <- HEK_Nterm_Kd_half_life_sequence |>
     matched_motifs = list(
       ELM_classes %>%
         filter(str_detect(Nterm_sequence, Regex)) %>%
-        pull(FunctionalSiteName)
+        pull(ELMIdentifier)
     )
   ) %>%
   ungroup() %>%
