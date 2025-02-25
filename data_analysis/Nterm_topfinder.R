@@ -1,6 +1,5 @@
 # import packages
-packages_names <- c("tidyverse", "rstatix")
-lapply(packages_names, require, character.only = TRUE)
+library(tidyverse)
 
 # generate data frame for TopFinder (https://topfind.clip.msl.ubc.ca/topfinder) upload
 topfinder_id <- HEK_Nterm_Kd_half_life_sequence |> 
@@ -31,6 +30,8 @@ Nterm_topfinder_cleaving_proteases <- Nterm_topfinder_result |>
   separate_rows(Cleaving.proteases, sep = ';')
 
 # Wilcoxon rank-sum test
+library(rstatix)
+
 Cleaving.Proteases.List <- Nterm_topfinder_cleaving_proteases |> 
   group_by(Cleaving.proteases) |> 
   get_summary_stats(half_life, type = 'median') |> 

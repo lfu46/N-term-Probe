@@ -1,3 +1,4 @@
+# import packages
 library(tidyverse)
 
 ### figure 5A, N-terminus secondary structure, solvent accessibility and IDR analysis

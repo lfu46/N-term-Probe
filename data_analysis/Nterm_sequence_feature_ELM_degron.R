@@ -1,6 +1,5 @@
 # import packages
-packages_names <- c("tidyverse", "rstatix")
-lapply(packages_names, require, character.only = TRUE)
+library(tidyverse)
 
 # ELM N-degron
 HEK_Nterm_ELM_N_degron <- HEK_Nterm_Kd_half_life_sequence |> 
@@ -19,6 +18,8 @@ HEK_Nterm_ELM_N_degron <- HEK_Nterm_Kd_half_life_sequence |>
   )
 
 # ELM N-degron half life median
+library(rstatix)
+
 ELM_N_degron_half_life_median <- HEK_Nterm_ELM_N_degron |> 
   group_by(ELM_N_degron) |> 
   get_summary_stats(half_life, type = 'median') |> 
