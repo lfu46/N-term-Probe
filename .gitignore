@@ -93,6 +93,7 @@ rsconnect/
 *.cif
 *.hdf
 
-
+#Ingore LOG files
+*.log
 
 
