@@ -452,6 +452,11 @@ common_Nterm_protein <- common_Nterm |>
     remove = FALSE
   )
 
+write_csv(
+  common_Nterm_protein,
+  'data_source/common_Nterm/common_Nterm_protein.csv'
+)
+
 ## generate Nterm sequence
 library(Biostrings)
 
@@ -488,3 +493,100 @@ writeLines(
   'data_source/common_Nterm/topfinder_id_common_Nterm.txt'
 )
 
+## import topfinder result
+common_Nterm_topfinder <- read_delim(
+  'data_source/common_Nterm/2025_02_26_common_Nterm_02262025/2025_02_26_common_Nterm_02262025_Full_Table.txt',
+  col_names = TRUE,
+  name_repair = 'universal'
+)
+
+# database feature
+common_Nterm_database_feature <- common_Nterm_topfinder |> 
+  select(
+    UniProt.curated.start, 
+    Alternative.Spliced.Start,
+    Cleaving.proteases,
+    Other.experimental.terminus.evidences,
+    Alternative.Translation.Start
+) |> 
+  pivot_longer(UniProt.curated.start:Alternative.Translation.Start, names_to = 'category', values_to = 'value') |> 
+  filter(!is.na(value)) |> 
+  count(category) |> 
+  mutate(
+    category = factor(category, levels = c(
+      'UniProt.curated.start',
+      'Alternative.Spliced.Start',
+      'Cleaving.proteases',
+      'Other.experimental.terminus.evidences',
+      'Alternative.Translation.Start'
+    ))
+  )
+
+# bar plot
+barplot_common_Nterm_database_feature <- common_Nterm_database_feature |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = category, 
+      y = n
+    ), 
+    stat = 'identity', 
+    fill = color_1
+  ) + 
+  labs(x= '', y = '# of N-terminal Proteoform') +
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(size = 8, color = "black"),
+  )
+
+ggsave(
+  filename = 'figures/figure2/barplot_common_Nterm_database_feature.eps',
+  plot = barplot_common_Nterm_database_feature,
+  height = 2, width = 2, units = 'in'
+)
+
+# cleaving proteases
+common_Nterm_cleaving_proteases <- common_Nterm_topfinder |> 
+  select(
+    Cleaving.proteases
+  ) |> 
+  separate_rows(Cleaving.proteases) |> 
+  filter(!is.na(Cleaving.proteases)) |> 
+  count(Cleaving.proteases) |> 
+  arrange(desc(n)) |> 
+  slice(1:8)
+
+# bar plot
+barplot_common_Nterm_cleaving_proteases <- common_Nterm_cleaving_proteases |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = Cleaving.proteases, 
+      y = n
+    ), 
+    fill = color_2, 
+    stat = 'identity'
+  ) +
+  labs(x= '', y = '# of N-terminal Proteoform') +
+  theme(
+    axis.text.x = element_text(size = 8, color = "black", angle = 30, hjust = 1),
+    axis.text.y = element_text(size = 8, color = "black"),
+  )
+
+ggsave(
+  filename = 'figures/figure2/barplot_common_Nterm_cleaving_proteases.eps',
+  plot = barplot_common_Nterm_cleaving_proteases,
+  height = 2, width = 2.3, units = 'in'
+)
+
+### figure 2G, Nterm structure feature
+library(reticulate)
+
+# use specific virtual env created by anaconda
+use_condaenv(
+  condaenv = '/opt/anaconda3/envs/structuremap',
+  required = TRUE
+)
+
+# execute the python script for Nterm structure
+source_python("data_analysis/Nterm_structuremap_common_unique.py")
