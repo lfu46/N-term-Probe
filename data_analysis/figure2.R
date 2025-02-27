@@ -579,7 +579,7 @@ ggsave(
   height = 2, width = 2.3, units = 'in'
 )
 
-### figure 2G, Nterm structure feature
+### figure 2H, Nterm structure feature
 library(reticulate)
 
 # use specific virtual env created by anaconda
@@ -590,3 +590,151 @@ use_condaenv(
 
 # execute the python script for Nterm structure
 source_python("data_analysis/Nterm_structuremap_common_unique.py")
+
+# generate a table example for Fisher's Exact test
+library(gridExtra)
+
+Fisher_Exact_test_table <- tibble(
+  'Yes' = c('a', 'b'),
+  'No' = c('c', 'd')
+)
+
+grid.table(Fisher_Exact_test_table)
+
+# save the result for proteoform N-terminus structural information
+common_Nterm_alphafold_N_terminus_tb <- tibble(common_Nterm_alphafold_N_terminus) |> 
+      filter(common_Nterm != 0) |> 
+      select(-protein_number, -UniProt_Accession, -start.position)
+
+write_csv(
+  common_Nterm_alphafold_N_terminus_tb,
+  file = 'data_source/common_Nterm/common_Nterm_alphafold_N_terminus_tb.csv'
+)
+
+# calculate the percentage of secondary structure
+common_Nterm_secondary_structure_percentage <- common_Nterm_alphafold_N_terminus_tb |> 
+  count(structure_group) |> 
+  mutate(
+    percentage = (n / sum(n)) * 100
+  )
+
+# circular barplot
+circular_barplot_secondary_structure_percentage <- common_Nterm_secondary_structure_percentage |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = 1, 
+      y = percentage, 
+      fill = structure_group
+    ),
+    stat = 'identity', 
+    show.legend = FALSE
+  ) +
+  scale_fill_manual(
+    values = c(
+      'HELX' = color_1,
+      'BEND' = color_2,
+      'STRN' = color_3,
+      'TURN' = color_4,
+      'unstructured' = 'gray70'
+    )
+  ) +
+  labs(x = '', y = '') +
+  coord_polar(theta = "y") +
+  theme(
+    axis.text = element_blank(), 
+    axis.ticks = element_blank()
+  )
+
+ggsave(
+  filename = 'figures/figure2/circular_barplot_secondary_structure_percentage.eps',
+  plot = circular_barplot_secondary_structure_percentage,
+  height = 2, width = 2, units = 'in'
+)
+
+# calculate the percentage of solvent accessiblity
+common_Nterm_solvent_accessibility_percentage <- common_Nterm_alphafold_N_terminus_tb |> 
+  count(high_acc_5) |> 
+  mutate(
+    percentage = (n / sum(n)) * 100
+  ) |> 
+  mutate(
+    high_acc_5 = as.character(high_acc_5)
+  )
+
+# circular barplot
+circular_barplot_solvent_accessibility_percentage <- common_Nterm_solvent_accessibility_percentage |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = 1, 
+      y = percentage, 
+      fill = high_acc_5
+    ),
+    stat = 'identity', 
+    show.legend = FALSE
+  ) +
+  scale_fill_manual(
+    values = c(
+      '0' = color_3,
+      '1' = color_4
+    )
+  ) +
+  labs(x = '', y = '') +
+  coord_polar(theta = "y") +
+  theme(
+    axis.text = element_blank(), 
+    axis.ticks = element_blank()
+  )
+
+ggsave(
+  filename = 'figures/figure2/circular_barplot_solvent_accessibility_percentage.eps',
+  plot = circular_barplot_solvent_accessibility_percentage,
+  height = 2, width = 2, units = 'in'
+)
+
+# calculate the percentage of IDR
+common_Nterm_IDR_percentage <- common_Nterm_alphafold_N_terminus_tb |> 
+  count(IDR) |> 
+  mutate(
+    percentage = (n / sum(n)) * 100
+  ) |> 
+  mutate(
+    IDR = as.character(IDR)
+  )
+
+# circular barplot
+circular_barplot_IDR_percentage <- common_Nterm_IDR_percentage |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = 1, 
+      y = percentage, 
+      fill = IDR
+    ),
+    stat = 'identity', 
+    show.legend = FALSE
+  ) +
+  scale_fill_manual(
+    values = c(
+      '0' = color_2,
+      '1' = color_1
+    )
+  ) +
+  labs(x = '', y = '') +
+  coord_polar(theta = "y") +
+  theme(
+    axis.text = element_blank(), 
+    axis.ticks = element_blank()
+  )
+
+ggsave(
+  filename = 'figures/figure2/circular_barplot_IDR_percentage.eps',
+  plot = circular_barplot_IDR_percentage,
+  height = 2, width = 2, units = 'in'
+)
+
+
+
+
+
