@@ -119,8 +119,376 @@ writeLines(
   'data_source/unique_Nterm/topfinder_id_unique_Nterm_THP1.txt'
 )
 
+## import topfinder results
+# HEK293T
+unique_Nterm_topfinder_HEK293T <- read_delim(
+  'data_source/unique_Nterm/2025_02_27_unique_Nterm_HEK293T_02272025/2025_02_27_unique_Nterm_HEK293T_02272025_Full_Table.txt',
+  col_names = TRUE,
+  name_repair = 'universal'
+)
 
-### figure 3B, GO and KEGG analysis of identified unique N-terminal proteoform in HEK293T, Jurkat and THP-1 cells
+# Jurkat
+unique_Nterm_topfinder_Jurkat <- read_delim(
+  'data_source/unique_Nterm/2025_02_27_unique_Nterm_Jurkat_02272025/2025_02_27_unique_Nterm_Jurkat_02272025_Full_Table.txt',
+  col_names = TRUE,
+  name_repair = 'universal'
+)
+
+# THP-1
+unique_Nterm_topfinder_THP1 <- read_delim(
+  'data_source/unique_Nterm/2025_02_27_unique_Nterm_THP1_02272025/2025_02_27_unique_Nterm_THP1_02272025_Full_Table.txt',
+  col_names = TRUE,
+  name_repair = 'universal'
+)
+
+## calculate the # of N-terminal proteoform in each cell line
+# HEK293T
+annotate_unique_Nterm_HEK293T <- unique_Nterm_topfinder_HEK293T |> 
+  select(
+    UniProt.curated.start, 
+    Alternative.Spliced.Start,
+    Cleaving.proteases,
+    Other.experimental.terminus.evidences,
+    Alternative.Translation.Start
+  ) |> 
+  pivot_longer(UniProt.curated.start:Alternative.Translation.Start, names_to = 'category', values_to = 'value') |> 
+  filter(!is.na(value))
+
+not_annotate_unique_Nterm_HEK293T <- unique_Nterm_topfinder_HEK293T |> 
+  filter(if_all(c(
+    UniProt.curated.start, 
+    Alternative.Spliced.Start,
+    Cleaving.proteases,
+    Other.experimental.terminus.evidences,
+    Alternative.Translation.Start
+  ), is.na))
+
+# unique Nterm HEK293T topfinder annotation
+annotation_unique_Nterm_HEK293T <- bind_rows(
+  annotate_unique_Nterm_HEK293T |> 
+    count(category),
+  
+  tibble(
+    category = 'Not.Annotated',
+    n = not_annotate_unique_Nterm_HEK293T |> nrow()
+  )
+)
+
+colnames(annotation_unique_Nterm_HEK293T) <- c('category', 'HEK293T')
+
+# Jurkat
+annotate_unique_Nterm_Jurkat <- unique_Nterm_topfinder_Jurkat |> 
+  select(
+    UniProt.curated.start, 
+    Alternative.Spliced.Start,
+    Cleaving.proteases,
+    Other.experimental.terminus.evidences,
+    Alternative.Translation.Start
+  ) |> 
+  pivot_longer(UniProt.curated.start:Alternative.Translation.Start, names_to = 'category', values_to = 'value') |> 
+  filter(!is.na(value))
+
+not_annotate_unique_Nterm_Jurkat <- unique_Nterm_topfinder_Jurkat |> 
+  filter(if_all(c(
+    UniProt.curated.start, 
+    Alternative.Spliced.Start,
+    Cleaving.proteases,
+    Other.experimental.terminus.evidences,
+    Alternative.Translation.Start
+  ), is.na))
+
+# unique Nterm Jurkat topfinder annotation
+annotation_unique_Nterm_Jurkat <- bind_rows(
+  annotate_unique_Nterm_Jurkat |> 
+    count(category),
+  
+  tibble(
+    category = 'Not.Annotated',
+    n = not_annotate_unique_Nterm_Jurkat |> nrow()
+  )
+)
+
+colnames(annotation_unique_Nterm_Jurkat) <- c('category', 'Jurkat')
+
+# THP-1
+annotate_unique_Nterm_THP1 <- unique_Nterm_topfinder_THP1 |> 
+  select(
+    UniProt.curated.start, 
+    Alternative.Spliced.Start,
+    Cleaving.proteases,
+    Other.experimental.terminus.evidences,
+    Alternative.Translation.Start
+  ) |> 
+  pivot_longer(UniProt.curated.start:Alternative.Translation.Start, names_to = 'category', values_to = 'value') |> 
+  filter(!is.na(value))
+
+not_annotate_unique_Nterm_THP1 <- unique_Nterm_topfinder_THP1 |> 
+  filter(if_all(c(
+    UniProt.curated.start, 
+    Alternative.Spliced.Start,
+    Cleaving.proteases,
+    Other.experimental.terminus.evidences,
+    Alternative.Translation.Start
+  ), is.na))
+
+# unique Nterm Jurkat topfinder annotation
+annotation_unique_Nterm_THP1 <- bind_rows(
+  annotate_unique_Nterm_THP1 |> 
+    count(category),
+  
+  tibble(
+    category = 'Not.Annotated',
+    n = not_annotate_unique_Nterm_THP1 |> nrow()
+  )
+)
+
+colnames(annotation_unique_Nterm_THP1) <- c('category', 'THP1')
+
+# combine results from HEK293T, Jurkat and THP-1
+annotation_unique_Nterm_comb <- annotation_unique_Nterm_HEK293T |> 
+  left_join(
+    annotation_unique_Nterm_Jurkat, by = 'category'
+  ) |> 
+  left_join(
+    annotation_unique_Nterm_THP1, by = 'category'
+  )
+
+# chi-square test
+annotation_unique_Nterm_comb_matrix <- data.matrix(
+  annotation_unique_Nterm_comb |> select(-category)
+)
+
+rownames(annotation_unique_Nterm_comb_matrix) <- annotation_unique_Nterm_comb$category
+
+# pairwise chi-square tests
+# HEK293T vs. Jurkat
+chisq.test(
+  annotation_unique_Nterm_comb_matrix[, c('HEK293T', 'Jurkat')]
+)
+
+# Jurkat vs. THP-1
+chisq.test(
+  annotation_unique_Nterm_comb_matrix[, c('Jurkat', 'THP1')]
+)
+
+# THP-1 vs. HEK293T
+chisq.test(
+  annotation_unique_Nterm_comb_matrix[, c('THP1', 'HEK293T')]
+)
+
+# bar plot
+barplot_annotation_unique_Nterm_comb <- annotation_unique_Nterm_comb |> 
+  pivot_longer(
+    cols = 'HEK293T':'THP1', names_to = 'cell', values_to = 'count'
+  ) |> 
+  mutate(
+    category = factor(category, levels = c(
+      'Not.Annotated',
+      'Alternative.Translation.Start',
+      'Other.experimental.terminus.evidences',
+      'Cleaving.proteases',
+      'Alternative.Spliced.Start',
+      'UniProt.curated.start'
+    )) 
+  ) |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = cell,
+      y = count,
+      fill = category
+    ),
+    stat = 'identity', 
+    position = 'stack'
+  ) +
+  labs(x = '', y = '') +
+  scale_fill_manual(
+    name = '',
+    values = c(
+      'Not.Annotated' = 'gray70',
+      'Alternative.Translation.Start' = color_5,
+      'Other.experimental.terminus.evidences' = color_4,
+      'Cleaving.proteases' = color_3,
+      'Alternative.Spliced.Start' = color_2,
+      'UniProt.curated.start' = color_1
+    )
+  ) +
+  theme(
+    axis.text.x = element_text(size = 8, color = 'black', angle = 30, hjust = 1),
+    axis.text.y = element_text(size = 8, color = 'black'),
+    legend.text = element_text(size = 8, color = 'black')
+  )
+
+ggsave(
+  filename = 'figures/figure3/barplot_annotation_unique_Nterm_comb.eps',
+  plot = barplot_annotation_unique_Nterm_comb,
+  height = 2, width = 4, units = 'in'
+)
+
+### figure 3B, enriched cleaving proteases in each cell line
+enriched_protease_HEK293T <- unique_Nterm_topfinder_HEK293T |> 
+  separate_rows(Cleaving.proteases, sep = ';') |> 
+  filter(str_detect(Cleaving.proteases, 'GRAA')) |> 
+  count(Cleaving.proteases) |> 
+  mutate(
+    cell = 'HEK293T'
+  )
+
+enriched_protease_Jurkat <- unique_Nterm_topfinder_Jurkat |> 
+  separate_rows(Cleaving.proteases, sep = ';') |> 
+  filter(str_detect(Cleaving.proteases, 'CATL1|MEP1B|CATS|MEP1A|CATB')) |> 
+  count(Cleaving.proteases) |> 
+  mutate(
+    cell = 'Jurkat'
+  )
+
+enriched_protease_THP1 <- unique_Nterm_topfinder_THP1 |> 
+  separate_rows(Cleaving.proteases, sep = ';') |> 
+  filter(str_detect(Cleaving.proteases, 'HTRA2|CASP1|MMP11|ELNE|CASP7|MMP3')) |> 
+  count(Cleaving.proteases) |> 
+  mutate(
+    cell = 'THP-1'
+  )
+
+# combine result form HEK293T, Jurkat and THP-1
+enriched_protease_comb <- bind_rows(
+  enriched_protease_HEK293T,
+  enriched_protease_Jurkat,
+  enriched_protease_THP1
+)
+
+# bar plot
+barplot_enriched_protease_comb <- enriched_protease_comb |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = fct_reorder(Cleaving.proteases, n),
+      y = n,
+      fill = cell
+    ),
+    stat = 'identity', show.legend = FALSE
+  ) +
+  facet_grid(. ~ cell, scales = 'free', space = 'free') +
+  labs(x = '', y = 'Cleavages') +
+  scale_fill_manual(
+    values = c(
+      'HEK293T' = color_1,
+      'Jurkat' = color_2,
+      'THP-1' = color_3
+    )
+  ) +
+  theme(
+    axis.text.x = element_text(size = 8, color = 'black', angle = 90, hjust = 1),
+    axis.text.y = element_text(size = 8, color = 'black'),
+    axis.title = element_text(size = 8, color = 'black'),
+    strip.text = element_text(size = 8, color = 'black')
+  )
+
+ggsave(
+  filename = 'figures/figure3/barplot_enriched_protease_comb.eps',
+  plot = barplot_enriched_protease_comb,
+  height = 2, width = 2.5, units = 'in'
+)
+  
+
+### figure 3C, N-terminus features in each cell line
+N_terminus_feature_HEK293T <- unique_Nterm_topfinder_HEK293T |> 
+  select(Distance.To.signal.peptide, Distance.to.propeptide.lost, Distance.to.last.transmembrane.domain..shed.) |> 
+  pivot_longer(
+   cols =  Distance.To.signal.peptide:Distance.to.last.transmembrane.domain..shed., names_to = 'N_terminus_feature', values_to = 'distance'
+  ) |> 
+  filter(!is.na(distance)) |> 
+  count(N_terminus_feature) |> 
+  mutate(
+    cell = 'HEK293T'
+  )
+
+N_terminus_feature_Jurkat <- unique_Nterm_topfinder_Jurkat |> 
+  select(Distance.To.signal.peptide, Distance.to.propeptide.lost, Distance.to.last.transmembrane.domain..shed.) |> 
+  pivot_longer(
+    cols =  Distance.To.signal.peptide:Distance.to.last.transmembrane.domain..shed., names_to = 'N_terminus_feature', values_to = 'distance'
+  ) |> 
+  filter(!is.na(distance)) |> 
+  count(N_terminus_feature) |> 
+  mutate(
+    cell = 'Jurkat'
+  )
+
+N_terminus_feature_THP1 <- unique_Nterm_topfinder_THP1 |> 
+  select(Distance.To.signal.peptide, Distance.to.propeptide.lost, Distance.to.last.transmembrane.domain..shed.) |> 
+  pivot_longer(
+    cols =  Distance.To.signal.peptide:Distance.to.last.transmembrane.domain..shed., names_to = 'N_terminus_feature', values_to = 'distance'
+  ) |> 
+  filter(!is.na(distance)) |> 
+  count(N_terminus_feature) |> 
+  mutate(
+    cell = 'THP-1'
+  )
+
+# combine results from HEK293T, Jurkat and THP-1
+N_terminus_feature_comb <- bind_rows(
+  N_terminus_feature_HEK293T,
+  N_terminus_feature_Jurkat,
+  N_terminus_feature_THP1
+) |> 
+  mutate(
+    N_terminus_feature = case_when(
+      str_detect(N_terminus_feature, 'signal.peptide') ~ 'Signal.Peptide',
+      str_detect(N_terminus_feature, 'transmembrane.domain') ~ 'Transmembrane.Domain',
+      str_detect(N_terminus_feature, 'propeptide.lost') ~ 'Propeptide.Lost'
+    )
+  )
+
+# pairwise chi-square test
+N_terminus_feature_comb_matrix_tb <- N_terminus_feature_comb |> 
+  pivot_wider(names_from = cell, values_from = n)
+
+N_terminus_feature_comb_matrix <- data.matrix(N_terminus_feature_comb_matrix_tb)
+rownames(N_terminus_feature_comb_matrix) <- N_terminus_feature_comb_matrix_tb$N_terminus_feature
+
+# HEK293T vs. Jurkat
+chisq.test(N_terminus_feature_comb_matrix[, c('HEK293T', 'Jurkat')])
+
+# Jurkat vs. THP-1
+chisq.test(N_terminus_feature_comb_matrix[, c('Jurkat', 'THP-1')])
+
+# THP-1 vs. HEK293T
+chisq.test(N_terminus_feature_comb_matrix[, c('THP-1', 'HEK293T')])
+
+# bar plot
+barplot_N_terminus_feature_comb <- N_terminus_feature_comb |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = N_terminus_feature,
+      y = n,
+      fill = N_terminus_feature
+    ),
+    stat = 'identity'
+  ) +
+  facet_wrap(vars(cell), nrow = 1) +
+  scale_fill_manual(
+    name = '',
+    values = c(
+      'Signal.Peptide' = color_1,
+      'Transmembrane.Domain' = color_2,
+      'Propeptide.Lost' = color_3
+    )
+  ) +
+  labs(x = '', y = '') +
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(size = 8, color = 'black'),
+    strip.text = element_text(size = 8, color = 'black')
+  )
+
+ggsave(
+  filename = 'figures/figure3/barplot_N_terminus_feature_comb.eps',
+  plot = barplot_N_terminus_feature_comb,
+  height = 1.65, width = 4, units = 'in'
+)
+
+### figure 3D, GO and KEGG analysis of identified unique N-terminal proteoform in HEK293T, Jurkat and THP-1 cells
 ## GO analysis
 library(clusterProfiler)
 library(org.Hs.eg.db)
@@ -361,7 +729,7 @@ ggsave(
   height = 2, width = 3.5, units = 'in'
 )
 
-### figure 3C, protein domain and complex analysis of identified unique N-terminal proteoform in HEK293T, Jurkat and THP-1 cells
+### figure 3E, protein domain and complex analysis of identified unique N-terminal proteoform in HEK293T, Jurkat and THP-1 cells
 # import protein domain information from Pfam 
 # (https://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam37.0/proteomes/, 9606.tsv.gz, 2024-05-28 13:25	2.8M)
 human_pfam <- read_tsv(
@@ -604,7 +972,7 @@ ggsave(
   height = 2, width = 3.5, units = 'in'
 )
 
-### figure 3D, Nterm structure features
+### figure 3F, Nterm structure features
 library(reticulate)
 
 # use specific virtual env created by anaconda

@@ -6,8 +6,7 @@ color_1 <- '#4b1978'
 color_2 <- '#18647c'
 color_3 <- '#0164c9'
 color_4 <- '#00b32d'
-color_5 <- '#c73001'
-color_6 <- '#ffb042'
+color_5 <- '#ffb042'
 
 # psm 
 HEK_Nt_1_psm <- read_csv(
