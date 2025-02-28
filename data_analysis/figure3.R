@@ -2,6 +2,7 @@
 library(tidyverse)
 
 # generate unique N-terminal proteoform identified in each cell line
+# HEK293T
 unique_Nterm_HEK293T <- setdiff(
   Nterm_list_comb$HEK293T, c(Nterm_list_comb$Jurkat, Nterm_list_comb$`THP-1`)
 ) |> 
@@ -12,6 +13,12 @@ unique_Nterm_HEK293T <- setdiff(
   ) |> 
   select(Index = value, UniProt_Accession, start.position)
 
+write_csv(
+  unique_Nterm_HEK293T,
+  'data_source/unique_Nterm/unique_Nterm_HEK293T.csv'
+)
+
+# Jurkat
 unique_Nterm_Jurkat <- setdiff(
   Nterm_list_comb$Jurkat, c(Nterm_list_comb$`THP-1`, Nterm_list_comb$HEK293T)
 ) |> 
@@ -22,6 +29,12 @@ unique_Nterm_Jurkat <- setdiff(
   ) |> 
   select(Index = value, UniProt_Accession, start.position)
 
+write_csv(
+  unique_Nterm_Jurkat,
+  'data_source/unique_Nterm/unique_Nterm_Jurkat.csv'
+)
+
+# THP-1
 unique_Nterm_THP1 <- setdiff(
   Nterm_list_comb$`THP-1`, c(Nterm_list_comb$HEK293T, Nterm_list_comb$Jurkat)
 ) |> 
@@ -32,6 +45,12 @@ unique_Nterm_THP1 <- setdiff(
   ) |> 
   select(Index = value, UniProt_Accession, start.position)
 
+write_csv(
+  unique_Nterm_THP1,
+  'data_source/unique_Nterm/unique_Nterm_THP1.csv'
+)
+
+# total Nterm protein
 total_Nterm_comb <- Nterm_list_comb |> 
   unlist() |> 
   unname() |> 
@@ -984,4 +1003,289 @@ use_condaenv(
 # execute the python script for Nterm structure
 source_python("data_analysis/Nterm_structuremap_common_unique.py")
 
+## AlphaFold annotation for unique Nterm in each cell line
+# HEK293T
+unique_Nterm_HEK293T_alphafold_annotation_R <- unique_Nterm_HEK293T |> 
+  left_join(
+    unique_Nterm_HEK293T_alphafold_accessibility_smooth, by = join_by(
+      'UniProt_Accession' == 'protein_id', 'start.position' == 'position'
+    )
+  )
 
+write_csv(
+  unique_Nterm_HEK293T_alphafold_annotation_R,
+  'data_source/unique_Nterm/unique_Nterm_HEK293T_alphafold_annotation_R.csv'
+)
+
+# Jurkat
+unique_Nterm_Jurkat_alphafold_annotation_R <- unique_Nterm_Jurkat |> 
+  left_join(
+    unique_Nterm_Jurkat_alphafold_accessibility_smooth, by = join_by(
+      'UniProt_Accession' == 'protein_id', 'start.position' == 'position'
+    )
+  )
+
+write_csv(
+  unique_Nterm_Jurkat_alphafold_annotation_R,
+  'data_source/unique_Nterm/unique_Nterm_Jurkat_alphafold_annotation_R.csv'
+)
+
+# THP-1
+unique_Nterm_THP1_alphafold_annotation_R <- unique_Nterm_THP1 |> 
+  left_join(
+    unique_Nterm_THP1_alphafold_accessibility_smooth, by = join_by(
+      'UniProt_Accession' == 'protein_id', 'start.position' == 'position'
+    )
+  )
+
+write_csv(
+  unique_Nterm_THP1_alphafold_annotation_R,
+  'data_source/unique_Nterm/unique_Nterm_THP1_alphafold_annotation_R.csv'
+)
+
+# import the results of AlphaFold annotation from each cell line
+# HEK293T 
+unique_Nterm_HEK293T_alphafold_annotation_R <- read_csv(
+  'data_source/unique_Nterm/unique_Nterm_HEK293T_alphafold_annotation_R.csv'
+)
+
+# Jurkat
+unique_Nterm_Jurkat_alphafold_annotation_R <- read_csv(
+  'data_source/unique_Nterm/unique_Nterm_Jurkat_alphafold_annotation_R.csv'
+)
+
+# THP-1
+unique_Nterm_THP1_alphafold_annotation_R <- read_csv(
+  'data_source/unique_Nterm/unique_Nterm_THP1_alphafold_annotation_R.csv'
+)
+
+## calculate the percentage of secondary structure for each cell line
+# HEK293T
+unique_Nterm_HEK293T_secondary_group_percentage <- unique_Nterm_HEK293T_alphafold_annotation_R |> 
+  filter(!is.na(structure_group)) |> 
+  count(structure_group) |> 
+  mutate(
+    percentage = n/sum(n),
+    cell = 'HEK293T'
+  )
+
+# Jurkat
+unique_Nterm_Jurkat_secondary_group_percentage <- unique_Nterm_Jurkat_alphafold_annotation_R |> 
+  filter(!is.na(structure_group)) |> 
+  count(structure_group) |> 
+  mutate(
+    percentage = n/sum(n),
+    cell = 'Jurkat'
+  )
+
+# THP-1
+unique_Nterm_THP1_secondary_group_percentage <- unique_Nterm_THP1_alphafold_annotation_R |> 
+  filter(!is.na(structure_group)) |> 
+  count(structure_group) |> 
+  mutate(
+    percentage = n/sum(n),
+    cell = 'THP-1'
+  )
+
+# combine result from HEK293T, Jurkat and THP-1
+unique_Nterm_secondary_group_percentage_comb <- bind_rows(
+  unique_Nterm_HEK293T_secondary_group_percentage,
+  unique_Nterm_Jurkat_secondary_group_percentage,
+  unique_Nterm_THP1_secondary_group_percentage
+)
+
+# ANOVA test/Turkey HSD
+ANOVA_result <- aov(
+  percentage ~ structure_group, data = unique_Nterm_secondary_group_percentage_comb
+)
+summary(ANOVA_result)
+TukeyHSD(ANOVA_result)
+
+# bar plot
+barplot_unique_Nterm_secondary_group_percentage_comb <- unique_Nterm_secondary_group_percentage_comb |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = cell,
+      y = percentage,
+      fill = structure_group
+    ), 
+    stat = 'identity',
+    position = 'stack'
+  ) +
+  labs(x = '', y = '') +
+  scale_fill_manual(
+    name = '',
+    values = c(
+      'BEND' = color_1,
+      'HELX' = color_2,
+      'STRN' = color_3,
+      'TURN' = color_4,
+      'unstructured' = 'gray70'
+    )
+  ) +
+  theme(
+    axis.text.x = element_text(size = 8, color = 'black', angle = 60, hjust = 1),
+    axis.text.y = element_text(size = 8, color = 'black'),
+    legend.text = element_text(size = 8, color = 'black')
+  )
+
+ggsave(
+  filename = 'figures/figure3/barplot_unique_Nterm_secondary_group_percentage_comb.eps',
+  plot = barplot_unique_Nterm_secondary_group_percentage_comb,
+  height = 2, width = 2.5, units = 'in'
+)
+
+## calculate the percentage of solvent accessibility for each cell line
+# HEK293T
+unique_Nterm_HEK293T_solvent_accessibility_percentage <- unique_Nterm_HEK293T_alphafold_annotation_R |> 
+  filter(!is.na(high_acc_5)) |> 
+  count(high_acc_5) |> 
+  mutate(
+    percentage = n/sum(n),
+    cell = 'HEK293T'
+  )
+
+# Jurkat
+unique_Nterm_Jurkat_solvent_accessibility_percentage <- unique_Nterm_Jurkat_alphafold_annotation_R |> 
+  filter(!is.na(high_acc_5)) |> 
+  count(high_acc_5) |> 
+  mutate(
+    percentage = n/sum(n),
+    cell = 'Jurkat'
+  )
+
+# THP-1
+unique_Nterm_THP1_solvent_accessibility_percentage <- unique_Nterm_THP1_alphafold_annotation_R |> 
+  filter(!is.na(high_acc_5)) |> 
+  count(high_acc_5) |> 
+  mutate(
+    percentage = n/sum(n),
+    cell = 'THP-1'
+  )
+
+# combine result from HEK293T, Jurkat and THP-1
+unique_Nterm_solvent_accessibility_percentage_comb <- bind_rows(
+  unique_Nterm_HEK293T_solvent_accessibility_percentage,
+  unique_Nterm_Jurkat_solvent_accessibility_percentage,
+  unique_Nterm_THP1_solvent_accessibility_percentage
+)
+
+# ANOVA test/Turkey HSD
+ANOVA_result <- aov(
+  percentage ~ cell, data = unique_Nterm_solvent_accessibility_percentage_comb
+)
+summary(ANOVA_result)
+TukeyHSD(ANOVA_result)
+
+# bar plot
+barplot_unique_Nterm_solvent_accessibility_percentage_comb <- unique_Nterm_solvent_accessibility_percentage_comb |> 
+  mutate(
+    high_acc_5 = as.character(high_acc_5)
+  ) |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = cell,
+      y = percentage,
+      fill = high_acc_5
+    ), 
+    stat = 'identity',
+    position = 'stack'
+  ) +
+  labs(x = '', y = '') +
+  scale_fill_manual(
+    name = '',
+    values = c(
+      '0' = color_3,
+      '1' = color_4
+    )
+  ) +
+  theme(
+    axis.text.x = element_text(size = 8, color = 'black', angle = 60, hjust = 1),
+    axis.text.y = element_text(size = 8, color = 'black'),
+    legend.text = element_text(size = 8, color = 'black')
+  )
+
+ggsave(
+  filename = 'figures/figure3/barplot_unique_Nterm_solvent_accessibility_percentage_comb.eps',
+  plot = barplot_unique_Nterm_solvent_accessibility_percentage_comb,
+  height = 2, width = 2, units = 'in'
+)
+
+## calculate the percentage of IDR for each cell line
+# HEK293T
+unique_Nterm_HEK293T_IDR_percentage <- unique_Nterm_HEK293T_alphafold_annotation_R |> 
+  filter(!is.na(IDR)) |> 
+  count(IDR) |> 
+  mutate(
+    percentage = n/sum(n),
+    cell = 'HEK293T'
+  )
+
+# Jurkat
+unique_Nterm_Jurkat_IDR_percentage <- unique_Nterm_Jurkat_alphafold_annotation_R |> 
+  filter(!is.na(IDR)) |> 
+  count(IDR) |> 
+  mutate(
+    percentage = n/sum(n),
+    cell = 'Jurkat'
+  )
+
+# THP-1
+unique_Nterm_THP1_IDR_percentage <- unique_Nterm_THP1_alphafold_annotation_R |> 
+  filter(!is.na(IDR)) |> 
+  count(IDR) |> 
+  mutate(
+    percentage = n/sum(n),
+    cell = 'THP-1'
+  )
+
+# combine result from HEK293T, Jurkat and THP-1
+unique_Nterm_IDR_percentage_comb <- bind_rows(
+  unique_Nterm_HEK293T_IDR_percentage,
+  unique_Nterm_Jurkat_IDR_percentage,
+  unique_Nterm_THP1_IDR_percentage
+)
+
+# ANOVA test/Turkey HSD
+ANOVA_result <- aov(
+  percentage ~ cell, data = unique_Nterm_IDR_percentage_comb
+)
+summary(ANOVA_result)
+TukeyHSD(ANOVA_result)
+
+# bar plot
+barplot_unique_Nterm_IDR_percentage_comb <- unique_Nterm_IDR_percentage_comb |> 
+  mutate(
+    IDR = as.character(IDR)
+  ) |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = cell,
+      y = percentage,
+      fill = IDR
+    ), 
+    stat = 'identity',
+    position = 'stack'
+  ) +
+  labs(x = '', y = '') +
+  scale_fill_manual(
+    name = '',
+    values = c(
+      '0' = color_2,
+      '1' = color_1
+    )
+  ) +
+  theme(
+    axis.text.x = element_text(size = 8, color = 'black', angle = 60, hjust = 1),
+    axis.text.y = element_text(size = 8, color = 'black'),
+    legend.text = element_text(size = 8, color = 'black')
+  )
+
+ggsave(
+  filename = 'figures/figure3/barplot_unique_Nterm_IDR_percentage_comb.eps',
+  plot = barplot_unique_Nterm_IDR_percentage_comb,
+  height = 2, width = 2, units = 'in'
+)

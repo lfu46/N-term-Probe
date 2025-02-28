@@ -8,79 +8,79 @@ import structuremap.utils
 structuremap.utils.set_logger()
 from structuremap.processing import download_alphafold_cif, download_alphafold_pae, format_alphafold_data, annotate_accessibility, get_smooth_score, annotate_proteins_with_idr_pattern, get_extended_flexible_pattern, get_proximity_pvals, perform_enrichment_analysis, perform_enrichment_analysis_per_protein, evaluate_ptm_colocalization, extract_motifs_in_proteome
 
-# import common Nterm data from results
-total_Nterm_comb = pd.read_csv(
-  'data_source/unique_Nterm/total_Nterm_comb.csv',
+# import unique Nterm HEK293T data from results
+unique_Nterm_THP1 = pd.read_csv(
+  'data_source/unique_Nterm/unique_Nterm_THP1.csv',
   header = 0,
   index_col = None
 )
 
-total_Nterm_protein_list = total_Nterm_comb["UniProt_Accession"].unique().tolist()
+unique_Nterm_THP1_protein_list = unique_Nterm_THP1["UniProt_Accession"].unique().tolist()
 
 ## download AlphaFold data
 # crystallographic information file
-valid_proteins_cif, invalid_proteins_cif, existing_proteins_cif = download_alphafold_cif(
-    proteins = total_Nterm_protein_list,
-    out_folder = "data_source/Nterm_structuremap/Nterm_degradation_cif"
-)
+# valid_proteins_cif, invalid_proteins_cif, existing_proteins_cif = download_alphafold_cif(
+#     proteins = total_Nterm_protein_list,
+#     out_folder = "data_source/Nterm_structuremap/Nterm_degradation_cif"
+# )
 
 # predicted aligned error
-valid_proteins_pae, invalid_proteins_pae, existing_proteins_pae = download_alphafold_pae(
-    proteins = total_Nterm_protein_list,
-    out_folder = "data_source/Nterm_structuremap/Nterm_degradation_pae"
-)
+# valid_proteins_pae, invalid_proteins_pae, existing_proteins_pae = download_alphafold_pae(
+#     proteins = total_Nterm_protein_list,
+#     out_folder = "data_source/Nterm_structuremap/Nterm_degradation_pae"
+# )
 
 # format AlphaFold data input
-# common_Nterm_alphafold_annotation = format_alphafold_data(
-#   directory = "data_source/Nterm_structuremap/Nterm_degradation_cif",
-#   protein_ids = common_Nterm_protein_list
-# )
+unique_Nterm_THP1_alphafold_annotation = format_alphafold_data(
+  directory = "data_source/Nterm_structuremap/Nterm_degradation_cif",
+  protein_ids = unique_Nterm_THP1_protein_list
+)
 
 # annotate prediction-aware part-sphere exposure (pPSE) values
-# common_Nterm_full_sphere_exposure = annotate_accessibility(
-#     df = common_Nterm_alphafold_annotation, 
-#     max_dist = 24, 
-#     max_angle = 180, 
-#     error_dir = "data_source/Nterm_structuremap/Nterm_degradation_pae"
-# )
+unique_Nterm_THP1_full_sphere_exposure = annotate_accessibility(
+    df = unique_Nterm_THP1_alphafold_annotation,
+    max_dist = 24,
+    max_angle = 180,
+    error_dir = "data_source/Nterm_structuremap/Nterm_degradation_pae"
+)
 
-# common_Nterm_alphafold_accessibility = common_Nterm_alphafold_annotation.merge(
-#   common_Nterm_full_sphere_exposure,
-#   how = "left",
-#   on = ["protein_id", "AA", "position"]
-# )
+unique_Nterm_THP1_alphafold_accessibility = unique_Nterm_THP1_alphafold_annotation.merge(
+  unique_Nterm_THP1_full_sphere_exposure,
+  how = "left",
+  on = ["protein_id", "AA", "position"]
+)
 
-# common_Nterm_part_sphere_exposure = annotate_accessibility(
-#     df = common_Nterm_alphafold_annotation, 
-#     max_dist = 12, 
-#     max_angle = 70, 
-#     error_dir = "data_source/Nterm_structuremap/Nterm_degradation_pae"
-# )
+unique_Nterm_THP1_part_sphere_exposure = annotate_accessibility(
+    df = unique_Nterm_THP1_alphafold_annotation,
+    max_dist = 12,
+    max_angle = 70,
+    error_dir = "data_source/Nterm_structuremap/Nterm_degradation_pae"
+)
 
-# common_Nterm_alphafold_accessibility = common_Nterm_alphafold_accessibility.merge(
-#   common_Nterm_part_sphere_exposure,
-#   how = "left",
-#   on = ["protein_id", "AA", "position"]
-# )
+unique_Nterm_THP1_alphafold_accessibility = unique_Nterm_THP1_alphafold_accessibility.merge(
+  unique_Nterm_THP1_part_sphere_exposure,
+  how = "left",
+  on = ["protein_id", "AA", "position"]
+)
 
-# common_Nterm_alphafold_accessibility["high_acc_5"] = np.where(
-#   common_Nterm_alphafold_accessibility.nAA_12_70_pae <= 5, 1, 0
-# )
+unique_Nterm_THP1_alphafold_accessibility["high_acc_5"] = np.where(
+  unique_Nterm_THP1_alphafold_accessibility.nAA_12_70_pae <= 5, 1, 0
+)
 
-# common_Nterm_alphafold_accessibility["low_acc_5"] = np.where(
-#   common_Nterm_alphafold_accessibility.nAA_12_70_pae > 5, 1, 0
-# )
+unique_Nterm_THP1_alphafold_accessibility["low_acc_5"] = np.where(
+  unique_Nterm_THP1_alphafold_accessibility.nAA_12_70_pae > 5, 1, 0
+)
 
 # annotate instrisicly disorder region (IDR)
-# common_Nterm_alphafold_accessibility_smooth = get_smooth_score(
-#   common_Nterm_alphafold_accessibility,
-#   np.array(['nAA_24_180_pae']),
-#   [10]
-# ).reset_index(drop=True)
+unique_Nterm_THP1_alphafold_accessibility_smooth = get_smooth_score(
+  unique_Nterm_THP1_alphafold_accessibility,
+  np.array(['nAA_24_180_pae']),
+  [10]
+).reset_index(drop=True)
 
-# common_Nterm_alphafold_accessibility_smooth["IDR"] = np.where(
-#   common_Nterm_alphafold_accessibility_smooth.nAA_24_180_pae_smooth10 <= 34.27, 1, 0
-# )
+unique_Nterm_THP1_alphafold_accessibility_smooth["IDR"] = np.where(
+  unique_Nterm_THP1_alphafold_accessibility_smooth.nAA_24_180_pae_smooth10 <= 34.27, 1, 0
+)
 
 # anntate short IDRs
 # common_Nterm_alphafold_accessibility_smooth_pattern = annotate_proteins_with_idr_pattern(
