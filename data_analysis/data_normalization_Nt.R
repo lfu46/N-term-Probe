@@ -64,7 +64,7 @@ HEK_Nt_3_psm_TMTi_light_N_term <- HEK_Nt_3_psm_TMTi |>
 
 write_csv(HEK_Nt_3_psm_TMTi_light_N_term, file = 'data_source/normalized_data/HEK_Nt_3_psm_TMTi_light_N_term.csv')
 
-# group by N-term index
+## group by N-term index
 # HEK_Nt_1
 HEK_Nterm_1 <- HEK_Nt_1_psm_TMTi_light_N_term |> 
   group_by(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name) |> 

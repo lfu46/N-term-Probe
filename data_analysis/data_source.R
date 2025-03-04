@@ -8,7 +8,8 @@ color_3 <- '#0164c9'
 color_4 <- '#00b32d'
 color_5 <- '#ffb042'
 
-# psm 
+## psm 
+# Nterm
 HEK_Nt_1_psm <- read_csv(
   'data_source/psm/HEK_Nt_1_psm.csv'
 )
@@ -19,7 +20,19 @@ HEK_Nt_3_psm <- read_csv(
   'data_source/psm/HEK_Nt_3_psm.csv'
 )
 
-# TMT intensity normalized psm
+# Whole Proteome
+HEK_WP_1_psm <- read_csv(
+  'data_source/psm/HEK_WP_1_psm.csv'
+)
+HEK_WP_2_psm <- read_csv(
+  'data_source/psm/HEK_WP_2_psm.csv'
+)
+HEK_WP_3_psm <- read_csv(
+  'data_source/psm/HEK_WP_3_psm.csv'
+)
+
+## TMT intensity normalized psm
+# Nterm
 HEK_Nt_1_psm_TMTi <- read_csv(
   'data_source/normalized_data/HEK_Nt_1_psm_TMTi.csv'
 )
@@ -30,7 +43,18 @@ HEK_Nt_3_psm_TMTi <- read_csv(
   'data_source/normalized_data/HEK_Nt_3_psm_TMTi.csv'
 )
 
-# Remove heavy labeled and not N-term modified psm
+# Whole Proteome
+HEK_WP_1_psm_TMTi <- read_csv(
+  'data_source/normalized_data/HEK_WP_1_psm_TMTi.csv'
+)
+HEK_WP_2_psm_TMTi <- read_csv(
+  'data_source/normalized_data/HEK_WP_2_psm_TMTi.csv'
+)
+HEK_WP_3_psm_TMTi <- read_csv(
+  'data_source/normalized_data/HEK_WP_3_psm_TMTi.csv'
+)
+
+# Nterm, remove heavy labeled and not N-term modified psm
 HEK_Nt_1_psm_TMTi_light_N_term <- read_csv(
   'data_source/normalized_data/HEK_Nt_1_psm_TMTi_light_N_term.csv'
 )
@@ -41,7 +65,18 @@ HEK_Nt_3_psm_TMTi_light_N_term <- read_csv(
   'data_source/normalized_data/HEK_Nt_3_psm_TMTi_light_N_term.csv'
 )
 
-# group by N-term Index
+# Whole Proteome, remove heavy labeled and not N-term modified psm
+HEK_WP_1_psm_TMTi_light <- read_csv(
+  'data_source/normalized_data/HEK_WP_1_psm_TMTi_light.csv'
+)
+HEK_WP_2_psm_TMTi_light <- read_csv(
+  'data_source/normalized_data/HEK_WP_2_psm_TMTi_light.csv'
+)
+HEK_WP_3_psm_TMTi_light <- read_csv(
+  'data_source/normalized_data/HEK_WP_3_psm_TMTi_light.csv'
+)
+
+# Nterm, group by N-term Index
 HEK_Nterm_1 <- read_csv(
   'data_source/normalized_data/HEK_Nterm_1.csv'
 )
@@ -52,7 +87,19 @@ HEK_Nterm_3 <- read_csv(
   'data_source/normalized_data/HEK_Nterm_3.csv'
 )
 
-#internal reference scaling normalization
+# Whole Proteome, group by UniProt_Accession
+HEK_Whole_Proteome_1 <- read_csv(
+  'data_source/normalized_data/HEK_Whole_Proteome_1.csv'
+)
+HEK_Whole_Proteome_2 <- read_csv(
+  'data_source/normalized_data/HEK_Whole_Proteome_2.csv'
+)
+HEK_Whole_Proteome_3 <- read_csv(
+  'data_source/normalized_data/HEK_Whole_Proteome_3.csv'
+)
+
+## internal reference scaling normalization
+# Nterm
 HEK_Nterm_1_irs <- read_csv(
   'data_source/normalized_data/HEK_Nterm_1_irs.csv'
 )
@@ -61,6 +108,17 @@ HEK_Nterm_2_irs <- read_csv(
 )
 HEK_Nterm_3_irs <- read_csv(
   'data_source/normalized_data/HEK_Nterm_3_irs.csv'
+)
+
+# Whole Proteome
+HEK_Whole_Proteome_1_irs <- read_csv(
+  'data_source/normalized_data/HEK_Whole_Proteome_1_irs.csv'
+)
+HEK_Whole_Proteome_2_irs <- read_csv(
+  'data_source/normalized_data/HEK_Whole_Proteome_2_irs.csv'
+)
+HEK_Whole_Proteome_3_irs <- read_csv(
+  'data_source/normalized_data/HEK_Whole_Proteome_3_irs.csv'
 )
 
 # degradation ratio
