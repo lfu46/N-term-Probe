@@ -418,11 +418,59 @@ ggsave(
   height = 2, width = 2, units = 'in'
 )
 
+### figure 4C, overlap of quantified proteins for Nterm and Whole Proteome
+Nterm_number <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> distinct(Index) |> nrow()
+Nterm_protein_number <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> distinct(UniProt_Accession) |> nrow()
+total_protein_number <- HEK_WP_Kd_half_life_LaminB_Tcomplex |> distinct(UniProt_Accession) |> nrow()
+overlap_Nterm_protein_total_protein_number <- intersect(
+  HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> distinct(UniProt_Accession),
+  HEK_WP_Kd_half_life_LaminB_Tcomplex |> distinct(UniProt_Accession)
+) |> nrow()
+
+# generate data frame
+Nterm_WP_overlap <- tibble(
+  category = factor(
+    c('Proteoform', 'Nterm Protein', 'Nterm Protein', 'total protein'),
+    levels = c('total protein', 'Nterm Protein', 'Proteoform')
+  ),
+  count = c(Nterm_number, Nterm_protein_number - overlap_Nterm_protein_total_protein_number, overlap_Nterm_protein_total_protein_number, total_protein_number),
+  group = c('group_1', 'group_2', 'group_3', 'group_4')
+)
+
+# bar plot
+barplot_Nterm_WP_overlap <- Nterm_WP_overlap |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = category,
+      y = count,
+      fill = group
+    ),
+    stat = 'identity', show.legend = FALSE
+  ) +
+  labs(x = '', y = 'Count') +
+  scale_fill_manual(
+    values = c(
+      'group_1' = color_1,
+      'group_2' = 'gray70',
+      'group_3' = color_3,
+      'group_4' = color_2
+    )
+  ) +
+  coord_flip() +
+  theme(
+    axis.text = element_text(size = 8, family = c('arial')),
+    axis.title = element_text(size = 8, family = c('arial'))
+  )
+
+ggsave(
+  filename = 'figures/figure4/barplot_Nterm_WP_overlap.eps',
+  plot = barplot_Nterm_WP_overlap, 
+  height = 1.5, width = 2.5, units = 'in'
+)
+
 ### figure 4D, half life distribution
 # Nterm histogram
-font_add(family = 'arial', regular = 'arial.ttf')
-showtext_auto()
-
 Nterm_half_life_median <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
   get_summary_stats(half_life, type = 'median') |> 
   pull(median)
@@ -437,7 +485,7 @@ histogram_Nterm_half_life <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |>
   ) +
   labs(x = 'Half-life (hr)', y = 'Count') +
   theme(
-    axis.title = element_text(size = 10),
+    axis.title = element_text(size = 8),
     axis.text = element_text(size = 8)
   )
 
@@ -448,4 +496,35 @@ ggsave(
 )
 
 # Whole proteome histogram
+library(rstatix)
+
+Whole_Proteome_half_life_median <- HEK_WP_Kd_half_life_LaminB_Tcomplex |> 
+  get_summary_stats(half_life, type = 'median') |> 
+  pull(median)
+
+histogram_WP_half_life <- HEK_WP_Kd_half_life_LaminB_Tcomplex |> 
+  ggplot() +
+  geom_histogram(aes(x = half_life), color = 'black', fill = color_2, bins = 20) +
+  geom_vline(xintercept = Whole_Proteome_half_life_median, linetype = 'dashed', color = 'gray') +
+  annotate(
+    'text', label = paste(round(Whole_Proteome_half_life_median, digits = 1), ' hr'),
+    x = 55, y = 2000, size = 3, color = 'black', 
+  ) +
+  labs(x = 'Half-life (hr)', y = 'Count') +
+  theme(
+    axis.title = element_text(size = 8),
+    axis.text = element_text(size = 8)
+  )
+
+ggsave(
+  'figures/figure4/histogram_WP_half_life.eps',
+  plot = histogram_WP_half_life,
+  height = 1.5, width = 2, units = 'in'
+)
+
+# Kolmogorov-Smirnov (KS) test for the half-life of N-terminal proteoforms and total proteins
+Nterm_WP_half_life_ks_test <- ks.test(
+  HEK_WP_Kd_half_life_LaminB_Tcomplex$half_life,
+  HEK_Nterm_Kd_half_life_LaminB_Tcomplex$half_life
+)
 
