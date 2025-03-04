@@ -64,7 +64,6 @@ HEK_Nt_2_psm_TMTi_light_N_term <- read_csv(
 HEK_Nt_3_psm_TMTi_light_N_term <- read_csv(
   'data_source/normalized_data/HEK_Nt_3_psm_TMTi_light_N_term.csv'
 )
-
 # Whole Proteome, remove heavy labeled and not N-term modified psm
 HEK_WP_1_psm_TMTi_light <- read_csv(
   'data_source/normalized_data/HEK_WP_1_psm_TMTi_light.csv'
@@ -109,7 +108,6 @@ HEK_Nterm_2_irs <- read_csv(
 HEK_Nterm_3_irs <- read_csv(
   'data_source/normalized_data/HEK_Nterm_3_irs.csv'
 )
-
 # Whole Proteome
 HEK_Whole_Proteome_1_irs <- read_csv(
   'data_source/normalized_data/HEK_Whole_Proteome_1_irs.csv'
@@ -121,7 +119,8 @@ HEK_Whole_Proteome_3_irs <- read_csv(
   'data_source/normalized_data/HEK_Whole_Proteome_3_irs.csv'
 )
 
-# degradation ratio
+## degradation ratio
+# Nterm
 HEK_Nterm_1_deg_ratio <- read_csv(
   'data_source/degradation_ratio/HEK_Nterm_1_deg_ratio.csv'
 )
@@ -134,10 +133,28 @@ HEK_Nterm_3_deg_ratio <- read_csv(
 HEK_Nterm_deg_ratio <- read_csv(
   'data_source/degradation_ratio/HEK_Nterm_deg_ratio.csv'
 )
+# Whole Proteome
+HEK_WP_1_deg_ratio <- read_csv(
+  'data_source/degradation_ratio/HEK_WP_1_deg_ratio.csv'
+)
+HEK_WP_2_deg_ratio <- read_csv(
+  'data_source/degradation_ratio/HEK_WP_2_deg_ratio.csv'
+)
+HEK_WP_3_deg_ratio <- read_csv(
+  'data_source/degradation_ratio/HEK_WP_3_deg_ratio.csv'
+)
+HEK_WP_deg_ratio <- read_csv(
+  'data_source/degradation_ratio/HEK_WP_deg_ratio.csv'
+)
 
-# curve fitting
+## curve fitting
+# Nterm
 HEK_Nterm_curve_fitting_combined <- read_csv(
   'data_source/curve_fitting/HEK_Nterm_curve_fitting_combined.csv'
+)
+# Whole Proteome
+HEK_WP_curve_fitting_combined <- read_csv(
+  'data_source/curve_fitting/HEK_WP_curve_fitting_combined.csv'
 )
 
 # half life for Nterm
@@ -146,6 +163,9 @@ HEK_Nterm_Kd_half_life_LaminB_Tcomplex <- read_csv(
 )
 
 # half life for WP
+HEK_WP_Kd_half_life_LaminB_Tcomplex <- read_csv(
+  'data_source/Kd_half_life/HEK_WP_Kd_half_life_LaminB_Tcomplex.csv'
+)
 
 # Nterm sequence
 HEK_Nterm_Kd_half_life_sequence <- read_csv(
