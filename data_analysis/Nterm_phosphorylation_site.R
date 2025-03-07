@@ -1,3 +1,4 @@
+# import packages
 library(tidyverse)
 
 # import phosphorylation dataset from PhosphoSitePlus v6.7.7 
@@ -40,9 +41,7 @@ Nterm_phosphorylation_site_occurrence <- phosphorylation_site_human |>
 library(rstatix)
 
 Nterm_phosphorylation_site_occurrence |> 
-  group_by(category) |> 
-  get_summary_stats(n)
-  # wilcox_test(n ~ category)
+  wilcox_test(n ~ category)
 
 # Spearman correlation test
 cor.test(

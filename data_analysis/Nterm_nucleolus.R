@@ -1,8 +1,9 @@
 # import packages
-packages_names <- c("tidyverse", 'readxl', 'rstatix')
-lapply(packages_names, require, character.only = TRUE)
+library(tidyverse)
 
 # import data for nucleolus protein sub-localization
+library(readxl)
+
 nucleolus_localization <- read_xlsx(
   'data_source/nucleolus/41586_2023_5767_MOESM4_ESM.xlsx',
   skip = 1,
@@ -19,6 +20,8 @@ Nterm_nucleolus_localization_half_life <- nucleolus_localization |>
   mutate(category = 'nucleolus')
 
 # Wilcoxon rank-sum test
+library(rstatix)
+
 Nterm_nucleolus_localization_half_life |> 
   wilcox_test(half_life ~ Localization) |> 
   filter(p < 0.05)

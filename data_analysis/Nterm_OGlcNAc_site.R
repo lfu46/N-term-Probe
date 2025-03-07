@@ -1,6 +1,5 @@
+# import packages
 library(tidyverse)
-
-# import ubiquitination dataset from manuscript Glycosylation Crosstalk
 library(readxl)
 
 # OGlcNAc_site_HEK293T <- read_xlsx(

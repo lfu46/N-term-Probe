@@ -1,6 +1,5 @@
 # import packages
-packages_names <- c("tidyverse", 'rstatix')
-lapply(packages_names, require, character.only = TRUE)
+library(tidyverse)
 
 # import sub-cellular location data from Human Protein Atlas (https://www.proteinatlas.org/)
 hpa_subcellular_location <- read_tsv(
@@ -21,6 +20,8 @@ HEK_Nterm_Kd_half_life_subcellular <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |>
   filter(!is.na(Main.location))
 
 # sub-cellular location median half life
+library(rstatix)
+
 Nterm_subcellular_median_half_life <- HEK_Nterm_Kd_half_life_subcellular |> 
   group_by(Main.location) |> 
   get_summary_stats(half_life, type = 'median') |> 

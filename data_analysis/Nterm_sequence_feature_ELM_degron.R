@@ -31,4 +31,3 @@ write_csv(ELM_N_degron_half_life_median, file = 'data_source/ELM_degron/ELM_N_de
 HEK_Nterm_ELM_N_degron |>
   wilcox_test(half_life ~ ELM_N_degron) |> 
   filter(p < 0.05)
-

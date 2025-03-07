@@ -126,7 +126,7 @@ HEK_Nterm_Kd_half_life_LaminB_Tcomplex <- HEK_Nterm_Kd_half_life_cell_doubling |
   arrange(Percentile) |> 
   mutate(
     category = case_when(
-      half_life < 6 ~ 'Fast turnover',
+      half_life < 7 ~ 'Fast turnover',
       half_life == 200 ~ 'Stable',
       .default = 'Median'
     )

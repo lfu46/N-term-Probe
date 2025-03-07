@@ -182,7 +182,7 @@ non_linear_model <- function(df) {
       # A refers to the maximum of the curve and should be 1 in an ideal case
       # B accounts for a potential curve offset which ideally should be 0
       # the initial Kd value can be fine-tuned to achieve better results
-      start = list(A = 1, B = 0, Kd = 0.25)
+      start = list(A = 1, B = 0.5, Kd = 0.5)
     )
     
     # Extract coefficients

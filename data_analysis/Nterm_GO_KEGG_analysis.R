@@ -1,8 +1,9 @@
 # import packages
-packages_names <- c('tidyverse', 'clusterProfiler', 'org.Hs.eg.db')
-lapply(packages_names, require, character.only = TRUE)
+library(tidyverse)
+library(clusterProfiler)
+library(org.Hs.eg.db)
 
-# Nterm, Fast turnover, half-life < 7 h
+# Nterm, Fast turnover, half-life < 6 h
 Nterm_fast_turnover_protein <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
   filter(category == 'Fast turnover') |> 
   distinct(UniProt_Accession) |> 
@@ -20,7 +21,7 @@ Nterm_protein_total <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |>
   pull()
 
 ## Gene Ontology analysis
-# Fast turnover, half-life < 7 h
+# Fast turnover, half-life < 6 h
 Nterm_fast_turnover_GO <- enrichGO(
   gene = Nterm_fast_turnover_protein,
   OrgDb = org.Hs.eg.db,
@@ -51,7 +52,7 @@ write_csv(
 )
 
 ## KEGG analysis
-# Fast turnover, half-life < 7 h
+# Fast turnover, half-life < 6 h
 Nterm_fast_turnover_KEGG <- enrichKEGG(
   gene = Nterm_fast_turnover_protein,
   organism = 'hsa',

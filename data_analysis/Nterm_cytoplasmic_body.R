@@ -1,6 +1,5 @@
 # import packages
-packages_names <- c('tidyverse', 'rstatix', 'readxl')
-lapply(packages_names, require, character.only = TRUE)
+library(tidyverse)
 
 ### import stress granule, processing body and cajal body database
 ## stress granule 
@@ -28,6 +27,8 @@ processing_body_list <- read_csv(
 ## cajal body 
 ## (https://www.sciencedirect.com/science/article/pii/S2211124724010854?via%3Dihub, Table S4 and Table S6)
 # Table S4
+library(readxl)
+
 cajal_body_list_1 <- read_xlsx(
   'data_source/cytoplasmic_body/mmc6.xlsx',
   sheet = 'HEK_insitu_FC>10',
@@ -78,6 +79,7 @@ Nterm_cytoplasmic_body_half_life <- bind_rows(
 )
 
 # Wilcoxon rank-sum test
-Nterm_cytoplasmic_body |> 
-  wilcox_test(half_life ~ category)
+library(rstatix)
 
+Nterm_cytoplasmic_body_half_life |> 
+  wilcox_test(half_life ~ category)

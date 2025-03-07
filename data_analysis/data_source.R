@@ -176,4 +176,3 @@ HEK_Nterm_Kd_half_life_sequence <- read_csv(
 HEK_Nterm_WP_delta_half_life <- read_csv(
   'data_source/Nterm_WP_comparison/HEK_Nterm_WP_delta_half_life.csv'
 )
-

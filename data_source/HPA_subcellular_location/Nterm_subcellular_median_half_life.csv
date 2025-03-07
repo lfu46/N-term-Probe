@@ -1,30 +1,30 @@
 Main.location,variable,n,median
 Microtubule ends,half_life,1,200
-Lipid droplets,half_life,4,112.737
-Cytoplasmic bodies,half_life,17,31.484
-Golgi apparatus,half_life,83,23.439
-Nuclear bodies,half_life,17,21.02
-Nucleoli rim,half_life,22,18.299
-Cell Junctions,half_life,22,18.2
-Peroxisomes,half_life,13,17.918
-Vesicles,half_life,192,17.807
-Centriolar satellite,half_life,4,16.677
-Intermediate filaments,half_life,40,15.78
-Mitochondrion,half_life,509,15.393
-Actin filaments,half_life,22,12.778
-Nucleoli,half_life,50,12.602
-Nuclear membrane,half_life,114,12.543
-Nucleoplasm,half_life,1432,12.071
-Mid piece,half_life,18,11.987
-Nuclear speckles,half_life,185,11.805
-Cytosol,half_life,1104,11.709
-Endoplasmic reticulum,half_life,255,11.093
-Centrosome,half_life,5,11.013
-Plasma membrane,half_life,129,10.867
-Microtubules,half_life,28,9.973
-Focal adhesion sites,half_life,21,8.727
-Nucleoli fibrillar center,half_life,35,8.293
-Endosomes,half_life,3,8.246
-Midbody ring,half_life,3,5.809
+Endosomes,half_life,4,104.123
+Midbody ring,half_life,4,102.904
+Nucleoli,half_life,65,26.685
+Lipid droplets,half_life,6,24.751
+Nuclear bodies,half_life,17,18.832
+Golgi apparatus,half_life,90,18.422
+Cytoplasmic bodies,half_life,16,14.075
+Intermediate filaments,half_life,40,14.049
+Cell Junctions,half_life,24,13.561
+Nucleoli rim,half_life,23,13.259
+Vesicles,half_life,208,12.928
+Mitochondria,half_life,572,12.866
+Nuclear membrane,half_life,123,12.507
+Centrosome,half_life,5,12.429
+Cytosol,half_life,1205,11.319
+Nucleoplasm,half_life,1534,11.033
+Plasma membrane,half_life,136,10.914
+Endoplasmic reticulum,half_life,268,10.554
+Mid piece,half_life,18,9.367
+Nuclear speckles,half_life,190,9.286
+Nucleoli fibrillar center,half_life,35,8.242
+Focal adhesion sites,half_life,23,8.175
+Actin filaments,half_life,23,7.902
+Microtubules,half_life,30,7.819
+Peroxisomes,half_life,14,7.624
+Centriolar satellite,half_life,5,6.95
 Lysosomes,half_life,1,3.669
-Midbody,half_life,1,0.381
+Midbody,half_life,1,0.382

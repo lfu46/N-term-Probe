@@ -21,16 +21,16 @@ Nterm_degradation_protein_list = HEK_Nterm_Kd_half_life_sequence["UniProt_Access
 
 ## download AlphaFold data
 # crystallographic information file
-# valid_proteins_cif, invalid_proteins_cif, existing_proteins_cif = download_alphafold_cif(
-#     proteins = Nterm_protein_list,
-#     out_folder = "data_source/Nterm_structuremap/Nterm_degradation_cif"
-# )
+valid_proteins_cif, invalid_proteins_cif, existing_proteins_cif = download_alphafold_cif(
+    proteins = Nterm_degradation_protein_list,
+    out_folder = "data_source/Nterm_structuremap/Nterm_degradation_cif"
+)
 
 # predicted aligned error
-# valid_proteins_pae, invalid_proteins_pae, existing_proteins_pae = download_alphafold_pae(
-#     proteins = Nterm_protein_list,
-#     out_folder = "data_source/Nterm_structuremap/Nterm_degradation_pae"
-# )
+valid_proteins_pae, invalid_proteins_pae, existing_proteins_pae = download_alphafold_pae(
+    proteins = Nterm_degradation_protein_list,
+    out_folder = "data_source/Nterm_structuremap/Nterm_degradation_pae"
+)
 
 # format AlphaFold data input
 Nterm_alphafold_annotation = format_alphafold_data(

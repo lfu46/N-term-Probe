@@ -1,3 +1,4 @@
+# import packages
 library(tidyverse)
 
 # for executing python script in Rstudio
@@ -36,12 +37,27 @@ Nterm_alphafold_half_life |>
   wilcox_test(half_life ~ structure_group) |> 
   filter(p < 0.05)
 
+ks.test(
+  Nterm_alphafold_half_life |> filter(structure_group == 'unstructured') |> pull(half_life),
+  Nterm_alphafold_half_life |> filter(structure_group == 'BEND') |> pull(half_life)
+)
+
 # accessibility
 Nterm_alphafold_half_life |> 
   wilcox_test(half_life ~ accessibility) |> 
   filter(p < 0.05)
 
+ks.test(
+  Nterm_alphafold_half_life |> filter(accessibility == 'high exposure') |> pull(half_life),
+  Nterm_alphafold_half_life |> filter(accessibility == 'low exposure') |> pull(half_life)
+)
+
 # IDR
 Nterm_alphafold_half_life |> 
   wilcox_test(half_life ~ IDR) |> 
   filter(p < 0.05)
+
+ks.test(
+  Nterm_alphafold_half_life |> filter(IDR == 'IDR') |> pull(half_life),
+  Nterm_alphafold_half_life |> filter(IDR == 'Structural Region') |> pull(half_life)
+)

@@ -209,7 +209,7 @@ ribosome_related_protein_list <- Nterm_WP_overlap_GO |>
       'organellar ribosome'
     )
   ) |> 
-  select(geneID) |> 
+  dplyr::select(geneID) |> 
   separate_rows(geneID, sep = '/') |> 
   distinct() |> 
   pull()
@@ -224,7 +224,7 @@ proteasome_related_protein_list <- Nterm_WP_overlap_GO |>
       'proteasome regulatory particle'
     )
   ) |> 
-  select(geneID) |> 
+  dplyr::select(geneID) |> 
   separate_rows(geneID, sep = '/') |> 
   distinct() |> 
   pull()
@@ -243,7 +243,7 @@ spliceosome_related_protein_list <- Nterm_WP_overlap_GO |>
       'U2-type catalytic step 2 spliceosome'
     )
   ) |> 
-  select(geneID) |> 
+  dplyr::select(geneID) |> 
   separate_rows(geneID, sep = '/') |> 
   distinct() |> 
   pull()

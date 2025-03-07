@@ -1,3 +1,4 @@
+# import packages
 library(tidyverse)
 
 # import ubiquitination dataset from PhosphoSitePlus v6.7.7 
@@ -48,4 +49,3 @@ cor.test(
   Nterm_ubiquitination_site_occurrence$n,
   method = 'spearman'
 )
-

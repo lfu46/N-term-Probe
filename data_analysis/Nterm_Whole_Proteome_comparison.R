@@ -106,7 +106,7 @@ human_pfam <- read_tsv(
   skip = 3, 
   col_names = FALSE
 ) |> 
-  select(X6, X1)
+  dplyr::select(X6, X1)
 
 colnames(human_pfam) <- c('TERM', 'GENE')
 
@@ -145,7 +145,7 @@ human_corum <- read_delim(
   mutate(
     corum_id = paste('corum_id', corum_id, sep = '_')
   ) |> 
-  select(corum_id, UniProtKB_accession_number)
+  dplyr::select(corum_id, UniProtKB_accession_number)
 
 colnames(human_corum) <- c('TERM', 'GENE')
 

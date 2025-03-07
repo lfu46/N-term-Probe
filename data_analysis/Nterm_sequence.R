@@ -1,6 +1,6 @@
 # import packages
-packages_names <- c("tidyverse", 'Biostrings')
-lapply(packages_names, require, character.only = TRUE)
+library(tidyverse)
+library(Biostrings)
 
 # import human fasta downloaded from UniProt (https://www.uniprot.org/)
 human_fasta <- readAAStringSet(
