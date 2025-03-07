@@ -6,7 +6,7 @@ linear_model <- function(df) {
   tryCatch({
     # Fit the model
     model <- lm(
-      ln_ratio ~ timepoint,
+      ln_deg_ratio_avg ~ timepoint,
       data = df
     )
     
@@ -20,10 +20,10 @@ linear_model <- function(df) {
     r_squared <- summary(model)$r.squared
     
     # Return coefficients and R^2
-    tibble(lnA = params["(Intercept)"], Kd = params["timepoint"], RSS = ss_residual)
+    tibble(lnA = params["(Intercept)"], Kd = params["timepoint"], R2_RSS = ss_residual)
   }, error = function(e) {
     # Return NA if fitting fails
-    tibble(lnA = NA, Kd = NA, RSS = NA)
+    tibble(lnA = NA, Kd = NA, R2_RSS = NA)
   })
 }
 
@@ -61,7 +61,10 @@ Rep3_BCA <- tribble(
 cell_double_rate_kinetic <- bind_rows(
   Rep1_BCA, Rep2_BCA, Rep3_BCA
 ) |> 
-  mutate(ln_ratio = log(ratio)) |> 
+  select(Exp, timepoint, ratio) |> 
+  mutate(
+    ln_deg_ratio_avg = log(ratio)
+  ) |> 
   group_by(Exp) |> 
   group_modify(~ linear_model(.x)) |> 
   ungroup()
@@ -72,6 +75,7 @@ K_cd <- mean(cell_double_rate_kinetic$Kd)
 HEK_Nterm_Kd_half_life_cell_doubling <- HEK_Nterm_curve_fitting_combined |> 
   filter(parameters %in% c('Kd', 'RSS')) |> 
   pivot_wider(names_from = `parameters`, values_from = `values`) |> 
+  filter(Kd < 5) |> 
   mutate(
     half_life = log(2)/(Kd - K_cd)
   )
@@ -101,7 +105,9 @@ Nterm_LaminB_Tcomplex_combined <- bind_rows(
   HEK_Nterm_Tcomplex_half_life
 )
 
-Nterm_LaminB_Tcomplex_half_life_filter_criteria <- Nerm_LaminB_Tcomplex_combined |> 
+library(rstatix)
+
+Nterm_LaminB_Tcomplex_half_life_filter_criteria <- Nterm_LaminB_Tcomplex_combined |> 
   filter(half_life < 0) |> 
   get_summary_stats(half_life, type = 'median')
 
@@ -111,7 +117,8 @@ HEK_Nterm_Kd_half_life_LaminB_Tcomplex <- HEK_Nterm_Kd_half_life_cell_doubling |
   mutate(
     half_life = ifelse(half_life < 0 | half_life > 200, 200, half_life)
   ) |> 
-  # get_summary_stats(half_life) |>
+  # count(half_life == 200)
+  # get_summary_stats(half_life)
   select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, Kd, half_life, RSS) |> 
   mutate(
     Percentile = percent_rank(half_life)
@@ -119,7 +126,7 @@ HEK_Nterm_Kd_half_life_LaminB_Tcomplex <- HEK_Nterm_Kd_half_life_cell_doubling |
   arrange(Percentile) |> 
   mutate(
     category = case_when(
-      half_life < 7 ~ 'Fast turnover',
+      half_life < 6 ~ 'Fast turnover',
       half_life == 200 ~ 'Stable',
       .default = 'Median'
     )
@@ -131,6 +138,7 @@ write_csv(HEK_Nterm_Kd_half_life_LaminB_Tcomplex, file = 'data_source/Kd_half_li
 HEK_WP_Kd_half_life_cell_doubling <- HEK_WP_curve_fitting_combined |> 
   filter(parameters %in% c('Kd', 'RSS')) |> 
   pivot_wider(names_from = `parameters`, values_from = `values`) |> 
+  filter(Kd < 5) |> 
   mutate(
     half_life = log(2)/(Kd - K_cd)
   )
@@ -172,6 +180,8 @@ HEK_WP_Kd_half_life_LaminB_Tcomplex <- HEK_WP_Kd_half_life_cell_doubling |>
   mutate(
     half_life = ifelse(half_life < 0 | half_life > 200, 200, half_life)
   ) |> 
+  # count(half_life == 200)
+  # get_summary_stats(half_life)
   select(UniProt_Accession, Gene, Entry.Name, Kd, half_life, RSS) |> 
   mutate(
     Percentile = percent_rank(half_life)
@@ -179,4 +189,3 @@ HEK_WP_Kd_half_life_LaminB_Tcomplex <- HEK_WP_Kd_half_life_cell_doubling |>
   arrange(Percentile)
 
 write_csv(HEK_WP_Kd_half_life_LaminB_Tcomplex, file = 'data_source/Kd_half_life/HEK_WP_Kd_half_life_LaminB_Tcomplex.csv')
-

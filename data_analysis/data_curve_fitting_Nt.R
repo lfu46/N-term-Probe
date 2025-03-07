@@ -179,7 +179,10 @@ non_linear_model <- function(df) {
     model <- nls(
       deg_ratio_avg ~ (A - B) * exp(-Kd * timepoint) + B,
       data = df,
-      start = list(A = 1, B = 0.5, Kd = 0.5)
+      # A refers to the maximum of the curve and should be 1 in an ideal case
+      # B accounts for a potential curve offset which ideally should be 0
+      # the initial Kd value can be fine-tuned to achieve better results
+      start = list(A = 1, B = 0, Kd = 0.25)
     )
     
     # Extract coefficients
@@ -227,7 +230,8 @@ linear_model <- function(df) {
 
 ## curve fitting
 # non-linear model fitting
-HEK_Nterm_curve_fitting_result_1 <- HEK_Nterm_deg_ratio %>%
+HEK_Nterm_curve_fitting_result_1 <- HEK_Nterm_deg_ratio |> 
+  select(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name, timepoint, deg_ratio_avg) |> 
   group_by(Index, UniProt_Accession, Protein.Start, Gene, Entry.Name) |> 
   group_modify(~ non_linear_model(.x)) |> 
   ungroup()
@@ -242,7 +246,7 @@ HEK_Nterm_nonlinear_fitting <- HEK_Nterm_curve_fitting_result_1 |>
 
 write_csv(HEK_Nterm_nonlinear_fitting, file = 'data_source/curve_fitting/HEK_Nterm_nonlinear_fitting.csv')
 
-# linear model fitting
+# non-linear model fitting
 HEK_Nterm_curve_fitting_result_2 <- HEK_Nterm_curve_fitting_result_1 |> 
   filter(is.na(A) | RSS >= 0.05) |> 
   left_join(HEK_Nterm_deg_ratio, by = c('Index', 'UniProt_Accession', 'Protein.Start', 'Gene', 'Entry.Name')) |> 

@@ -198,7 +198,10 @@ non_linear_model <- function(df) {
     model <- nls(
       deg_ratio_avg ~ (A - B) * exp(-Kd * timepoint) + B,
       data = df,
-      start = list(A = 1, B = 0.5, Kd = 0.5)
+      # A refers to the maximum of the curve and should be 1 in an ideal case
+      # B accounts for a potential curve offset which ideally should be 0
+      # the initial Kd value can be fine-tuned to achieve better results
+      start = list(A = 1, B = 0, Kd = 0.015)
     )
     
     # Extract coefficients
