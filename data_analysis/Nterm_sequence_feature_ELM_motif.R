@@ -14,22 +14,27 @@ ELM_classes <- read_tsv(
 HEK_Nterm_sequence_ELM_motif <- HEK_Nterm_Kd_half_life_sequence |> 
   rowwise() |> 
   mutate(
-    matched_motifs = list(
+    matched_info = list(
       ELM_classes %>%
         filter(str_detect(Nterm_sequence, Regex)) %>%
-        pull(ELMIdentifier)
+        transmute(
+          matched_motif = ELMIdentifier,
+          matched_pattern = str_extract(Nterm_sequence, Regex)
+        )
     )
   ) %>%
-  ungroup() %>%
-  mutate(matched_motifs = sapply(matched_motifs, function(x) paste(x, collapse = ";"))) |> 
-  separate_rows(matched_motifs, sep = ';') |> 
-  distinct()
+  unnest(matched_info)
+
+# write_csv(
+#   HEK_Nterm_sequence_ELM_motif,
+#   file = 'data_source/ELM_degron/HEK_Nterm_sequence_ELM_motif.csv'
+# )
 
 # calculate medain half life for each ELM motif
 library(rstatix)
 
 HEK_Nterm_sequence_ELM_motif_median <- HEK_Nterm_sequence_ELM_motif |> 
-  group_by(matched_motifs) |> 
+  group_by(matched_motif) |> 
   get_summary_stats(half_life, type = 'median') |> 
   arrange(median)
 
@@ -38,7 +43,7 @@ write_csv(HEK_Nterm_sequence_ELM_motif_median, file = 'data_source/ELM_degron/HE
 ## GSEA for ELM motif
 # construct database
 ELM_motif_database <- HEK_Nterm_sequence_ELM_motif |> 
-  select(matched_motifs, Index) |> 
+  select(matched_motif, Index) |> 
   distinct()
 
 # genelist descending Kd
