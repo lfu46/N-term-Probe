@@ -1,190 +1,7 @@
 # import packages
 library(tidyverse)
 
-### figure 2A, venn diagram, HEK293T duplicates
-# import result from MSFragger
-HEK293T_1_07102024 <- read_tsv(
-  'data_source/HEK293T_duplicates/NGlyco_HEK293T_1_2_1_07102024_psm.tsv',
-  col_names = TRUE,
-  name_repair = "universal"
-)
-
-HEK293T_2_07102024 <- read_tsv(
-  'data_source/HEK293T_duplicates/NGlyco_HEK293T_1_2_2_07102024_psm.tsv',
-  col_names = TRUE,
-  name_repair = "universal"
-)
-
-## filter out the PSMs which contain N-term modification
-# HEK293T_1_07102024
-HEK293T_1_07102024_N_term <- HEK293T_1_07102024 |> 
-  filter(
-    str_detect(Assigned.Modifications, "N-term"),
-    str_detect(Entry.Name, 'HUMAN')
-  ) |> 
-  select(
-    UniProt_Accession = Protein.ID,
-    Protein.Start,
-    Gene,
-    Entry.Name
-  ) |> 
-  mutate(
-    Index = paste(UniProt_Accession, Protein.Start, sep = '_'),
-    Exp = "Exp1"
-  )
-
-HEK293T_1_07102024_N_term_distinct <- HEK293T_1_07102024_N_term |> 
-  distinct()
-
-# HEK293T_2_07102024
-HEK293T_2_07102024_N_term <- HEK293T_2_07102024 |> 
-  filter(
-    str_detect(Assigned.Modifications, "N-term"),
-    str_detect(Entry.Name, 'HUMAN')
-  ) |> 
-  select(
-    UniProt_Accession = Protein.ID,
-    Protein.Start,
-    Gene,
-    Entry.Name
-  ) |> 
-  mutate(
-    Index = paste(UniProt_Accession, Protein.Start, sep = '_'),
-    Exp = "Exp2"
-  )
-
-HEK293T_2_07102024_N_term_distinct <- HEK293T_2_07102024_N_term |> 
-  distinct()
-
-## remove N-term which only identified in one replicate with one psm
-overlap_HEK293T <- intersect(
-  HEK293T_1_07102024_N_term_distinct |> pull(Index),
-  HEK293T_2_07102024_N_term_distinct |> pull(Index)
-)
-
-# HEK293T_1_07102024
-HEK293T_1_07102024_N_term_unique_filtered <- HEK293T_1_07102024_N_term |> 
-  filter(! Index %in% overlap_HEK293T) |> 
-  group_by(Index) |> 
-  filter(n() > 1) |> 
-  ungroup() |> 
-  distinct()
-
-# HEK293T_2_07102024
-HEK293T_2_07102024_N_term_unique_filtered <- HEK293T_2_07102024_N_term |> 
-  filter(! Index %in% overlap_HEK293T) |> 
-  group_by(Index) |> 
-  filter(n() > 1) |> 
-  ungroup() |> 
-  distinct()
-
-## combine overlap and unique N-term in each replicate
-# HEK293T_1_07102024
-HEK293T_1_07102024_N_term_combined <- bind_rows(
-  HEK293T_1_07102024_N_term_distinct |> 
-    filter(Index %in% overlap_HEK293T),
-  HEK293T_1_07102024_N_term_unique_filtered
-)
-
-# HEK293T_2_07102024
-HEK293T_2_07102024_N_term_combined <- bind_rows(
-  HEK293T_2_07102024_N_term_distinct |> 
-    filter(Index %in% overlap_HEK293T),
-  HEK293T_2_07102024_N_term_unique_filtered
-)
-
-# venn diagram
-library(VennDiagram)
-
-venn.diagram(
-  x = list(HEK293T_1_07102024_N_term_combined$Index, HEK293T_2_07102024_N_term_combined$Index),
-  category.names = c("", ""),
-  cex = 0,
-  filename = 'figures/figure2/venn_diagram_HEK293T_identification.tiff', 
-  fill = c(color_1, color_2),
-  output = FALSE,
-  imagetype = "tiff",
-  height = 2,
-  width = 2,
-  units = c("in"),
-  resolution = 1200,
-  margin = 0.02,
-  col = 'transparent'
-)
-
-### figure 2B, venn diagram, Jurkat and THP-1
-# import result from MSFragger
-# Jurkat
-Jurkat_07102024 <- read_tsv(
-  "data_source/Jurkat/N_term_Jurkat_07102024_psm.tsv",
-  col_names = TRUE,
-  name_repair = "universal"
-)
-
-Jurkat_07102024_N_term <- Jurkat_07102024 |> 
-  filter(
-    str_detect(Assigned.Modifications, "N-term"),
-    str_detect(Entry.Name, 'HUMAN')
-  ) |> 
-  select(
-    UniProt_Accession = Protein.ID,
-    Protein.Start,
-    Gene,
-    Entry.Name
-  ) |> 
-  mutate(
-    Index = paste(UniProt_Accession, Protein.Start, sep = '_')
-  ) |> 
-  distinct()
-
-# THP-1
-THP1_07102024 <- read_tsv(
-  "data_source/THP1/N_term_THP1_07102024_psm.tsv",
-  col_names = TRUE,
-  name_repair = "universal"
-)
-
-THP1_07102024_N_term <- THP1_07102024 |> 
-  filter(
-    str_detect(Assigned.Modifications, "N-term"),
-    str_detect(Entry.Name, 'HUMAN')
-  ) |> 
-  select(
-    UniProt_Accession = Protein.ID,
-    Protein.Start,
-    Gene,
-    Entry.Name
-  ) |> 
-  mutate(
-    Index = paste(UniProt_Accession, Protein.Start, sep = '_')
-  ) |> 
-  distinct()
-
-# check the overlap Nterm
-overlap_Jurkat_THP1 <- intersect(
-  Jurkat_07102024_N_term$Index, THP1_07102024_N_term$Index
-)
-
-# venn diagram
-library(VennDiagram)
-
-venn.diagram(
-  x = list(Jurkat_07102024_N_term$Index, THP1_07102024_N_term$Index),
-  category.names = c("", ""),
-  cex = 0,
-  filename = 'figures/figure2/venn_diagram_Jurkat_THP1_identification.tiff', 
-  fill = c(color_3, color_4),
-  output = FALSE,
-  imagetype = "tiff",
-  height = 2,
-  width = 2,
-  units = c("in"),
-  resolution = 1200,
-  margin = 0.02,
-  col = 'transparent'
-)
-
-### figure 2C, UpSet plot for HEK293T, Jurkat and THP-1
+### figure 2A, UpSet plot for HEK293T, Jurkat and THP-1
 library(ComplexHeatmap)
 
 # generate the list which contains all identified unique N-term in each cell line
@@ -211,7 +28,7 @@ UpSet(
   lwd = 3
 )
 
-### figure 2D, GO analysis of commonly identified N-term in HEK293T, Jurkat and THP-1 cells
+### figure 2B, GO analysis of commonly identified N-term in HEK293T, Jurkat and THP-1 cells
 # generate the list which contains all identified unique N-term in each cell line
 Nterm_list_comb <- list(
   'HEK293T' = c(
@@ -255,6 +72,7 @@ GO_common_Nterm <- read_csv(
   'data_source/common_Nterm/GO_common_Nterm.csv'
 )
 
+### figure 2B
 ## bar plot
 # BP
 barplot_GO_BP_common_Nterm <- GO_common_Nterm |> 
@@ -290,75 +108,7 @@ ggsave(
   height = 2, width = 4, units = 'in'
 )
 
-# CC
-barplot_GO_CC_common_Nterm <- GO_common_Nterm |> 
-  filter(Description %in% c(
-    'cytosolic small ribosomal subunit',
-    'protein folding chaperone complex',
-    'Sm-like protein family complex',
-    'spliceosomal snRNP complex',
-    'proteasome complex',
-    'Lsm1-7-Pat1 complex',
-    'chaperonin-containing T-complex',
-    'U2 snRNP',
-    'U6 snRNP',
-    'proton-transporting two-sector ATPase complex'
-  )) |> 
-  ggplot() +
-  geom_bar(
-    aes(
-      x = fct_reorder(Description, -log10(p.adjust)), 
-      y = -log10(p.adjust)
-    ),
-    fill = color_2, color = 'transparent', stat = 'identity'
-  ) +
-  labs(x = 'Cellular Component', y = '-log10(adjust P value)') +
-  coord_flip() +
-  theme(
-    axis.text = element_text(size = 8, color = 'black')
-  )
-
-ggsave(
-  filename = 'figures/figure2/barplot_GO_CC_common_Nterm.eps',
-  plot = barplot_GO_CC_common_Nterm,
-  height = 2, width = 4, units = 'in'
-)
-
-# MF
-barplot_GO_MF_common_Nterm <- GO_common_Nterm |> 
-  filter(Description %in% c(
-    'intramolecular oxidoreductase activity',
-    'protein-disulfide reductase activity',
-    'ATPase regulator activity',
-    'adenyl-nucleotide exchange factor activity',
-    'translation initiation factor activity',
-    'thioredoxin peroxidase activity',
-    'aldehyde-lyase activity',
-    'proton channel activity',
-    '2 iron, 2 sulfur cluster binding',
-    'rRNA binding'
-  )) |> 
-  ggplot() +
-  geom_bar(
-    aes(
-      x = fct_reorder(Description, -log10(p.adjust)), 
-      y = -log10(p.adjust)
-    ),
-    fill = color_3, color = 'transparent', stat = 'identity'
-  ) +
-  labs(x = 'Molecular Function', y = '-log10(adjust P value)') +
-  coord_flip() +
-  theme(
-    axis.text = element_text(size = 8, color = 'black')
-  )
-
-ggsave(
-  filename = 'figures/figure2/barplot_GO_MF_common_Nterm.eps',
-  plot = barplot_GO_MF_common_Nterm,
-  height = 2, width = 4, units = 'in'
-)
-
-### figure 2E, KEGG analysis of commonly identified N-term in HEK293T, Jurkat and THP-1 cells
+### figure 2C, KEGG analysis of commonly identified N-term in HEK293T, Jurkat and THP-1 cells
 # generate the list which contains overlapping N-term from three cell lines
 common_Nterm <- tibble(Reduce(intersect, Nterm_list_comb))
 colnames(common_Nterm) <- 'common_Nterm'
@@ -423,7 +173,7 @@ ggsave(
   height = 2, width = 4, units = 'in'
 )
 
-### figure 2F, N-termial proteoform topFinder information
+### figure 2D, N-termial proteoform topFinder information
 # TopFIND ExploreR retrieves general and position specific information 
 # for a list of protein termini as well as protease specific analysis tools. 
 # (https://topfind.clip.msl.ubc.ca/topfinder)
@@ -494,6 +244,8 @@ writeLines(
 )
 
 ## import topfinder result
+library(tidyverse)
+
 common_Nterm_topfinder <- read_delim(
   'data_source/common_Nterm/2025_02_26_common_Nterm_02262025/2025_02_26_common_Nterm_02262025_Full_Table.txt',
   col_names = TRUE,
@@ -545,7 +297,9 @@ ggsave(
   height = 2, width = 2, units = 'in'
 )
 
-# cleaving proteases
+### figure 2E, enriched cleaving proteases
+# Protease_histogram.svg, q < 0.05
+# MEP1A, CATL1, MEP1B, CATS, MMP11
 common_Nterm_cleaving_proteases <- common_Nterm_topfinder |> 
   select(
     Cleaving.proteases
@@ -553,15 +307,37 @@ common_Nterm_cleaving_proteases <- common_Nterm_topfinder |>
   separate_rows(Cleaving.proteases) |> 
   filter(!is.na(Cleaving.proteases)) |> 
   count(Cleaving.proteases) |> 
-  arrange(desc(n)) |> 
-  slice(1:8)
+  filter(
+    Cleaving.proteases %in% c(
+      'MEP1A', 'MEP1B', 'CATL1', 'CATS', 'MMP11'
+    )
+  )
+
+# generate data frame for the five enriched proteases
+common_Nterm_enriched_cleaving_proteases <- common_Nterm_topfinder |> 
+  separate_rows(
+    Cleaving.proteases, sep = ';'
+  ) |> 
+  filter(
+    Cleaving.proteases %in% c(
+      'MEP1A', 'MEP1B', 'CATL1', 'CATS', 'MMP11'
+    )
+  ) |> 
+  select(
+    Accession, Recommended.Protein.Name, Other.Names.and.IDs, Cleaving.proteases
+  )
+
+write_csv(
+  common_Nterm_enriched_cleaving_proteases,
+  file = 'data_source/common_Nterm/common_Nterm_enriched_cleaving_proteases.csv'
+)
 
 # bar plot
 barplot_common_Nterm_cleaving_proteases <- common_Nterm_cleaving_proteases |> 
   ggplot() +
   geom_bar(
     aes(
-      x = Cleaving.proteases, 
+      x = fct_reorder(Cleaving.proteases, n), 
       y = n
     ), 
     fill = color_2, 
@@ -576,10 +352,310 @@ barplot_common_Nterm_cleaving_proteases <- common_Nterm_cleaving_proteases |>
 ggsave(
   filename = 'figures/figure2/barplot_common_Nterm_cleaving_proteases.eps',
   plot = barplot_common_Nterm_cleaving_proteases,
-  height = 2, width = 2.3, units = 'in'
+  height = 2, width = 2, units = 'in'
 )
 
-### figure 2H, Nterm structure feature
+### figure 2F, enriched cleaving proteases example
+library(tidyverse)
+
+## MEP1A/MEP1B
+# P07900, HSP90AA1, Heat shock protein HSP 90-alpha
+P07900_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 732,
+  'HSP90', 196, 714,
+  'HATPase_c_3', 43, 159
+)
+
+P07900_result <- tibble(
+  cleavage_site = c(422, 632, 633, 634, 636, 637, 638)
+)
+
+# example plot
+P07900_example <- ggplot() +
+  geom_rect(
+    data = P07900_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = P07900_result$cleavage_site, 
+      xend = P07900_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      'HSP90' = color_1,
+      'HATPase_c_3' = color_2
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      'HSP90' = 'transparent',
+      'HATPase_c_3' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figure2/P07900_example.eps',
+  height = 0.2, width = 2, units = 'in'
+)
+
+# P08238, HSP90AB1, Heat shock protein HSP 90-beta
+library(tidyverse)
+
+P08238_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 724,
+  'HSP90', 191, 702,
+  'HATPase_c_3', 39, 154
+)
+
+P08238_result <- tibble(
+  cleavage_site = c(292, 492, 624, 625, 626, 627, 628, 629, 630)
+)
+
+# example plot
+P08238_example <- ggplot() +
+  geom_rect(
+    data = P08238_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = P08238_result$cleavage_site, 
+      xend = P08238_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      'HSP90' = color_3,
+      'HATPase_c_3' = color_4
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      'HSP90' = 'transparent',
+      'HATPase_c_3' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figure2/P08238_example.eps',
+  height = 0.2, width = 2, units = 'in'
+)
+
+## CATL1
+# P24534, EEF1B2, Elongation factor 1-beta
+library(tidyverse)
+
+P24534_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 225,
+  'EF1_GNE', 142, 225,
+  'EF-1_beta_acid', 103, 130
+)
+
+P24534_result <- tibble(
+  cleavage_site = c(143, 144, 145)
+)
+
+# example plot
+P24534_example <- ggplot() +
+  geom_rect(
+    data = P24534_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = P24534_result$cleavage_site, 
+      xend = P24534_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      'EF1_GNE' = color_1,
+      'EF-1_beta_acid' = color_2
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      'EF1_GNE' = 'transparent',
+      'EF-1_beta_acid' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figure2/P24534_example.eps',
+  height = 0.2, width = 2, units = 'in'
+)
+
+# P29692, EEF1D, Elongation factor 1-delta
+library(tidyverse)
+
+P29692_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 281,
+  'EF1_GNE', 198, 281,
+  'EF-1_beta_acid', 159, 186
+)
+
+P29692_result <- tibble(
+  cleavage_site = c(60, 61, 62)
+)
+
+# example plot
+P29692_example <- ggplot() +
+  geom_rect(
+    data = P29692_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = P29692_result$cleavage_site, 
+      xend = P29692_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      'EF1_GNE' = color_3,
+      'EF-1_beta_acid' = color_4
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      'EF1_GNE' = 'transparent',
+      'EF-1_beta_acid' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figure2/P29692_example.eps',
+  height = 0.2, width = 2, units = 'in'
+)
+
+# P31946, YWHAB, 14-3-3 protein beta/alpha
+library(tidyverse)
+
+P31946_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 246,
+  '14-3-3', 11, 231
+)
+
+P31946_result <- tibble(
+  cleavage_site = c(30, 31)
+)
+
+# example plot
+P31946_example <- ggplot() +
+  geom_rect(
+    data = P31946_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = P31946_result$cleavage_site, 
+      xend = P31946_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      '14-3-3' = color_5
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      '14-3-3' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figure2/P31946_example.eps',
+  height = 0.2, width = 2, units = 'in'
+)
+
+### figure 2G, Nterm structure feature
 library(reticulate)
 
 # use specific virtual env created by anaconda
@@ -589,7 +665,7 @@ use_condaenv(
 )
 
 # execute the python script for Nterm structure
-source_python("data_analysis/Nterm_structuremap_common_unique.py")
+source_python("data_analysis/Nterm_structuremap_common.py")
 
 # generate a table example for Fisher's Exact test
 library(gridExtra)
@@ -601,7 +677,8 @@ Fisher_Exact_test_table <- tibble(
 
 grid.table(Fisher_Exact_test_table)
 
-# save the result for proteoform N-terminus structural information
+## save the result 
+# proteoform N-terminus structural information
 common_Nterm_alphafold_N_terminus_tb <- tibble(common_Nterm_alphafold_N_terminus) |> 
       filter(common_Nterm != 0) |> 
       select(-protein_number, -UniProt_Accession, -start.position)
@@ -611,7 +688,19 @@ write_csv(
   file = 'data_source/common_Nterm/common_Nterm_alphafold_N_terminus_tb.csv'
 )
 
+# enrichment analysis
+write_csv(
+  enrichment_N_terminus,
+  file = 'data_source/common_Nterm/common_Nterm_enrichment_N_terminus.csv'
+)
+
 # calculate the percentage of secondary structure
+library(tidyverse)
+
+common_Nterm_alphafold_N_terminus_tb <- read_csv(
+  'data_source/common_Nterm/common_Nterm_alphafold_N_terminus_tb.csv'
+)
+
 common_Nterm_secondary_structure_percentage <- common_Nterm_alphafold_N_terminus_tb |> 
   count(structure_group) |> 
   mutate(
@@ -623,7 +712,7 @@ circular_barplot_secondary_structure_percentage <- common_Nterm_secondary_struct
   ggplot() +
   geom_bar(
     aes(
-      x = 1, 
+      x = 3, 
       y = percentage, 
       fill = structure_group
     ),
@@ -639,6 +728,7 @@ circular_barplot_secondary_structure_percentage <- common_Nterm_secondary_struct
       'unstructured' = 'gray70'
     )
   ) +
+  xlim(1, 4) +
   labs(x = '', y = '') +
   coord_polar(theta = "y") +
   theme(
@@ -667,7 +757,7 @@ circular_barplot_solvent_accessibility_percentage <- common_Nterm_solvent_access
   ggplot() +
   geom_bar(
     aes(
-      x = 1, 
+      x = 3, 
       y = percentage, 
       fill = high_acc_5
     ),
@@ -680,6 +770,7 @@ circular_barplot_solvent_accessibility_percentage <- common_Nterm_solvent_access
       '1' = color_4
     )
   ) +
+  xlim(1, 4) +
   labs(x = '', y = '') +
   coord_polar(theta = "y") +
   theme(
@@ -692,49 +783,3 @@ ggsave(
   plot = circular_barplot_solvent_accessibility_percentage,
   height = 2, width = 2, units = 'in'
 )
-
-# calculate the percentage of IDR
-common_Nterm_IDR_percentage <- common_Nterm_alphafold_N_terminus_tb |> 
-  count(IDR) |> 
-  mutate(
-    percentage = (n / sum(n)) * 100
-  ) |> 
-  mutate(
-    IDR = as.character(IDR)
-  )
-
-# circular barplot
-circular_barplot_IDR_percentage <- common_Nterm_IDR_percentage |> 
-  ggplot() +
-  geom_bar(
-    aes(
-      x = 1, 
-      y = percentage, 
-      fill = IDR
-    ),
-    stat = 'identity', 
-    show.legend = FALSE
-  ) +
-  scale_fill_manual(
-    values = c(
-      '0' = color_2,
-      '1' = color_1
-    )
-  ) +
-  labs(x = '', y = '') +
-  coord_polar(theta = "y") +
-  theme(
-    axis.text = element_blank(), 
-    axis.ticks = element_blank()
-  )
-
-ggsave(
-  filename = 'figures/figure2/circular_barplot_IDR_percentage.eps',
-  plot = circular_barplot_IDR_percentage,
-  height = 2, width = 2, units = 'in'
-)
-
-
-
-
-

@@ -65,3 +65,4 @@ write_csv(
   Nterm_ELM_motif_GSEA_des_Kd@result,
   'data_source/ELM_degron/Nterm_ELM_motif_GSEA_des_Kd.csv'
 )
+  
