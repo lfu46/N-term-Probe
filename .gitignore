@@ -89,9 +89,11 @@ rsconnect/
 #Ingore CYS files
 *.cys
 
-#Ingore CIF, HDF files
+#Ingore CIF, HDF, PDB, PSE files
 *.cif
 *.hdf
+*.pdb
+*.pse
 
 #Ingore LOG files
 *.log
