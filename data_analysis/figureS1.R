@@ -296,4 +296,3 @@ ggsave(
   plot = circular_barplot_IDR_percentage,
   height = 2, width = 2, units = 'in'
 )
-

@@ -694,6 +694,11 @@ write_csv(
   file = 'data_source/common_Nterm/common_Nterm_enrichment_N_terminus.csv'
 )
 
+write_csv(
+  common_Nterm_proximity,
+  file = 'data_source/common_Nterm/common_Nterm_proximity.csv'
+)
+
 # calculate the percentage of secondary structure
 library(tidyverse)
 
@@ -782,4 +787,122 @@ ggsave(
   filename = 'figures/figure2/circular_barplot_solvent_accessibility_percentage.eps',
   plot = circular_barplot_solvent_accessibility_percentage,
   height = 2, width = 2, units = 'in'
+)
+
+### figure 2H, protein N termini structural examples
+library(tidyverse)
+
+## P23588, EIF4B, Eukaryotic translation initiation factor 4B
+P23588_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 611,
+  'RRM_1', 99, 167
+)
+
+P23588_result <- tibble(
+  cleavage_site = c(46, 47, 55, 56, 70, 100, 357, 358, 359, 360, 361)
+)
+
+# example plot
+P23588_example <- ggplot() +
+  geom_rect(
+    data = P23588_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = P23588_result$cleavage_site, 
+      xend = P23588_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      'RRM_1' = color_1
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      'RRM_1' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figure2/P23588_example.eps',
+  height = 0.2, width = 2, units = 'in'
+)
+
+## P63241, EIF5A, Eukaryotic translation initiation factor 5A-1
+library(tidyverse)
+
+P63241_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 154,
+  'eIF-5a', 83, 150,
+  'IF5A-like_N', 15, 77
+)
+
+P63241_result <- tibble(
+  cleavage_site = c(4, 12, 95, 101, 111)
+)
+
+# example plot
+P63241_example <- ggplot() +
+  geom_rect(
+    data = P63241_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = P63241_result$cleavage_site, 
+      xend = P63241_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      'eIF-5a' = color_2,
+      'IF5A-like_N' = color_3
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      'eIF-5a' = 'transparent',
+      'IF5A-like_N' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figure2/P63241_example.eps',
+  height = 0.2, width = 2, units = 'in'
 )

@@ -205,16 +205,16 @@ enrichment_N_terminus = perform_enrichment_analysis(
 # )
 
 # N-terminus colocalization
-common_Nterm_colocaliztion = evaluate_ptm_colocalization(
-    df = common_Nterm_alphafold_N_terminus,
-    ptm_target = 'self',
-    ptm_types = ['common_Nterm'],
-    ptm_dict = Nterm_site_dict,
-    pae_dir = "data_source/Nterm_structuremap/Nterm_degradation_pae",
-    min_dist = 1,
-    max_dist = 35,
-    dist_step = 5
-)
+# common_Nterm_colocaliztion = evaluate_ptm_colocalization(
+#     df = common_Nterm_alphafold_N_terminus,
+#     ptm_target = 'self',
+#     ptm_types = ['common_Nterm'],
+#     ptm_dict = Nterm_site_dict,
+#     pae_dir = "data_source/Nterm_structuremap/Nterm_degradation_pae",
+#     min_dist = 1,
+#     max_dist = 35,
+#     dist_step = 5
+# )
 
 # N-terminus 3D structures
 common_Nterm_proximity = get_proximity_pvals(
