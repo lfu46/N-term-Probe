@@ -100,7 +100,7 @@ venn.diagram(
   x = list(HEK293T_1_07102024_N_term_combined$Index, HEK293T_2_07102024_N_term_combined$Index),
   category.names = c("", ""),
   cex = 0,
-  filename = 'figures/figure2/venn_diagram_HEK293T_identification.tiff', 
+  filename = 'figures/figureS1/venn_diagram_HEK293T_identification.tiff', 
   fill = c(color_1, color_2),
   output = FALSE,
   imagetype = "tiff",
@@ -172,7 +172,7 @@ venn.diagram(
   x = list(Jurkat_07102024_N_term$Index, THP1_07102024_N_term$Index),
   category.names = c("", ""),
   cex = 0,
-  filename = 'figures/figure2/venn_diagram_Jurkat_THP1_identification.tiff', 
+  filename = 'figures/figureS1/venn_diagram_Jurkat_THP1_identification.tiff', 
   fill = c(color_3, color_4),
   output = FALSE,
   imagetype = "tiff",
@@ -214,7 +214,7 @@ barplot_GO_CC_common_Nterm <- GO_common_Nterm |>
   )
 
 ggsave(
-  filename = 'figures/figure2/barplot_GO_CC_common_Nterm.eps',
+  filename = 'figures/figureS1/barplot_GO_CC_common_Nterm.eps',
   plot = barplot_GO_CC_common_Nterm,
   height = 2, width = 4, units = 'in'
 )
@@ -249,7 +249,7 @@ barplot_GO_MF_common_Nterm <- GO_common_Nterm |>
   )
 
 ggsave(
-  filename = 'figures/figure2/barplot_GO_MF_common_Nterm.eps',
+  filename = 'figures/figureS1/barplot_GO_MF_common_Nterm.eps',
   plot = barplot_GO_MF_common_Nterm,
   height = 2, width = 4, units = 'in'
 )
@@ -292,7 +292,72 @@ circular_barplot_IDR_percentage <- common_Nterm_IDR_percentage |>
   )
 
 ggsave(
-  filename = 'figures/figure2/circular_barplot_IDR_percentage.eps',
+  filename = 'figures/figureS1/circular_barplot_IDR_percentage.eps',
   plot = circular_barplot_IDR_percentage,
   height = 2, width = 2, units = 'in'
+)
+
+### figure S1F
+## Q15459, SF3A1, Splicing factor 3A subunit 1
+library(tidyverse)
+
+Q15459_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 793,
+  'ubiquitin', 722, 788,
+  'Surp', 50, 101,
+  'Surp', 164, 215,
+  'PRP21_like_P', 233, 472
+)
+
+Q15459_result <- tibble(
+  cleavage_site = c(2, 3, 6, 51, 116, 132, 382, 397, 403, 458, 473, 685)
+)
+
+# example plot
+Q15459_example <- ggplot() +
+  geom_rect(
+    data = Q15459_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = Q15459_result$cleavage_site, 
+      xend = Q15459_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      'ubiquitin' = color_4,
+      'Surp' = color_5,
+      'PRP21_like_P' = color_1
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      'ubiquitin' = 'transparent',
+      'Surp' = 'transparent',
+      'PRP21_like_P' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figureS1/Q15459_example.eps',
+  height = 0.2, width = 2, units = 'in'
 )
