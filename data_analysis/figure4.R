@@ -427,6 +427,15 @@ overlap_Nterm_protein_total_protein_number <- intersect(
   HEK_WP_Kd_half_life_LaminB_Tcomplex |> distinct(UniProt_Accession)
 ) |> nrow()
 
+Nterm_protein_list <- intersect(
+  HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> distinct(UniProt_Accession),
+  HEK_WP_Kd_half_life_LaminB_Tcomplex |> distinct(UniProt_Accession)
+)
+
+Nterm_overlap_number <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
+  filter(UniProt_Accession %in% Nterm_protein_list$UniProt_Accession) |> 
+  nrow()
+
 # generate data frame
 Nterm_WP_overlap <- tibble(
   category = factor(
