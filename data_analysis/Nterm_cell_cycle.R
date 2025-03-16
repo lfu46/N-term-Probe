@@ -1,6 +1,6 @@
 # import packages
-packages_names <- c("tidyverse", 'readxl', 'rstatix')
-lapply(packages_names, require, character.only = TRUE)
+library(tidyverse)
+library(readxl)
 
 # import result from literature 
 # (https://www.sciencedirect.com/science/article/pii/S1535947620350209?via%3Dihub, Supplemental Table S1)

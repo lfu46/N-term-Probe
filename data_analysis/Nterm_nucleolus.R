@@ -2,6 +2,8 @@
 library(tidyverse)
 
 # import data for nucleolus protein sub-localization
+# Nucleolar URB1 ensures 3′ ETS rRNA removal to prevent exosome surveillance
+# (https://www.nature.com/articles/s41586-023-05767-5, Supplementary Table 2)
 library(readxl)
 
 nucleolus_localization <- read_xlsx(

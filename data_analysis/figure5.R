@@ -47,9 +47,6 @@ Nterm_GO_KEGG <- bind_rows(
 )
 
 # dot plot
-font_add(family = 'arial', regular = 'arial.ttf')
-showtext_auto()
-
 dot_plot_Nterm_GO_KEGG <- Nterm_GO_KEGG |> 
   ggplot(aes(x = factor(Category, levels = c('Fast turnover', 'Stable')), 
              y = factor(Description, levels = Nterm_GO_KEGG |> pull(Description)))) +
@@ -69,9 +66,9 @@ dot_plot_Nterm_GO_KEGG <- Nterm_GO_KEGG |>
     panel.grid.minor = element_line(color = "gray", linewidth = 0.1),
     axis.title = element_blank(),
     axis.text.x = element_blank(),
-    axis.text.y = element_text(size = 9, color = "black", lineheight = 0.05),
-    legend.text = element_text(size = 9),
-    legend.title = element_text(size = 9, color = "black"),
+    axis.text.y = element_text(size = 8, color = "black", lineheight = 0.05, family = 'arial'),
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 8, color = "black"),
     legend.frame = element_rect(color = "black", linewidth = 0.2),
     legend.ticks = element_line(color = "black", linewidth = 0.2),
     legend.key.size = unit(0.1, "in")
@@ -89,35 +86,42 @@ ggsave(
 # selected sub-cellular location
 HEK_Nterm_Kd_half_life_subcellular_adj <- HEK_Nterm_Kd_half_life_subcellular |> 
   filter(Main.location %in% c(
-    'Midbody', 'Midbody ring', 'Centrosome',
-    'Nuclear speckles', 'Nucleoli', 'Nucleoli rim', 'Nucleoli fibrillar center', 'Nucleoplasm',
-    'Golgi apparatus', 'Endoplasmic reticulum', 'Mitochondrion', 'Cell Junctions', 'Cytoplasmic bodies',
-    'Peroxisomes',  'Endosomes', 'Lysosomes'
+    'Centrosome', 'Centriolar satellite',
+    'Cytoplasmic bodies',
+    'Nuclear speckles', 'Nucleoli', 'Nucleoli rim', 'Nuclear bodies','Nucleoli fibrillar center', 'Nucleoplasm', 
+    'Golgi apparatus', 'Cytosol', 'Endoplasmic reticulum', 'Plasma membrane','Mitochondria', 
+    'Peroxisomes'
   ))
+
+write_csv(
+  HEK_Nterm_Kd_half_life_subcellular_adj,
+  file = 'data_source/HPA_subcellular_location/HEK_Nterm_Kd_half_life_subcellular_adj.csv'
+)
 
 # Wilcoxon rank-sum test
 library(rstatix)
+
+HEK_Nterm_Kd_half_life_subcellular_adj |> 
+  count(Main.location)
+
 subcellular_half_life_wilcox_test <- HEK_Nterm_Kd_half_life_subcellular_adj |> 
   wilcox_test(half_life ~ Main.location) |> 
   add_significance('p') |> 
   filter(p.signif != 'ns')
 
 # point range plot
-library(showtext)
 library(ggpubr)
-
-font_add(family = 'arial', regular = 'arial.ttf')
-showtext_auto()
 
 point_boxplot_Nterm_subcellular <- HEK_Nterm_Kd_half_life_subcellular_adj |> 
   ggplot() +
   geom_point(
     aes(
       x = factor(Main.location, levels = c(
-        'Midbody', 'Midbody ring', 'Centrosome',
-        'Nuclear speckles', 'Nucleoli', 'Nucleoli rim', 'Nucleoli fibrillar center', 'Nucleoplasm',
-        'Golgi apparatus', 'Endoplasmic reticulum', 'Mitochondrion', 'Cell Junctions', 'Cytoplasmic bodies',
-        'Peroxisomes',  'Endosomes', 'Lysosomes'
+        'Centrosome', 'Centriolar satellite',
+        'Cytoplasmic bodies',
+        'Nuclear speckles', 'Nucleoli', 'Nucleoli rim', 'Nuclear bodies','Nucleoli fibrillar center', 'Nucleoplasm', 
+        'Golgi apparatus', 'Cytosol', 'Endoplasmic reticulum', 'Plasma membrane','Mitochondria', 
+        'Peroxisomes'
       )), 
       y = half_life
     ), 
@@ -128,10 +132,11 @@ point_boxplot_Nterm_subcellular <- HEK_Nterm_Kd_half_life_subcellular_adj |>
   stat_summary(
     aes(
       x = factor(Main.location, levels = c(
-        'Midbody', 'Midbody ring', 'Centrosome',
-        'Nuclear speckles', 'Nucleoli', 'Nucleoli rim', 'Nucleoli fibrillar center', 'Nucleoplasm',
-        'Golgi apparatus', 'Endoplasmic reticulum', 'Mitochondrion', 'Cell Junctions', 'Cytoplasmic bodies',
-        'Peroxisomes',  'Endosomes', 'Lysosomes'
+        'Centrosome', 'Centriolar satellite',
+        'Cytoplasmic bodies',
+        'Nuclear speckles', 'Nucleoli', 'Nucleoli rim', 'Nuclear bodies','Nucleoli fibrillar center', 'Nucleoplasm', 
+        'Golgi apparatus', 'Cytosol', 'Endoplasmic reticulum', 'Plasma membrane','Mitochondria', 
+        'Peroxisomes'
       )), 
       y = half_life
     ),
@@ -141,7 +146,7 @@ point_boxplot_Nterm_subcellular <- HEK_Nterm_Kd_half_life_subcellular_adj |>
   stat_pvalue_manual(
     data = subcellular_half_life_wilcox_test,
     label = 'p.signif',
-    y.position = c(170, 180, 160),
+    y.position = c(170, 165, 160, 155, 150),
     tip.length = 0,
     coord.flip = TRUE,
     label.size = 6
@@ -150,8 +155,8 @@ point_boxplot_Nterm_subcellular <- HEK_Nterm_Kd_half_life_subcellular_adj |>
   theme(
     panel.grid.major = element_line(color = 'gray', linewidth = 0.2),
     panel.grid.minor = element_line(color = 'gray', linewidth = 0.1),
-    axis.text.x = element_text(color = 'black', size = 10),
-    axis.text.y = element_text(color = 'black', size = 9)
+    axis.text.x = element_text(color = 'black', size = 8, family = 'arial'),
+    axis.text.y = element_text(color = 'black', size = 8, family = 'arial')
   )
 
 ggsave(
@@ -190,10 +195,16 @@ circos.clear()
 # heatmap
 library(ComplexHeatmap)
 
-Nterm_cell_cycle_example <- HEK_Nterm_deg_ratio |> 
+Nterm_cell_cycle_example <- HEK_Nterm_curve_fitting_combined |> 
   filter(Index %in% c(
+    'P17096_1',
+    'P17096_8',
+    'O00273_105',
+    'O00273_108',
+    'P17028_128',
     'Q9NXR7_207',
-    'Q8IYL3_28',
+    'Q9HAW4_873',
+    'P31350_62',
     'P20248_174',
     'P20248_23',
     'P20248_20',
@@ -203,102 +214,111 @@ Nterm_cell_cycle_example <- HEK_Nterm_deg_ratio |>
     'Q02224_230',
     'Q02224_627',
     'Q02224_612',
-    'Q9HAW4_873',
-    'O00273_105',
-    'O00273_108',
-    'O75496_90',
     'P62805_68',
     'P62805_61',
     'P62805_69',
-    'P17096_1',
-    'P17096_8',
+    'P62805_25',
+    'P62805_47',
+    'Q96EA4_180',
+    'Q96EA4_30',
     'Q96EA4_535',
-    'Q9Y6A5_7',
-    'Q9Y6A5_479',
-    'Q9UNY4_893',
-    'Q16763_138',
-    'Q16763_123',
-    'P17028_128'
-  )) |> 
-  select(Index, timepoint, deg_ratio_avg) |> 
-  pivot_wider(names_from = timepoint, values_from = deg_ratio_avg)
+    'O00762_16',
+    'O00762_83',
+    'Q96Q89_552'
+  ))
 
-Nterm_cell_cycle_example_matrix <- data.matrix(Nterm_cell_cycle_example)
-rownames(Nterm_cell_cycle_example_matrix) <- Nterm_cell_cycle_example$Index
+## generate ratio using the fitted model
+# non-linear model
+nonlinear_model <- function(A, B, Kd) {
+  
+  timepoint <- c(3, 6, 9, 12, 24)
+  
+  Kcd <- 0.03926746
+  
+  (A - B) * exp(-(Kd - Kcd) * timepoint) + B
+}
+
+Nterm_cell_cycle_non_linear_fitting <- Nterm_cell_cycle_example |> 
+  filter(
+    model == 'nonlinear fitting'
+  ) |> 
+  pivot_wider(
+    names_from = parameters, values_from = values
+  ) |> 
+  mutate(ratio = pmap(list(A, B, Kd), nonlinear_model)) %>%
+  unnest_wider(ratio, names_sep = "_")
+
+write_csv(
+  Nterm_cell_cycle_non_linear_fitting,
+  file = 'data_source/cell_cycle/Nterm_cell_cycle_non_linear_fitting.csv'
+)
+
+# linear model
+linear_model <- function(lnA, Kd) {
+  
+  timepoint <- c(3, 6, 9, 12, 24)
+  
+  Kcd <- 0.03926746
+  
+  exp(lnA - (Kd - Kcd) * timepoint)
+}
+
+Nterm_cell_cycle_linear_fitting <- Nterm_cell_cycle_example |> 
+  filter(
+    model == 'linear fitting'
+  ) |> 
+  pivot_wider(
+    names_from = parameters, values_from = values
+  ) |> 
+  mutate(ratio = map2(lnA, Kd, linear_model)) %>%
+  unnest_wider(ratio, names_sep = "_")
+
+write_csv(
+  Nterm_cell_cycle_linear_fitting,
+  file = 'data_source/cell_cycle/Nterm_cell_cycle_linear_fitting.csv'
+)
+
+## import result of the raito of example N-terminal proteoforms
+library(tidyverse)
+
+# non-linear fitting
+Nterm_cell_cycle_non_linear_fitting <- read_csv(
+  'data_source/cell_cycle/Nterm_cell_cycle_non_linear_fitting.csv'
+)
+# linear fitting
+Nterm_cell_cycle_linear_fitting <- read_csv(
+  'data_source/cell_cycle/Nterm_cell_cycle_linear_fitting.csv'
+)
+
+# heatmap
+library(ComplexHeatmap)
+library(circlize)
+
+Nterm_cell_cycle_curve_fitting_comb <- bind_rows(
+  Nterm_cell_cycle_non_linear_fitting,
+  Nterm_cell_cycle_linear_fitting
+) |> 
+  mutate(ratio_0 = 1)
+
+Nterm_cell_cycle_example_matrix <- data.matrix(
+  Nterm_cell_cycle_curve_fitting_comb |> 
+    select(ratio_0, ratio_1:ratio_5)
+)
+rownames(Nterm_cell_cycle_example_matrix) <- Nterm_cell_cycle_curve_fitting_comb$Index
 
 mat_col <- colorRamp2(
-  breaks = c(1.0, 0.75, 0.5),
+  breaks = c(1.0, 0.9, 0.2),
   colors = c('red', 'yellow', 'blue')
 )
 
 Heatmap(
-  matrix = Nterm_cell_cycle_example_matrix[,-1],
+  matrix = Nterm_cell_cycle_example_matrix,
   col = mat_col,
   cluster_rows = FALSE, 
   cluster_columns = FALSE
 )
 
-### figure 5D, nucleolus complexes
-# Wilcoxon rank-sum test
-library(rstatix)
-
-Nterm_nucleolus_localization_wilcoxon_test <- Nterm_nucleolus_localization_half_life |> 
-  filter(Localization %in% c(
-    'DFC', 'PDFC', 'GC', 'GC (aggregation)', 'NR'
-  )) |> 
-  wilcox_test(half_life ~ Localization) |> 
-  add_significance('p') |> 
-  filter(p < 0.05)
-
-# point range plot
-library(showtext)
-library(ggpubr)
-
-font_add(family = 'arial', regular = 'arial.ttf')
-showtext_auto()
-
-violin_boxplot_nucleolus_complex <- Nterm_nucleolus_localization_half_life |> 
-  filter(Localization %in% c(
-    'DFC', 'PDFC', 'GC', 'GC (aggregation)', 'NR'
-  )) |> 
-  ggplot() +
-  geom_point(
-    aes(
-      x = Localization,
-      y = half_life
-    ),
-    position = position_jitter(width = 0.3),
-    color = 'black',
-    alpha = 0.3
-  ) +
-  stat_summary(
-    aes(
-      x = Localization, 
-      y = half_life
-    ),
-    fun.data = 'mean_cl_boot', color = color_4, linewidth = 0.2, size = 0.5
-  ) +
-  stat_pvalue_manual(
-    data = Nterm_nucleolus_localization_wilcoxon_test, label = 'p.signif',
-    tip.length = 0, y.position = c(180, 170), label.size = 6
-  ) +
-  labs(x = '', y = '') +
-  theme(
-    panel.grid.major = element_line(color = 'gray', linewidth = 0.2),
-    panel.grid.minor = element_line(color = 'gray', linewidth = 0.1),
-    axis.text.x = element_blank(),
-    axis.text.y = element_text(color = 'black', size = 9)
-  )
-
-ggsave(
-  filename = 'figures/figure5/violin_boxplot_nucleolus_complex.eps',
-  device = cairo_ps,
-  plot = violin_boxplot_nucleolus_complex,
-  height = 2, width = 2, units = 'in',
-  fallback_resolution = 1200
-)
-
-### figure 5E, protein interaction network of nucleoli, stress granule, processing body and cajal body
+### figure 5D, protein interaction network of nucleoli, stress granule, processing body and cajal body
 # combine nucleolus and cytoplasmic body proteins
 nucleolus_cytoplasmic_body_protein <- bind_rows(
   Nterm_nucleolus_localization_half_life |> 
@@ -463,4 +483,64 @@ Heatmap(
   matrix = Nterm_example_half_life_matrix[,-1],
   col = mat_col,
   cluster_rows = FALSE
+)
+
+### figure 5E, nucleolus complexes
+# Wilcoxon rank-sum test
+library(rstatix)
+
+Nterm_nucleolus_localization_wilcoxon_test <- Nterm_nucleolus_localization_half_life |> 
+  filter(Localization %in% c(
+    'DFC', 'PDFC', 'GC', 'GC (aggregation)', 'NR'
+  )) |> 
+  wilcox_test(half_life ~ Localization) |> 
+  add_significance('p') |> 
+  filter(p < 0.05)
+
+# point range plot
+library(showtext)
+library(ggpubr)
+
+font_add(family = 'arial', regular = 'arial.ttf')
+showtext_auto()
+
+violin_boxplot_nucleolus_complex <- Nterm_nucleolus_localization_half_life |> 
+  filter(Localization %in% c(
+    'DFC', 'PDFC', 'GC', 'GC (aggregation)', 'NR'
+  )) |> 
+  ggplot() +
+  geom_point(
+    aes(
+      x = Localization,
+      y = half_life
+    ),
+    position = position_jitter(width = 0.3),
+    color = 'black',
+    alpha = 0.3
+  ) +
+  stat_summary(
+    aes(
+      x = Localization, 
+      y = half_life
+    ),
+    fun.data = 'mean_cl_boot', color = color_4, linewidth = 0.2, size = 0.5
+  ) +
+  stat_pvalue_manual(
+    data = Nterm_nucleolus_localization_wilcoxon_test, label = 'p.signif',
+    tip.length = 0, y.position = c(180, 170), label.size = 6
+  ) +
+  labs(x = '', y = '') +
+  theme(
+    panel.grid.major = element_line(color = 'gray', linewidth = 0.2),
+    panel.grid.minor = element_line(color = 'gray', linewidth = 0.1),
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(color = 'black', size = 9)
+  )
+
+ggsave(
+  filename = 'figures/figure5/violin_boxplot_nucleolus_complex.eps',
+  device = cairo_ps,
+  plot = violin_boxplot_nucleolus_complex,
+  height = 2, width = 2, units = 'in',
+  fallback_resolution = 1200
 )
