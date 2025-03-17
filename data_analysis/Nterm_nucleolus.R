@@ -21,6 +21,11 @@ Nterm_nucleolus_localization_half_life <- nucleolus_localization |>
   filter(!is.na(half_life)) |> 
   mutate(category = 'nucleolus')
 
+write_csv(
+  Nterm_nucleolus_localization_half_life,
+  file = 'data_source/nucleolus/Nterm_nucleolus_localization_half_life.csv'
+)
+
 # Wilcoxon rank-sum test
 library(rstatix)
 

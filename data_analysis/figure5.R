@@ -322,41 +322,67 @@ Heatmap(
 # combine nucleolus and cytoplasmic body proteins
 nucleolus_cytoplasmic_body_protein <- bind_rows(
   Nterm_nucleolus_localization_half_life |> 
-    select(UniProt_Accession, category, half_life) |> 
+    select(UniProt_Accession, category) |> 
     distinct(),
   
   Nterm_cytoplasmic_body_half_life |> 
-    select(UniProt_Accession, category, half_life) |> 
+    select(UniProt_Accession, category) |> 
     distinct()
 )
 
 # only keep the proteins with unique localization
 nucleolus_cytoplasmic_body_protein_unique_localization <- nucleolus_cytoplasmic_body_protein |> 
-  group_by(UniProt_Accession) |> 
-  filter(n() == 1) |> 
-  ungroup()
+  count(UniProt_Accession) |> 
+  filter(n == 1)
+
+# get half-life for those proteoforms with unique parent protein localization
+nucleolus_cytoplasmic_body_Nterm_half_life <- bind_rows(
+  Nterm_nucleolus_localization_half_life |> 
+    select(Index, UniProt_Accession, Gene = Gene.Symbol, category, half_life) |> 
+    distinct(),
+  
+  Nterm_cytoplasmic_body_half_life |> 
+    select(Index, UniProt_Accession, Gene, category, half_life)
+) |> 
+  filter(
+    UniProt_Accession %in% nucleolus_cytoplasmic_body_protein_unique_localization$UniProt_Accession
+  )
 
 write_csv(
-  nucleolus_cytoplasmic_body_protein_unique_localization,
-  file = 'figures/figure5/nucleolus_cytoplasmic_body_protein_unique_localization.csv'
+  nucleolus_cytoplasmic_body_Nterm_half_life,
+  file = 'data_source/nucleolus_cytoplasmic_body/nucleolus_cytoplasmic_body_Nterm_half_life.csv'
 )
 
 # Wilcoxon rank-sum test
+library(tidyverse)
+
+nucleolus_cytoplasmic_body_Nterm_half_life <- read_csv(
+  'data_source/nucleolus_cytoplasmic_body/nucleolus_cytoplasmic_body_Nterm_half_life.csv'
+)
+
 library(rstatix)
 
-nucleolus_cytoplasmic_body_protein_unique_localization_wilcoxon_test <- nucleolus_cytoplasmic_body_protein_unique_localization |> 
+nucleolus_cytoplasmic_body_protein_unique_localization_wilcoxon_test <- nucleolus_cytoplasmic_body_Nterm_half_life |> 
+  # count(category)
+  # group_by(category) |>
+  # get_summary_stats(half_life, type = 'mean')
   wilcox_test(half_life ~ category) |> 
-  add_significance('p') |> 
-  filter(p < 0.05)
+  slice(3)
+
+# Kolmogorov-Smirnov test
+SG_CB_ks_test <- ks.test(
+  nucleolus_cytoplasmic_body_Nterm_half_life |> filter(category == 'stress granule') |> pull(half_life),
+  nucleolus_cytoplasmic_body_Nterm_half_life |> filter(category == 'cajal body') |> pull(half_life)
+)
+
+nucleolus_cytoplasmic_body_protein_unique_localization_ks_test <- nucleolus_cytoplasmic_body_protein_unique_localization_wilcoxon_test |> 
+  mutate(p = SG_CB_ks_test$p.value) |> 
+  add_significance('p')
 
 # point range plot
-library(showtext)
 library(ggpubr)
 
-font_add(family = 'arial', regular = 'arial.ttf')
-showtext_auto()
-
-point_range_plot_Nterm_nucleolus_cytoplasmic_body <- nucleolus_cytoplasmic_body_protein_unique_localization |> 
+point_range_plot_Nterm_nucleolus_cytoplasmic_body <- nucleolus_cytoplasmic_body_Nterm_half_life |> 
   ggplot() +
   geom_point(
     aes(
@@ -375,15 +401,15 @@ point_range_plot_Nterm_nucleolus_cytoplasmic_body <- nucleolus_cytoplasmic_body_
     fun.data = 'mean_cl_boot', color = color_1, linewidth = 0.2, size = 0.5
   ) +
   stat_pvalue_manual(
-    data = nucleolus_cytoplasmic_body_protein_unique_localization_wilcoxon_test, label = 'p.signif',
-    tip.length = 0, y.position = c(180, 170), label.size = 6, coord.flip = TRUE
+    data = nucleolus_cytoplasmic_body_protein_unique_localization_ks_test, label = 'p.signif',
+    tip.length = 0, y.position = c(170), label.size = 6, coord.flip = TRUE
   ) +
   labs(x = '', y = '') +
   coord_flip() +
   theme(
     panel.grid.major = element_line(color = 'gray', linewidth = 0.2),
     panel.grid.minor = element_line(color = 'gray', linewidth = 0.1),
-    axis.text.x = element_text(color = 'black', size = 9),
+    axis.text.x = element_text(color = 'black', size = 8),
     axis.text.y = element_blank()
   )
 
@@ -441,37 +467,46 @@ deleteAllNetworks()
 library(ComplexHeatmap)
 library(circlize)
 
-protein_list <- c(
-  # nucleolus
-  'Q14137',
-  'O15160',
-  'P0DPB6',
-  'Q3B726',
-  'Q9P1U0',
-  # stress granule
-  'Q9UN86',
-  'Q14671',
-  'Q13347',
-  'P78344',
-  'Q9Y6M1',
-  # P-body
-  'O15116',
-  'Q8NDV7',
-  'O00165',
-  'Q9UKM9',
-  'Q92540',
-  # cajal body
-  'Q8WWY3',
-  'P08621',
-  'P09012',
-  'Q01081'
+proteoform_list <- c(
+  ## nucleolus
+  # P06748, NPM1
+  'P06748_16',
+  'P06748_66',
+  'P06748_93',
+  'P06748_142',
+  'P06748_213',
+  'P06748_222',
+  ## stress granule
+  # P60842, EIF4A1
+  'P60842_90',
+  'P60842_147',
+  'P60842_149',
+  'P60842_213',
+  'P60842_214',
+  'P60842_236',
+  'P60842_301',
+  ## P-body
+  # Q9NPI6, DCP1A
+  'Q9NPI6_420',
+  'Q9NPI6_502',
+  # Q9NRA8, EIF4ENIF1
+  'Q9NRA8_282',
+  'Q9NRA8_642',
+  ## cajal body
+  # Q9UQ35, SRRM2
+  'Q9UQ35_2311',
+  'Q9UQ35_2313',
+  'Q9UQ35_2150',
+  'Q9UQ35_2151',
+  'Q9UQ35_2360',
+  'Q9UQ35_2361'
 )
 
 Nterm_example_half_life <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
-  filter(UniProt_Accession %in% protein_list) |> 
+  filter(Index %in% proteoform_list) |> 
   select(Index, half_life)
 
-Nterm_example_half_life_matrix <- data.matrix(Nterm_example_half_life)
+Nterm_example_half_life_matrix <- data.matrix(Nterm_example_half_life |> select(half_life))
 rownames(Nterm_example_half_life_matrix) <- Nterm_example_half_life$Index
 
 mat_col <- colorRamp2(
@@ -480,7 +515,7 @@ mat_col <- colorRamp2(
 )
 
 Heatmap(
-  matrix = Nterm_example_half_life_matrix[,-1],
+  matrix = Nterm_example_half_life_matrix,
   col = mat_col,
   cluster_rows = FALSE
 )
@@ -493,18 +528,16 @@ Nterm_nucleolus_localization_wilcoxon_test <- Nterm_nucleolus_localization_half_
   filter(Localization %in% c(
     'DFC', 'PDFC', 'GC', 'GC (aggregation)', 'NR'
   )) |> 
+  group_by(Localization) |> 
+  get_summary_stats(half_life, type = 'mean')
   wilcox_test(half_life ~ Localization) |> 
   add_significance('p') |> 
   filter(p < 0.05)
 
 # point range plot
-library(showtext)
 library(ggpubr)
 
-font_add(family = 'arial', regular = 'arial.ttf')
-showtext_auto()
-
-violin_boxplot_nucleolus_complex <- Nterm_nucleolus_localization_half_life |> 
+point_range_plot_nucleolus_complex <- Nterm_nucleolus_localization_half_life |> 
   filter(Localization %in% c(
     'DFC', 'PDFC', 'GC', 'GC (aggregation)', 'NR'
   )) |> 
@@ -534,13 +567,13 @@ violin_boxplot_nucleolus_complex <- Nterm_nucleolus_localization_half_life |>
     panel.grid.major = element_line(color = 'gray', linewidth = 0.2),
     panel.grid.minor = element_line(color = 'gray', linewidth = 0.1),
     axis.text.x = element_blank(),
-    axis.text.y = element_text(color = 'black', size = 9)
+    axis.text.y = element_text(color = 'black', size = 8)
   )
 
 ggsave(
-  filename = 'figures/figure5/violin_boxplot_nucleolus_complex.eps',
+  filename = 'figures/figure5/point_range_plot_nucleolus_complex.eps',
   device = cairo_ps,
-  plot = violin_boxplot_nucleolus_complex,
+  plot = point_range_plot_nucleolus_complex,
   height = 2, width = 2, units = 'in',
   fallback_resolution = 1200
 )
