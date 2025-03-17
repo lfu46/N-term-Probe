@@ -205,12 +205,15 @@ Nterm_cell_cycle_example <- HEK_Nterm_curve_fitting_combined |>
     'Q9NXR7_207',
     'Q9HAW4_873',
     'P31350_62',
+    # CCNA2
     'P20248_174',
     'P20248_23',
     'P20248_20',
     'P20248_21',
+    # CCNB1
     'P14635_153',
     'P14635_155',
+    # CENPE
     'Q02224_230',
     'Q02224_627',
     'Q02224_612',
@@ -219,9 +222,11 @@ Nterm_cell_cycle_example <- HEK_Nterm_curve_fitting_combined |>
     'P62805_69',
     'P62805_25',
     'P62805_47',
+    # SPDL1
     'Q96EA4_180',
     'Q96EA4_30',
     'Q96EA4_535',
+    # UBE2C
     'O00762_16',
     'O00762_83',
     'Q96Q89_552'
