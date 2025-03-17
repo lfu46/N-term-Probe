@@ -21,61 +21,61 @@ Nterm_degradation_protein_list = HEK_Nterm_Kd_half_life_sequence["UniProt_Access
 
 ## download AlphaFold data
 # crystallographic information file
-valid_proteins_cif, invalid_proteins_cif, existing_proteins_cif = download_alphafold_cif(
-    proteins = Nterm_degradation_protein_list,
-    out_folder = "data_source/Nterm_structuremap/Nterm_degradation_cif"
-)
+# valid_proteins_cif, invalid_proteins_cif, existing_proteins_cif = download_alphafold_cif(
+#     proteins = Nterm_degradation_protein_list,
+#     out_folder = "data_source/Nterm_structuremap/Nterm_degradation_cif"
+# )
 
 # predicted aligned error
-valid_proteins_pae, invalid_proteins_pae, existing_proteins_pae = download_alphafold_pae(
-    proteins = Nterm_degradation_protein_list,
-    out_folder = "data_source/Nterm_structuremap/Nterm_degradation_pae"
-)
+# valid_proteins_pae, invalid_proteins_pae, existing_proteins_pae = download_alphafold_pae(
+#     proteins = Nterm_degradation_protein_list,
+#     out_folder = "data_source/Nterm_structuremap/Nterm_degradation_pae"
+# )
 
 # format AlphaFold data input
-Nterm_alphafold_annotation = format_alphafold_data(
+Nterm_degradation_alphafold_annotation = format_alphafold_data(
   directory = "data_source/Nterm_structuremap/Nterm_degradation_cif",
   protein_ids = Nterm_degradation_protein_list
 )
 
 # annotate prediction-aware part-sphere exposure (pPSE) values
-Nterm_full_sphere_exposure = annotate_accessibility(
-    df = Nterm_alphafold_annotation, 
+Nterm_degradation_full_sphere_exposure = annotate_accessibility(
+    df = Nterm_degradation_alphafold_annotation, 
     max_dist = 24, 
     max_angle = 180, 
     error_dir = "data_source/Nterm_structuremap/Nterm_degradation_pae"
 )
 
-Nterm_alphafold_accessibility = Nterm_alphafold_annotation.merge(
-  Nterm_full_sphere_exposure,
+Nterm_degradation_alphafold_accessibility = Nterm_degradation_alphafold_annotation.merge(
+  Nterm_degradation_full_sphere_exposure,
   how = "left",
   on = ["protein_id", "AA", "position"]
 )
 
-Nterm_part_sphere_exposure = annotate_accessibility(
-    df = Nterm_alphafold_annotation, 
+Nterm_degradation_part_sphere_exposure = annotate_accessibility(
+    df = Nterm_degradation_alphafold_annotation, 
     max_dist = 12, 
     max_angle = 70, 
     error_dir = "data_source/Nterm_structuremap/Nterm_degradation_pae"
 )
 
-Nterm_alphafold_accessibility = Nterm_alphafold_accessibility.merge(
-  Nterm_part_sphere_exposure,
+Nterm_degradation_alphafold_accessibility = Nterm_degradation_alphafold_accessibility.merge(
+  Nterm_degradation_part_sphere_exposure,
   how = "left",
   on = ["protein_id", "AA", "position"]
 )
 
-Nterm_alphafold_accessibility["accessibility"] = np.where(
-  Nterm_alphafold_accessibility.nAA_12_70_pae <= 5, "high exposure", "low exposure"
+Nterm_degradation_alphafold_accessibility["accessibility"] = np.where(
+  Nterm_degradation_alphafold_accessibility.nAA_12_70_pae <= 5, "high exposure", "low exposure"
 )
 
 # annotate intrisicly disorder region (IDR)
-Nterm_alphafold_accessibility_smooth = get_smooth_score(
-  Nterm_alphafold_accessibility,
+Nterm_degradation_alphafold_accessibility_smooth = get_smooth_score(
+  Nterm_degradation_alphafold_accessibility,
   np.array(["nAA_24_180_pae"]),
   [10]
 ).reset_index(drop=True)
 
-Nterm_alphafold_accessibility_smooth["IDR"] = np.where(
-  Nterm_alphafold_accessibility_smooth.nAA_24_180_pae_smooth10 <= 34.27, "IDR", "Structural Region"
+Nterm_degradation_alphafold_accessibility_smooth["IDR"] = np.where(
+  Nterm_degradation_alphafold_accessibility_smooth.nAA_24_180_pae_smooth10 <= 34.27, "IDR", "Structural Region"
 )

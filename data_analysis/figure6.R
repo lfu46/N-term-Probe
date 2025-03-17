@@ -10,17 +10,21 @@ library(tidyverse)
 ## Wilcoxon rank-sum test
 library(rstatix)
 
-Nterm_alphafold_half_life_property <- Nterm_alphafold_half_life |> 
+Nterm_degradation_alphafold_half_life <- read_csv(
+  'data_source/Nterm_degradation_structuremap/Nterm_degradation_alphafold_half_life.csv'
+)
+
+Nterm_degradation_alphafold_half_life_property <- Nterm_degradation_alphafold_half_life |> 
   select(Index, half_life, structure_group, accessibility, IDR) |> 
   pivot_longer(cols = c(structure_group, accessibility, IDR), names_to = 'property', values_to = 'category')
 
-Nterm_alphafold_half_life_property |> 
+Nterm_degradation_alphafold_half_life_property |> 
   group_by(category) |> 
   get_summary_stats(half_life, type = 'median')
 
 write_csv(
-  Nterm_alphafold_half_life_property, 
-  'data_source/Nterm_structuremap/Nterm_alphafold_half_life_property.csv'
+  Nterm_degradation_alphafold_half_life_property, 
+  'data_source/Nterm_structuremap/Nterm_degradation_alphafold_half_life_property.csv'
 )
 
 Nterm_alphafold_half_life_wilcox_test <- Nterm_alphafold_half_life_property |> 
@@ -30,7 +34,6 @@ Nterm_alphafold_half_life_wilcox_test <- Nterm_alphafold_half_life_property |>
   filter(p.signif != 'ns')
 
 # point range plot
-library(showtext)
 library(ggpubr)
 
 point_range_Nterm_alphafold_property <- Nterm_alphafold_half_life_property |> 
@@ -66,8 +69,8 @@ point_range_Nterm_alphafold_property <- Nterm_alphafold_half_life_property |>
     'structure_group', 'accessibility', 'IDR'
   ))), scales = 'free_x', space = 'free_x') +
   theme(
-    axis.text.x = element_text(family = 'arial', color = 'black', angle = 30, hjust = 1),
-    axis.text.y = element_text(family = 'arial', color = 'black'),
+    axis.text.x = element_text(family = 'arial', color = 'black', angle = 30, hjust = 1, size = 8),
+    axis.text.y = element_text(family = 'arial', color = 'black', size = 8),
   )
 
 ggsave(
@@ -170,7 +173,6 @@ Nterm_13mer_sequence_features_wilcox_test <- Nterm_13mer_sequence_features_selec
   filter(p.adj.signif != "ns")
 
 # boxplot
-library(showtext)
 library(ggpubr)
 
 boxplot_Nterm_13mer_sequence_features <- Nterm_13mer_sequence_features_selected |> 
@@ -196,8 +198,8 @@ boxplot_Nterm_13mer_sequence_features <- Nterm_13mer_sequence_features_selected 
     'hydropathy', 'NCPR', 'kappa'
   ))), scales = 'free_y', space = 'free_x') +
   theme(
-    axis.text.x = element_text(family = 'arial', color = 'black', angle = 30, hjust = 1),
-    axis.text.y = element_text(family = 'arial', color = 'black'),
+    axis.text.x = element_text(family = 'arial', color = 'black', angle = 30, hjust = 1, size = 8),
+    axis.text.y = element_text(family = 'arial', color = 'black', size = 8),
   )
 
 ggsave(
