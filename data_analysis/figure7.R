@@ -445,8 +445,8 @@ ggsave(
 
 ## NCPR for UBR-box and ZER1 N-recognin
 library(tidyverse)
-library(Biostrings)
 library(reticulate)
+library(Biostrings)
 
 ## get amino acid sequences for UBR-box and ZER1
 # import human fasta downloaded from UniProt (https://www.uniprot.org/)
@@ -468,7 +468,7 @@ human_fasta_tibble <- tibble(
   select(UniProt_Accession, Sequence, Full_Protein_Length)
 
 # binding region sequence
-binding_region_sequence <- human_fasta_tibble |> 
+N_recognin_binding_region_sequence <- human_fasta_tibble |> 
   filter(
     UniProt_Accession %in% c(
       'Q8IWV7', # UBR1
@@ -481,6 +481,11 @@ binding_region_sequence <- human_fasta_tibble |>
     binding_region = substr(Sequence, start = start, stop = end)
   )
 
+write_csv(
+  N_recognin_binding_region_sequence,
+  file = 'data_source/ELM_degron/N_recognin_binding_region_sequence.csv'
+)
+
 # use specific vitual env
 use_condaenv(
   condaenv = '/opt/anaconda3/envs/Nterm_probe',
@@ -489,6 +494,93 @@ use_condaenv(
 
 # excute python code for NCPR of binding region sequence
 source_python('data_analysis/N_recognin_NCPR.py')
+
+# convert list result to tibble
+NCPR_result_tibble_list <- lapply(names(NCPR_result), function(protein_id) {
+  tibble(UniProt_Accession = protein_id, NCPR = NCPR_result[[protein_id]])
+})
+
+NCPR_result_tibble <- bind_rows(NCPR_result_tibble_list) |> 
+  mutate(NCPR = lapply(NCPR, function(x) as.data.frame(t(x)))) |> 
+  unnest(NCPR)
+
+colnames(NCPR_result_tibble) <- c('UniProt_Accession', 'Position', 'NCPR', 'charge')
+
+NCPR_result_tibble_adj <- NCPR_result_tibble |> 
+  mutate(
+    charge = case_when(
+      NCPR > 0 ~ 'positive',
+      NCPR < 0 ~ 'negative',
+      NCPR == 0 ~ 'none'
+    )
+  )
+
+## NCPR distribution for each N-recoginin binding region
+# Q8IWV7, UBR1
+NCPR_UBR1 <- NCPR_result_tibble_adj |> 
+  filter(UniProt_Accession == 'Q8IWV7') |> 
+  ggplot() +
+  geom_col(
+    aes(
+      x = Position,
+      y = NCPR,
+      color = charge
+    ),
+    show.legend = FALSE
+  ) +
+  scale_color_manual(
+    values = c(
+      'positive' = color_1,
+      'negative' = color_2,
+      'none' = 'transparent'
+      )
+  ) +
+  labs(x = '', y = '') +
+  theme(
+    panel.grid.major = element_line(color = "gray", linewidth = 0.2),
+    panel.grid.minor = element_line(color = "gray", linewidth = 0.1),
+    axis.text.x = element_text(family = 'arial', color = 'black', size = 6),
+    axis.text.y = element_text(family = 'arial', color = 'black', size = 6)
+  )
+
+ggsave(
+  file = 'figures/figure7/NCPR_UBR1.eps',
+  plot = NCPR_UBR1,
+  height = 1, width = 1.8, units = 'in'
+)
+
+# Q7Z7L7, ZER1
+NCPR_ZER1 <- NCPR_result_tibble_adj |> 
+  filter(UniProt_Accession == 'Q7Z7L7') |> 
+  ggplot() +
+  geom_col(
+    aes(
+      x = Position,
+      y = NCPR,
+      color = charge
+    ),
+    show.legend = FALSE
+  ) +
+  scale_color_manual(
+    values = c(
+      'positive' = color_1,
+      'negative' = color_2,
+      'none' = 'transparent'
+    )
+  ) +
+  labs(x = '', y = '') +
+  theme(
+    panel.grid.major = element_line(color = "gray", linewidth = 0.2),
+    panel.grid.minor = element_line(color = "gray", linewidth = 0.1),
+    axis.text.x = element_text(family = 'arial', color = 'black', size = 6),
+    axis.text.y = element_text(family = 'arial', color = 'black', size = 6)
+  )
+
+ggsave(
+  file = 'figures/figure7/NCPR_ZER1.eps',
+  plot = NCPR_ZER1,
+  height = 1, width = 1.8, units = 'in'
+)
 
 ### figure 7C, half-life comparison of cleaving proteases
 # Wilcoxon rank-sum test
