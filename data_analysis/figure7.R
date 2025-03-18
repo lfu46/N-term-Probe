@@ -655,6 +655,8 @@ ggsave(
 )
 
 ### figure 7D, ELM motifs
+library(tidyverse)
+
 # import GSEA result from ELM motif analysis
 Nterm_ELM_motif_GSEA_des_Kd <- read_csv(
   'data_source/ELM_degron/Nterm_ELM_motif_GSEA_des_Kd.csv'
@@ -664,7 +666,15 @@ Nterm_ELM_motif_GSEA_des_Kd <- read_csv(
 library(gridExtra)
 
 Nterm_ELM_motif_GSEA_des_Kd_enriched_term <- Nterm_ELM_motif_GSEA_des_Kd |> 
-  filter(pvalue < 0.05) |> 
+  filter(
+    Description %in% c(
+      'DOC_AGCK_PIF_1',
+      'LIG_PDZ_Class_2',
+      'LIG_CaMK_CASK_1',
+      'LIG_HCF-1_HBM_1',
+      'DEG_CRL4_CDT2_2'
+    )
+  ) |> 
   select(
     'ELM.Name' = Description, NES, pvalue
   ) |> 
@@ -673,7 +683,7 @@ Nterm_ELM_motif_GSEA_des_Kd_enriched_term <- Nterm_ELM_motif_GSEA_des_Kd |>
     'P.value' = format(pvalue, format = "e", digits = 2)
   ) |> 
   select(-pvalue) |> 
-  arrange(desc(NES))
+  arrange(P.value)
 
 grid.table(Nterm_ELM_motif_GSEA_des_Kd_enriched_term)
 
