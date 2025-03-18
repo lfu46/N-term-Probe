@@ -23,16 +23,36 @@ Nterm_topfinder_result <- read_delim(
   mutate(Index = paste(Accession, P1..Position, sep = '_'))
 
 # Nterm cleaving proteases
-Nterm_topfinder_cleaving_proteases <- Nterm_topfinder_result |> 
+Nterm_degron_topfinder_cleaving_proteases <- Nterm_topfinder_result |> 
   select(Index, Cleaving.proteases) |> 
-  left_join(HEK_Nterm_Kd_half_life_LaminB_Tcomplex, by = 'Index') |> 
+  left_join(HEK_Nterm_ELM_N_degron, by = 'Index') |> 
   filter(!is.na(Cleaving.proteases)) |> 
   separate_rows(Cleaving.proteases, sep = ';')
+
+# cleaving protease, N-degron
+cleaving_protease_N_degron <- Nterm_degron_topfinder_cleaving_proteases |> 
+  group_by(Cleaving.proteases) |> 
+  count(ELM_N_degron)
+
+write_csv(
+  cleaving_protease_N_degron,
+  file = 'data_source/ELM_degron/cleaving_protease_N_degron.csv'
+)
+
+# N-degron, cleaving protease
+N_degron_cleaving_protease <- Nterm_degron_topfinder_cleaving_proteases |> 
+  group_by(ELM_N_degron) |> 
+  count(Cleaving.proteases)
+
+write_csv(
+  N_degron_cleaving_protease,
+  file = 'data_source/ELM_degron/N_degron_cleaving_protease.csv'
+)
 
 # Wilcoxon rank-sum test
 library(rstatix)
 
-Cleaving.Proteases.List <- Nterm_topfinder_cleaving_proteases |> 
+Cleaving.Proteases.List <- Nterm_degron_topfinder_cleaving_proteases |> 
   group_by(Cleaving.proteases) |> 
   get_summary_stats(half_life, type = 'median') |> 
   filter(n > 1) |> 

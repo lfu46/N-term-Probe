@@ -33,24 +33,536 @@ point_range_Nterm_degron <- HEK_Nterm_ELM_N_degron |>
     fun.data = 'mean_cl_boot', color = color_1, linewidth = 0.2, size = 0.5
   ) +
   stat_pvalue_manual(
-    data = HEK_Nterm_ELM_N_degron_wilcoxon_test, label = 'p.signif', label.size = 6, 
-    tip.length = 0, y.position = c(160, 180)
+    data = HEK_Nterm_ELM_N_degron_wilcoxon_test, label = 'p.adj.signif', label.size = 6, hide.ns = TRUE,
+    tip.length = 0, y.position = c(150, 165, 180)
   ) +
   labs(x = '', y = '') +
   theme(
-    axis.text.x = element_text(color = 'black', size = 9, angle = 30, hjust = 1),
-    axis.text.y = element_text(color = 'black', size = 9)
+    panel.grid.major = element_line(color = "gray", linewidth = 0.2),
+    panel.grid.minor = element_line(color = "gray", linewidth = 0.1),
+    axis.text.x = element_text(color = 'black', size = 8, angle = 30, hjust = 1),
+    axis.text.y = element_text(color = 'black', size = 8)
   )
 
 ggsave(
   filename = 'figures/figure7/point_range_Nterm_degron.eps',
   plot = point_range_Nterm_degron,
   device = cairo_ps,
-  height = 2, width = 2.5, units = 'in',
+  height = 2, width = 2.2, units = 'in',
   fallback_resolution = 1200
 )
 
-### figure 7B, ELM motifs
+### figure 7B, insights from half-life, N-degron, protease, structure, motif and domain
+library(tidyverse)
+
+## combine all features
+# half-life and N-degron
+HEK_Nterm_ELM_N_degron <- read_csv(
+  'data_source/ELM_degron/HEK_Nterm_ELM_N_degron.csv'
+) |> 
+  select(
+    Index, UniProt_Accession, Gene, Entry.Name, 
+    Kd, half_life, category, Nterm_terminus, ELM_N_degron
+  )
+
+# protease
+Nterm_topfinder_result_protease_feature <- read_delim(
+  'data_source/Nterm_topfinder/2025_02_17_Nterm_02172025/2025_02_17_Nterm_02172025_Full_Table.txt',
+  col_names = TRUE,
+  name_repair = 'universal'
+) |> 
+  filter(Protein.found == 'YES') |> 
+  mutate(Index = paste(Accession, P1..Position, sep = '_')) |> 
+  select(
+    Index, 
+    Cleaving.proteases, 
+    Distance.To.signal.peptide,
+    Distance.to.last.transmembrane.domain..shed.,
+    C.terminal.Features..P1..to.End.
+  )
+
+# structure
+Nterm_degradation_alphafold_half_life <- read_csv(
+  'data_source/Nterm_degradation_structuremap/Nterm_degradation_alphafold_half_life.csv'
+) |> 
+  select(Index, structure_group, IDR)
+
+# combine all features
+HEK_Nterm_N_degron_feature_comb <- HEK_Nterm_ELM_N_degron |> 
+  left_join(Nterm_topfinder_result_protease_feature, by = 'Index') |> 
+  left_join(Nterm_degradation_alphafold_half_life, by = 'Index')
+
+write_csv(
+  HEK_Nterm_N_degron_feature_comb,
+  file = 'data_source/ELM_degron/HEK_Nterm_N_degron_feature_comb.csv'
+)
+
+## UBR-box, N-degron example
+# O94826, TOMM70, O94826_389, O94826_414, O94826_523
+O94826_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 608,
+  'TPR_1', 114, 146,
+  'TPR_8', 329, 362,
+  'TPR_8', 401, 433,
+  'TPR_8', 476, 509,
+  'TPR_8', 547, 576
+)
+
+O94826_result <- tibble(
+  cleavage_site = c(414, 523)
+)
+
+# example plot
+O94826_example <- ggplot() +
+  geom_rect(
+    data = O94826_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = O94826_result$cleavage_site, 
+      xend = O94826_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      'TPR_1' = color_1,
+      'TPR_8' = color_2
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      'TPR_1' = 'transparent',
+      'TPR_8' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figure7/O94826_example.eps',
+  height = 0.2, width = 2, units = 'in'
+)
+
+# P21796, VDAC1, P21796_99, P21796_257
+P21796_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 283,
+  'Porin_3', 4, 276
+)
+
+P21796_result <- tibble(
+  cleavage_site = c(99, 257)
+)
+
+# example plot
+P21796_example <- ggplot() +
+  geom_rect(
+    data = P21796_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = P21796_result$cleavage_site, 
+      xend = P21796_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      'Porin_3' = color_3
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      'Porin_3' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figure7/P21796_example.eps',
+  height = 0.2, width = 2, units = 'in'
+)
+
+# P11021, HSPA5, P11021_128
+P11021_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 654,
+  'HSP70', 30, 635
+)
+
+P11021_result <- tibble(
+  cleavage_site = c(128)
+)
+
+# example plot
+P11021_example <- ggplot() +
+  geom_rect(
+    data = P11021_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = P11021_result$cleavage_site, 
+      xend = P11021_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      'HSP70' = color_4
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      'HSP70' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figure7/P11021_example.eps',
+  height = 0.2, width = 2, units = 'in'
+)
+
+# P38646, HSPA9, P38646_273
+P38646_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 679,
+  'HSP70', 55, 652
+)
+
+P38646_result <- tibble(
+  cleavage_site = c(273)
+)
+
+# example plot
+P38646_example <- ggplot() +
+  geom_rect(
+    data = P38646_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = P38646_result$cleavage_site, 
+      xend = P38646_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      'HSP70' = color_5
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      'HSP70' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figure7/P38646_example.eps',
+  height = 0.2, width = 2, units = 'in'
+)
+
+## ZER1, N-degron example
+# Q14103, HNRNPD, Q14103_36, Q14103_42, Q14103_103
+Q14103_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 355,
+  'RRM_1', 100, 167,
+  'RRM_1', 184, 243,
+  'CBFNT', 1, 78
+)
+
+Q14103_result <- tibble(
+  cleavage_site = c(36, 103)
+)
+
+# example plot
+Q14103_example <- ggplot() +
+  geom_rect(
+    data = Q14103_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = Q14103_result$cleavage_site, 
+      xend = Q14103_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      'RRM_1' = color_1,
+      'CBFNT' = color_2
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      'RRM_1' = 'transparent',
+      'CBFNT' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figure7/Q14103_example.eps',
+  height = 0.2, width = 2, units = 'in'
+)
+
+# P22626, HNRNPA2B1, P22626_214
+P22626_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 353,
+  'RRM_1', 23, 88,
+  'RRM_1', 114, 172,
+  'HnRNPA1_LC', 296, 334
+)
+
+P22626_result <- tibble(
+  cleavage_site = c(214)
+)
+
+# example plot
+P22626_example <- ggplot() +
+  geom_rect(
+    data = P22626_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = P22626_result$cleavage_site, 
+      xend = P22626_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      'RRM_1' = color_3,
+      'HnRNPA1_LC' = color_4
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      'RRM_1' = 'transparent',
+      'HnRNPA1_LC' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figure7/P22626_example.eps',
+  height = 0.2, width = 2, units = 'in'
+)
+
+## NCPR for UBR-box and ZER1 N-recognin
+library(tidyverse)
+library(Biostrings)
+library(reticulate)
+
+## get amino acid sequences for UBR-box and ZER1
+# import human fasta downloaded from UniProt (https://www.uniprot.org/)
+human_fasta <- readAAStringSet(
+  'data_source/fasta_file/uniprotkb_reviewed_true_AND_model_organ_2025_02_15.fasta'
+)
+
+# build tibble using human fasta
+human_fasta_tibble <- tibble(
+  Name = names(human_fasta),
+  Sequence = as.character(human_fasta),
+  Length = width(human_fasta)
+) |> 
+  mutate(
+    Name = sub(' .*', '', Name),
+    Full_Protein_Length = as.numeric(Length)
+  ) |> 
+  separate(Name, into = c('sp', 'UniProt_Accession', 'name'), sep = '\\|') |> 
+  select(UniProt_Accession, Sequence, Full_Protein_Length)
+
+# binding region sequence
+binding_region_sequence <- human_fasta_tibble |> 
+  filter(
+    UniProt_Accession %in% c(
+      'Q8IWV7', # UBR1
+      'Q7Z7L7' # ZER1
+    )
+  ) |> 
+  mutate(
+    start = c(401, 99),
+    end = c(755, 166),
+    binding_region = substr(Sequence, start = start, stop = end)
+  )
+
+# use specific vitual env
+use_condaenv(
+  condaenv = '/opt/anaconda3/envs/Nterm_probe',
+  required = TRUE
+)
+
+# excute python code for NCPR of binding region sequence
+source_python('data_analysis/N_recognin_NCPR.py')
+
+### figure 7C, half-life comparison of cleaving proteases
+# Wilcoxon rank-sum test
+library(rstatix)
+
+Cleaving.Proteases.List <- Nterm_degron_topfinder_cleaving_proteases |> 
+  group_by(Cleaving.proteases) |> 
+  get_summary_stats(half_life, type = 'median') |> 
+  filter(n > 1) |> 
+  pull(Cleaving.proteases)
+
+Nterm_topfiner_cleaving_proteases_wilcoxon_test <- Nterm_degron_topfinder_cleaving_proteases |> 
+  filter(Cleaving.proteases %in% Cleaving.Proteases.List) |> 
+  wilcox_test(half_life ~ Cleaving.proteases) |> 
+  add_significance('p') |> 
+  filter(p < 0.05)
+
+Nterm_cleaving_protease_list <- c(
+  'GRAB',
+  'CATL1',
+  'CATS',
+  'MEP1A',
+  'MEP1B',
+  'CATB',
+  'GRAM',
+  'MMP11'
+)
+
+# boxplot
+library(ggpubr)
+
+point_range_plot_Nterm_cleaving_proteases <- Nterm_degron_topfinder_cleaving_proteases |> 
+  filter(Cleaving.proteases %in% Nterm_cleaving_protease_list) |> 
+  ggplot() +
+  geom_point(
+    aes(
+      x = Cleaving.proteases, y = half_life
+    ),
+    position = position_jitter(width = 0.3),
+    size = 0.5,
+    color = 'black',
+    alpha = 0.3
+  ) +
+  stat_summary(
+    aes(
+      x = Cleaving.proteases, 
+      y = half_life
+    ),
+    fun.data = 'mean_cl_boot', color = color_3, linewidth = 0.2, size = 0.5
+  ) +
+  labs(x = '', y = '') +
+  stat_pvalue_manual(
+    data = Nterm_topfiner_cleaving_proteases_wilcoxon_test,
+    label = 'p.signif',
+    y.position = c(160, 180, 170, 150),
+    tip.length = 0,
+    label.size = 6
+  ) +
+  theme(
+    panel.grid.major = element_line(color = "gray", linewidth = 0.2),
+    panel.grid.minor = element_line(color = "gray", linewidth = 0.1),
+    axis.text.x = element_text(color = 'black', size = 8, angle = 30, hjust = 1),
+    axis.text.y = element_text(color = 'black', size = 8)
+  )
+
+ggsave(
+  filename = 'figures/figure7/point_range_plot_Nterm_cleaving_proteases.eps',
+  plot = point_range_plot_Nterm_cleaving_proteases,
+  device = cairo_ps,
+  height = 2, width = 2.2, units = 'in',
+  fallback_resolution = 1200
+)
+
+### figure 7D, ELM motifs
 # import GSEA result from ELM motif analysis
 Nterm_ELM_motif_GSEA_des_Kd <- read_csv(
   'data_source/ELM_degron/Nterm_ELM_motif_GSEA_des_Kd.csv'
@@ -238,247 +750,4 @@ ggsave(
   filename = 'figures/figure7/protein_example_with_motif.eps',
   plot = protein_example_with_motif,
   height = 1, width = 4, units = 'in'
-)
-
-### figure 7C, degron-related ELM motif
-# Wilcoxon rank-sum test
-library(rstatix)
-
-HEK_Nterm_sequence_ELM_motif_degron_wilcoxon_test <- HEK_Nterm_sequence_ELM_motif |> 
-  filter(str_detect(matched_motifs, 'DEG')) |> 
-  wilcox_test(half_life ~ matched_motifs) |> 
-  add_significance('p') |> 
-  filter(p < 0.05)
-
-# point range plot
-library(ggpubr)
-
-point_range_Nterm_ELM_motifs_degron <- HEK_Nterm_sequence_ELM_motif |> 
-  filter(
-    matched_motifs %in% c(
-      'DEG_APCC_KENBOX_2',
-      'DEG_Cend_FEM1B_2',
-      'DEG_Cend_KLHDC2_1',
-      'DEG_APCC_DBOX_1',
-      'DEG_COP1_1',
-      'DEG_Kelch_Keap1_1',
-      'DEG_Kelch_KLHL12_1',
-      'DEG_APCC_DBOX_1',
-      'DEG_ODPH_VHL_1',
-      'DEG_CRBN_cyclicCter_1',
-      'DEG_SCF_FBW7_1'
-    )
-  ) |> 
-  ggplot() +
-  stat_summary(
-    aes(
-      x = matched_motifs,
-      y = half_life
-    ),
-    fun.data = 'mean_cl_boot', 
-    color = color_2, 
-    linewidth = 0.2, 
-    size = 0.5
-  ) +
-  stat_pvalue_manual(
-    data = HEK_Nterm_sequence_ELM_motif_degron_wilcoxon_test |> slice(3, 14, 16), 
-    label = 'p.signif', label.size = 6, 
-    tip.length = 0, y.position = c(170, 190, 160), coord.flip = TRUE
-  ) +
-  labs(x = '', y = '') +
-  coord_flip(ylim = c(0, 200)) +
-  theme(
-    axis.text.x = element_text(color = 'black', size = 8, family = 'arial'),
-    axis.text.y = element_text(color = 'black', size = 8, family = 'arial')
-  )
-
-ggsave(
-  filename = 'figures/figure7/point_range_Nterm_ELM_motifs_degron.eps',
-  plot = point_range_Nterm_ELM_motifs_degron,
-  height = 3, width = 2.7, units = 'in'
-)
-
-### figure 7D, docking-related ELM motif
-# Wilcoxon rank-sum test
-library(rstatix)
-
-HEK_Nterm_sequence_ELM_motif_docking_wilcoxon_test <- HEK_Nterm_sequence_ELM_motif |> 
-  filter(str_detect(matched_motifs, 'DOC')) |> 
-  wilcox_test(half_life ~ matched_motifs) |> 
-  add_significance('p') |> 
-  filter(p < 0.05)
-
-# point range plot
-library(ggpubr)
-
-point_range_Nterm_ELM_motifs_docking <- HEK_Nterm_sequence_ELM_motif |> 
-  filter(
-    matched_motifs %in% c(
-      'DOC_MIT_MIM_1',
-      'DOC_MAPK_gen_1',
-      'DOC_PP2B_LxvP_1',
-      'DOC_USP7_MATH_1',
-      'DOC_USP7_MATH_2',
-      'DOC_PP1_RVXF_1',
-      'DOC_CKS1_1',
-      'DOC_CYCLIN_RxL_1',
-      'DOC_PP4_MxPP_1',
-      'DOC_RSK_DDVF_1'
-    )
-  ) |> 
-  ggplot() +
-  stat_summary(
-    aes(
-      x = matched_motifs,
-      y = half_life
-    ),
-    fun.data = 'mean_cl_boot', 
-    color = color_3, 
-    linewidth = 0.2, 
-    size = 0.5
-  ) +
-  stat_pvalue_manual(
-    data = HEK_Nterm_sequence_ELM_motif_docking_wilcoxon_test |> slice(2, 4, 6), 
-    label = 'p.signif', label.size = 6, 
-    tip.length = 0, y.position = c(100, 110, 120), coord.flip = TRUE
-  ) +
-  labs(x = '', y = '') +
-  coord_flip(ylim = c(0, 130)) +
-  theme(
-    axis.text.x = element_text(color = 'black', size = 8, family = 'arial'),
-    axis.text.y = element_text(color = 'black', size = 8, family = 'arial')
-  )
-
-ggsave(
-  filename = 'figures/figure7/point_range_Nterm_ELM_motifs_docking.eps',
-  plot = point_range_Nterm_ELM_motifs_docking,
-  height = 3, width = 2.5, units = 'in'
-)
-
-### figure 7E, targeting-related ELM motif
-# Wilcoxon rank-sum test
-library(rstatix)
-
-HEK_Nterm_sequence_ELM_motif_targeting_wilcoxon_test <- HEK_Nterm_sequence_ELM_motif |> 
-  filter(str_detect(matched_motifs, 'TRG')) |> 
-  wilcox_test(half_life ~ matched_motifs) |> 
-  add_significance('p') |> 
-  filter(p < 0.05)
-
-# point range plot
-library(ggpubr)
-
-point_range_Nterm_ELM_motifs_targeting <- HEK_Nterm_sequence_ELM_motif |> 
-  filter(
-    matched_motifs %in% c(
-      'TRG_ER_diArg_1',
-      'TRG_NLS_Bipartite_1',
-      'TRG_PTS1',
-      'TRG_ENDOCYTIC_2',
-      'TRG_ER_diLys_1',
-      'TRG_ER_FFAT_1',
-      'TRG_ER_KDEL_1',
-      'TRG_NES_CRM1_1',
-      'TRG_NLS_MonoCore_2',
-      'TRG_NLS_MonoExtC_3',
-      'TRG_NLS_MonoExtN_4'
-    )
-  ) |>
-  ggplot() +
-  stat_summary(
-    aes(
-      x = matched_motifs,
-      y = half_life
-    ),
-    fun.data = 'mean_cl_boot', 
-    color = color_4, 
-    linewidth = 0.2, 
-    size = 0.5
-  ) +
-  stat_pvalue_manual(
-    data = HEK_Nterm_sequence_ELM_motif_targeting_wilcoxon_test |> slice(12, 19, 20, 21, 22), 
-    label = 'p.signif', label.size = 6, 
-    tip.length = 0, y.position = c(160, 120, 130, 140, 150), coord.flip = TRUE
-  ) +
-  labs(x = '', y = '') +
-  coord_flip(ylim = c(0, 170)) +
-  theme(
-    axis.text.x = element_text(color = 'black', size = 8, family = 'arial'),
-    axis.text.y = element_text(color = 'black', size = 8, family = 'arial')
-  )
-
-ggsave(
-  filename = 'figures/figure7/point_range_Nterm_ELM_motifs_targeting.eps',
-  plot = point_range_Nterm_ELM_motifs_targeting,
-  height = 3.2, width = 2.6, units = 'in'
-)
-
-### figure 7F, binding-related ELM motif
-# Wilcoxon rank-sum test
-library(rstatix)
-
-HEK_Nterm_sequence_ELM_motif_binding_wilcoxon_test <- HEK_Nterm_sequence_ELM_motif |> 
-  filter(
-    matched_motifs %in% c(
-      'LIG_APCC_Cbox_2',
-      'LIG_AP_GAE_1',
-      'LIG_G3BP_FGDF_1',
-      'LIG_PTB_Phospho_1',
-      'LIG_NBox_RRM_1',
-      'LIG_RRM_PRI_1',
-      'LIG_14-3-3_CterR_2',
-      'LIG_eIF4E_2',
-      'LIG_UBA3_1',
-      'LIG_CNOT1_NIM_1'
-    )
-  ) |> 
-  wilcox_test(half_life ~ matched_motifs) |> 
-  add_significance('p') |> 
-  filter(p < 0.05)
-
-# point range plot
-library(ggpubr)
-
-point_range_Nterm_ELM_motifs_binding <- HEK_Nterm_sequence_ELM_motif |> 
-  filter(
-    matched_motifs %in% c(
-      'LIG_APCC_Cbox_2',
-      'LIG_AP_GAE_1',
-      'LIG_G3BP_FGDF_1',
-      'LIG_PTB_Phospho_1',
-      'LIG_NBox_RRM_1',
-      'LIG_RRM_PRI_1',
-      'LIG_14-3-3_CterR_2',
-      'LIG_eIF4E_2',
-      'LIG_UBA3_1',
-      'LIG_CNOT1_NIM_1'
-    )
-  ) |>
-  ggplot() +
-  stat_summary(
-    aes(
-      x = matched_motifs,
-      y = half_life
-    ),
-    fun.data = 'mean_cl_boot', 
-    color = color_1, 
-    linewidth = 0.2, 
-    size = 0.5
-  ) +
-  stat_pvalue_manual(
-    data = HEK_Nterm_sequence_ELM_motif_binding_wilcoxon_test |> slice(3, 4, 7), 
-    label = 'p.signif', label.size = 6, 
-    tip.length = 0, y.position = c(170, 180, 190), coord.flip = TRUE
-  ) +
-  labs(x = '', y = '') +
-  coord_flip(ylim = c(0, 200)) +
-  theme(
-    axis.text.x = element_text(color = 'black', size = 8, family = 'arial'),
-    axis.text.y = element_text(color = 'black', size = 8, family = 'arial')
-  )
-
-ggsave(
-  filename = 'figures/figure7/point_range_Nterm_ELM_motifs_binding.eps',
-  plot = point_range_Nterm_ELM_motifs_binding,
-  height = 3, width = 2.6, units = 'in'
 )

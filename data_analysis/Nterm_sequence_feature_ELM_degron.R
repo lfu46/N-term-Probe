@@ -9,7 +9,7 @@ HEK_Nterm_ELM_N_degron <- HEK_Nterm_Kd_half_life_sequence |>
       Nterm_terminus %in% c('R', 'K') ~ 'RK',
       Nterm_terminus %in% c('E', 'D') ~ 'ED',
       Nterm_terminus %in% c('N', 'Q') ~ 'NQ',
-      Nterm_terminus %in% c('C') ~ 'C',
+      Nterm_terminus %in% c('G', 'A', 'S', 'T', 'C') ~ 'GASTC',
       Nterm_terminus %in% c('M') ~ 'M'
     )  
   ) |> 
@@ -17,13 +17,18 @@ HEK_Nterm_ELM_N_degron <- HEK_Nterm_Kd_half_life_sequence |>
     ELM_N_degron = ifelse(is.na(ELM_N_degron), 'Others', ELM_N_degron)
   )
 
+write_csv(
+  HEK_Nterm_ELM_N_degron,
+  file = 'data_source/ELM_degron/HEK_Nterm_ELM_N_degron.csv'
+)
+
 # ELM N-degron half life median
 library(rstatix)
 
 ELM_N_degron_half_life_median <- HEK_Nterm_ELM_N_degron |> 
   group_by(ELM_N_degron) |> 
-  get_summary_stats(half_life, type = 'median') |> 
-  arrange(median)
+  get_summary_stats(half_life, type = 'mean') |> 
+  arrange(mean)
 
 write_csv(ELM_N_degron_half_life_median, file = 'data_source/ELM_degron/ELM_N_degron_half_life_median.csv')
 

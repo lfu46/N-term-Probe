@@ -172,6 +172,11 @@ HEK_Nterm_Kd_half_life_sequence <- read_csv(
   'data_source/Nterm_sequence/HEK_Nterm_Kd_half_life_sequence.csv'
 )
 
+# Nterm ELM N-degron
+HEK_Nterm_ELM_N_degron <- read_csv(
+  'data_source/ELM_degron/HEK_Nterm_ELM_N_degron.csv'
+)
+
 # half-life comparison between Nterm and Whole Proteome
 HEK_Nterm_WP_delta_half_life <- read_csv(
   'data_source/Nterm_WP_comparison/HEK_Nterm_WP_delta_half_life.csv'
