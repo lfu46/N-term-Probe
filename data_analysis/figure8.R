@@ -198,13 +198,13 @@ Nterm_WP_overlap_GO <- read_csv(
 )
 
 ## ribosome
-# GO:0022627, cytosolic small ribosomal subunit
+# GO:0015935, small ribosomal subunit
 # GO:0022625, cytosolic large ribosomal subunit
 # GO:0000313, organellar ribosome
 ribosome_related_protein_list <- Nterm_WP_overlap_GO |> 
   filter(
     Description %in% c(
-      'cytosolic small ribosomal subunit',
+      'small ribosomal subunit',
       'cytosolic large ribosomal subunit',
       'organellar ribosome'
     )
@@ -216,11 +216,13 @@ ribosome_related_protein_list <- Nterm_WP_overlap_GO |>
 
 ## proteasome
 # GO:0000502, proteasome complex
+# GO:0022624, proteasome accessory complex
 # GO:0005838, proteasome regulatory particle
 proteasome_related_protein_list <- Nterm_WP_overlap_GO |> 
   filter(
     Description %in% c(
       'proteasome complex',
+      'proteasome accessory complex', 
       'proteasome regulatory particle'
     )
   ) |> 
@@ -234,13 +236,15 @@ proteasome_related_protein_list <- Nterm_WP_overlap_GO |>
 # GO:0071011, precatalytic spliceosome
 # GO:0071006, U2-type catalytic step 1 spliceosome
 # GO:0071007, U2-type catalytic step 2 spliceosome
+# GO:0071010, prespliceosome
 spliceosome_related_protein_list <- Nterm_WP_overlap_GO |> 
   filter(
     Description %in% c(
       'spliceosomal snRNP complex',
       'precatalytic spliceosome',
       'U2-type catalytic step 1 spliceosome',
-      'U2-type catalytic step 2 spliceosome'
+      'U2-type catalytic step 2 spliceosome',
+      'prespliceosome'
     )
   ) |> 
   dplyr::select(geneID) |> 
@@ -308,6 +312,8 @@ point_range_plot_ribosome_proteasome_spliceosome_comb <- ribosome_proteasome_spl
     )
   ) +
   theme(
+    panel.grid.major = element_line(color = "gray", linewidth = 0.2),
+    panel.grid.minor = element_line(color = "gray", linewidth = 0.1),
     axis.text.x = element_text(color = 'black', size = 8, family = 'arial', angle = 30, hjust = 1),
     axis.text.y = element_text(color = 'black', size = 8, family = 'arial')
   )
@@ -316,7 +322,7 @@ ggsave(
   filename = 'figures/figure8/point_range_plot_ribosome_proteasome_spliceosome_comb.eps',
   device = cairo_ps,
   plot = point_range_plot_ribosome_proteasome_spliceosome_comb,
-  height = 2, width = 2, units = 'in',
+  height = 2, width = 1.8, units = 'in',
   fallback_resolution = 1200
 )
 
@@ -324,7 +330,7 @@ ggsave(
 
 ### figure 8E, 
 
-### figure 8F, top20 and bottom20 structure analysis
+### figure 8G, top20 and bottom20 structure analysis
 ## secondary structure
 top20_secondary_structure <- Nterm_WP_delta_half_life_alphafold_N_terminus |> 
   as_tibble() |> 

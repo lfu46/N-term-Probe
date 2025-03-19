@@ -1,6 +1,7 @@
 # import packages
 import pandas as pd
 import numpy as np
+import tqdm as tqdm
 
 # import strucutremap functions as instructed by tutorial 
 # (https://github.com/MannLabs/structuremap/blob/main/nbs/tutorial.ipynb)
@@ -151,77 +152,18 @@ Nterm_WP_delta_half_life_alphafold_N_terminus = HEK_Nterm_WP_delta_half_life_alp
 Nterm_WP_delta_half_life_alphafold_N_terminus = Nterm_WP_delta_half_life_alphafold_N_terminus.fillna(0)
 
 # N-terminus enrichment analysis
-# BEND
-enrichment_top20_bottom20_BNED = perform_enrichment_analysis(
-  df = Nterm_WP_delta_half_life_alphafold_N_terminus,
-  ptm_types = ["top20", "bottom20"],
-  rois = ["BEND"],
-  ptm_site_dict = Nterm_site_dict,
-  quality_cutoffs = [0]
-)
+rois_list = ["BEND", "HELX", "STRN", "TURN", "IDR", "high_acc_5", "low_acc_5", "flexible_pattern"]
 
-# HELX
-enrichment_top20_bottom20_HELX = perform_enrichment_analysis(
-  df = Nterm_WP_delta_half_life_alphafold_N_terminus,
-  ptm_types = ["top20", "bottom20"],
-  rois = ["HELX"],
-  ptm_site_dict = Nterm_site_dict,
-  quality_cutoffs = [0]
-)
+enrichment_results = {}
 
-# STRN
-enrichment_top20_bottom20_STRN = perform_enrichment_analysis(
-  df = Nterm_WP_delta_half_life_alphafold_N_terminus,
-  ptm_types = ["top20", "bottom20"],
-  rois = ["STRN"],
-  ptm_site_dict = Nterm_site_dict,
-  quality_cutoffs = [0]
-)
-
-# TURN
-enrichment_top20_bottom20_TURN = perform_enrichment_analysis(
-  df = Nterm_WP_delta_half_life_alphafold_N_terminus,
-  ptm_types = ["top20", "bottom20"],
-  rois = ["TURN"],
-  ptm_site_dict = Nterm_site_dict,
-  quality_cutoffs = [0]
-)
-
-# IDR
-enrichment_top20_bottom20_IDR = perform_enrichment_analysis(
-  df = Nterm_WP_delta_half_life_alphafold_N_terminus,
-  ptm_types = ["top20", "bottom20"],
-  rois = ["IDR"],
-  ptm_site_dict = Nterm_site_dict,
-  quality_cutoffs = [0]
-)
-
-# high_acc_5
-enrichment_top20_bottom20_high_acc_5 = perform_enrichment_analysis(
-  df = Nterm_WP_delta_half_life_alphafold_N_terminus,
-  ptm_types = ["top20", "bottom20"],
-  rois = ["high_acc_5"],
-  ptm_site_dict = Nterm_site_dict,
-  quality_cutoffs = [0]
-)
-
-# low_acc_5
-enrichment_top20_bottom20_low_acc_5 = perform_enrichment_analysis(
-  df = Nterm_WP_delta_half_life_alphafold_N_terminus,
-  ptm_types = ["top20", "bottom20"],
-  rois = ["low_acc_5"],
-  ptm_site_dict = Nterm_site_dict,
-  quality_cutoffs = [0]
-)
-
-# flexible_pattern
-enrichment_top20_bottom20_flexible_pattern = perform_enrichment_analysis(
-  df = Nterm_WP_delta_half_life_alphafold_N_terminus,
-  ptm_types = ["top20", "bottom20"],
-  rois = ["flexible_pattern"],
-  ptm_site_dict = Nterm_site_dict,
-  quality_cutoffs = [0]
-)
+for roi in tqdm(rois_list):
+    enrichment_results[f"enrichment_top20_bottom20_{roi}"] = perform_enrichment_analysis(
+        df=Nterm_WP_delta_half_life_alphafold_N_terminus,
+        ptm_types=["top20", "bottom20"],
+        rois=[roi],
+        ptm_site_dict=Nterm_site_dict,
+        quality_cutoffs=[0]
+    )
 
 # N-terminus 3D proximity
 enrichment_top20_bottom20_proximity = get_proximity_pvals(
