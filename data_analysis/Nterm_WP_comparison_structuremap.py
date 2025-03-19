@@ -31,7 +31,7 @@ overlap_protein_list = HEK_Nterm_WP_delta_half_life["UniProt_Accession"].unique(
 
 # format AlphaFold data input
 HEK_Nterm_WP_delta_half_life_alphafold_annotation = format_alphafold_data(
-  directory = "data_source/Nterm_structuremap/Nterm_degradation_cif",
+  directory = "data_source/Nterm_degradation_structuremap/Nterm_degradation_cif",
   protein_ids = overlap_protein_list
 )
 
@@ -40,7 +40,7 @@ HEK_Nterm_WP_delta_half_life_full_sphere_exposure = annotate_accessibility(
     df = HEK_Nterm_WP_delta_half_life_alphafold_annotation,
     max_dist = 24,
     max_angle = 180,
-    error_dir = "data_source/Nterm_structuremap/Nterm_degradation_pae"
+    error_dir = "data_source/Nterm_degradation_structuremap/Nterm_degradation_pae"
 )
 
 HEK_Nterm_WP_delta_half_life_alphafold_accessibility = HEK_Nterm_WP_delta_half_life_alphafold_annotation.merge(
@@ -53,7 +53,7 @@ HEK_Nterm_WP_delta_half_life_part_sphere_exposure = annotate_accessibility(
     df = HEK_Nterm_WP_delta_half_life_alphafold_annotation,
     max_dist = 12,
     max_angle = 70,
-    error_dir = "data_source/Nterm_structuremap/Nterm_degradation_pae"
+    error_dir = "data_source/Nterm_degradation_structuremap/Nterm_degradation_pae"
 )
 
 HEK_Nterm_WP_delta_half_life_alphafold_accessibility = HEK_Nterm_WP_delta_half_life_alphafold_accessibility.merge(
@@ -152,15 +152,10 @@ Nterm_WP_delta_half_life_alphafold_N_terminus = HEK_Nterm_WP_delta_half_life_alp
 Nterm_WP_delta_half_life_alphafold_N_terminus = Nterm_WP_delta_half_life_alphafold_N_terminus.fillna(0)
 
 # N-terminus enrichment analysis
-rois_list = ["BEND", "HELX", "STRN", "TURN", "IDR", "high_acc_5", "low_acc_5", "flexible_pattern"]
-
-enrichment_results = {}
-
-for roi in tqdm(rois_list):
-    enrichment_results[f"enrichment_top20_bottom20_{roi}"] = perform_enrichment_analysis(
+enrichment_structure = perform_enrichment_analysis(
         df=Nterm_WP_delta_half_life_alphafold_N_terminus,
         ptm_types=["top20", "bottom20"],
-        rois=[roi],
+        rois=["BEND", "HELX", "STRN", "TURN", "IDR", "high_acc_5", "low_acc_5", "flexible_pattern"],
         ptm_site_dict=Nterm_site_dict,
         quality_cutoffs=[0]
     )
@@ -170,7 +165,7 @@ enrichment_top20_bottom20_proximity = get_proximity_pvals(
   df = Nterm_WP_delta_half_life_alphafold_N_terminus,
   ptm_types = ["top20", "bottom20"],
   ptm_site_dict = Nterm_site_dict,
-  error_dir = "data_source/Nterm_structuremap/Nterm_degradation_pae", 
+  error_dir = "data_source/Nterm_degradation_structuremap/Nterm_degradation_pae", 
   per_site_metric = 'mean',
   error_operation = 'plus',
   n_random = 10000,

@@ -331,9 +331,13 @@ ggsave(
 ### figure 8E, 
 
 ### figure 8G, top20 and bottom20 structure analysis
+## import result from StructureMap
+top20_bottom20_protein_structure <- read_csv(
+  'data_source/Nterm_WP_comparison/top20_bottom20_protein_structure.csv'
+)
+
 ## secondary structure
-top20_secondary_structure <- Nterm_WP_delta_half_life_alphafold_N_terminus |> 
-  as_tibble() |> 
+top20_secondary_structure <- top20_bottom20_protein_structure |> 
   filter(top20 == 1) |> 
   count(structure_group) |> 
   mutate(
@@ -341,8 +345,7 @@ top20_secondary_structure <- Nterm_WP_delta_half_life_alphafold_N_terminus |>
     category = 'top20'
   )
 
-bottom20_secondary_structure <- Nterm_WP_delta_half_life_alphafold_N_terminus |> 
-  as_tibble() |> 
+bottom20_secondary_structure <- top20_bottom20_protein_structure |> 
   filter(bottom20 == 1) |> 
   count(structure_group) |> 
   mutate(
@@ -386,16 +389,19 @@ barplot_top20_bottom20_secondary_structure_comb <- top20_bottom20_secondary_stru
       'unstructured' = 'gray70'
     )
   ) +
+  ylim(0, 4/3) +
+  xlim('1', '2', 'top20', 'bottom20') +
+  coord_polar(theta = "y") +
   theme(
-    axis.text.x = element_text(size = 8, color = 'black', angle = 30, hjust = 1),
-    axis.text.y = element_text(size = 8, color = 'black'),
-    legend.text = element_text(size = 8, color = 'black')
+    axis.text.x = element_text(size = 8, color = 'black', family = 'arial'),
+    axis.text.y = element_text(size = 8, color = 'black', family = 'arial'),
+    legend.text = element_text(size = 8, color = 'black', family = 'arial')
   )
 
 ggsave(
   filename = 'figures/figure8/barplot_top20_bottom20_secondary_structure_comb.eps',
   plot = barplot_top20_bottom20_secondary_structure_comb,
-  height = 2, width = 2.5, units = 'in'
+  height = 2, width = 5, units = 'in'
 )
 
 ## IDR
@@ -465,3 +471,101 @@ ggsave(
   height = 2, width = 2, units = 'in'
 )
 
+### figure 8H, Nucleolin example
+# P19338, NCL, Nucleolin
+P19338_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 710,
+  'RRM_1', 309, 377,
+  'RRM_1', 398, 459,
+  'RRM_1', 488, 554,
+  'RRM_1', 574, 640
+)
+
+P19338_result <- tibble(
+  cleavage_site = c(
+    308, 311, 325, 332, 363, 
+    406, 411, 414, 430, 461,
+    491, 494, 526, 530, 576,
+    580
+  )
+)
+
+# example plot
+P19338_example <- ggplot() +
+  geom_rect(
+    data = P19338_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = P19338_result$cleavage_site, 
+      xend = P19338_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      'RRM_1' = color_1
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      'RRM_1' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figure8/P19338_example.eps',
+  height = 0.2, width = 2, units = 'in'
+)
+
+# heatmap for different protein N-termini
+library(ComplexHeatmap)
+library(circlize)
+
+P19338_N_termini <- str_c(
+  'P19338', 
+  c(
+    308, 311, 325, 332, 363, 
+    406, 411, 414, 430, 461,
+    491, 494, 526, 530, 576,
+    580
+  ),
+  sep = "_"
+)
+
+df <- HEK_Nterm_WP_delta_half_life |> 
+  filter(
+    Index %in% P19338_N_termini
+  ) |> 
+  select(Index, half_life.Nt)
+
+mat <- data.matrix(df |> select(half_life.Nt))
+rownames(mat) <- df$Index
+
+mat_color = colorRamp2(
+  breaks = c(5, 30, 55),
+  colors = c('blue', 'yellow', 'red')
+)
+
+Heatmap(
+  matrix = mat,
+  col = mat_color,
+  cluster_rows = FALSE
+)

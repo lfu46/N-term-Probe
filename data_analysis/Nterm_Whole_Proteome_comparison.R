@@ -187,6 +187,23 @@ use_condaenv(
 # execute the python script for Nterm structure
 source_python("data_analysis/Nterm_WP_comparison_structuremap.py")
 
+library(tidyverse)
+# output the result for N-terminus structure
+top20_bottom20_protein_structure <- Nterm_WP_delta_half_life_alphafold_N_terminus |> 
+  as_tibble() |> 
+  filter(top20 == 1 | bottom20 == 1)
+
+write_csv(
+  top20_bottom20_protein_structure,
+  file = 'data_source/Nterm_WP_comparison/top20_bottom20_protein_structure.csv'
+)
+
+# output the result for N-terminus enrichment analysis
+write_csv(
+  enrichment_structure,
+  file = 'data_source/Nterm_WP_comparison/enrichment_structure.csv'
+)
+
 # output the result for N-terminus 3D clustering
 write_csv(
   enrichment_top20_bottom20_proximity,
