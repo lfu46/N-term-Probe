@@ -253,6 +253,16 @@ spliceosome_related_protein_list <- Nterm_WP_overlap_GO |>
   pull()
 
 # combine protein from different organelle
+Nterm_linear_fit_protein_list <- HEK_Nterm_curve_fitting_combined |> 
+  filter(model == 'linear fitting') |> 
+  distinct(Index) |> 
+  pull()
+
+WP_linear_fit_protein_list <- HEK_WP_curve_fitting_combined |> 
+  filter(model == 'linear fitting') |> 
+  distinct(UniProt_Accession) |> 
+  pull()
+
 ribosome_proteasome_spliceosome_comb <- bind_rows(
   HEK_Nterm_WP_delta_half_life |> 
     filter(UniProt_Accession %in% ribosome_related_protein_list) |> 
@@ -265,6 +275,23 @@ ribosome_proteasome_spliceosome_comb <- bind_rows(
   HEK_Nterm_WP_delta_half_life |> 
     filter(UniProt_Accession %in% spliceosome_related_protein_list) |> 
     mutate(GO_category = 'spliceosome')
+) |> 
+  mutate(
+    Nterm_curve_fitting = ifelse(
+      Index %in% Nterm_linear_fit_protein_list,
+      'linear fitting',
+      'nonlinear fitting'
+    ),
+    WP_curve_fitting = ifelse(
+      UniProt_Accession %in% WP_linear_fit_protein_list,
+      'linear fitting',
+      'nonlinear fitting'
+    )
+  )
+
+write_csv(
+  ribosome_proteasome_spliceosome_comb,
+  file = 'data_source/Nterm_WP_comparison/ribosome_proteasome_spliceosome_comb.csv'
 )
 
 # Wilcoxon rank-sum test
@@ -326,11 +353,14 @@ ggsave(
   fallback_resolution = 1200
 )
 
-### figure 8D, spliceosome example
+### figure 8D, ribosome example
+# P63244, RACK1, 188, 226, 229
 
-### figure 8E, 
 
-### figure 8G, top20 and bottom20 structure analysis
+# P62899, RPL31
+
+
+### figure 8E, top20 and bottom20 structure analysis
 ## import result from StructureMap
 top20_bottom20_protein_structure <- read_csv(
   'data_source/Nterm_WP_comparison/top20_bottom20_protein_structure.csv'
@@ -471,7 +501,7 @@ ggsave(
   height = 2, width = 2, units = 'in'
 )
 
-### figure 8H, Nucleolin example
+### figure 8F, Nucleolin example
 # P19338, NCL, Nucleolin
 P19338_database_info <- tribble(
   ~ name, ~ start, ~ end,
