@@ -9,7 +9,7 @@ HEK_Nt_1_psm <- read_tsv(
   col_names = TRUE,
   name_repair = "universal"
 ) |> 
-  filter(Is.Unique == TRUE) |> 
+  filter(Is.Unique == TRUE) |>
   select(Peptide, Modified.Peptide, Observed.M.Z, Hyperscore, 
          Protein.Start, Protein.End, Is.Unique,
          Assigned.Modifications, UniProt_Accession = Protein.ID, Gene, Entry.Name,

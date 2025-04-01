@@ -479,6 +479,8 @@ ggsave(
 )
 
 ### figure 4D, half life distribution
+library(rstatix)
+
 # Nterm histogram
 Nterm_half_life_median <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
   get_summary_stats(half_life, type = 'median') |> 
@@ -486,11 +488,11 @@ Nterm_half_life_median <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |>
 
 histogram_Nterm_half_life <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
   ggplot() +
-  geom_histogram(aes(x = half_life), color = 'black', fill = color_1, bins = 20) +
+  geom_histogram(aes(x = half_life), color = 'black', fill = color_1, bins = 30) +
   geom_vline(xintercept = Nterm_half_life_median, linetype = 'dashed', color = 'gray') +
   annotate(
     'text', label = paste(round(Nterm_half_life_median, digits = 1), ' hr'),
-    x = 50, y = 2200, size = 3, color = 'black', 
+    x = 60, y = 3900, size = 3, color = 'black', 
   ) +
   labs(x = 'Half-life (hr)', y = 'Count') +
   theme(
@@ -508,16 +510,22 @@ ggsave(
 library(rstatix)
 
 Whole_Proteome_half_life_median <- HEK_WP_Kd_half_life_LaminB_Tcomplex |> 
+  filter(
+    UniProt_Accession %in% HEK_Nterm_Kd_half_life_LaminB_Tcomplex$UniProt_Accession
+  ) |> 
   get_summary_stats(half_life, type = 'median') |> 
   pull(median)
 
 histogram_WP_half_life <- HEK_WP_Kd_half_life_LaminB_Tcomplex |> 
+  filter(
+    UniProt_Accession %in% HEK_Nterm_Kd_half_life_LaminB_Tcomplex$UniProt_Accession
+  ) |> 
   ggplot() +
-  geom_histogram(aes(x = half_life), color = 'black', fill = color_2, bins = 20) +
+  geom_histogram(aes(x = half_life), color = 'black', fill = color_2, bins = 30) +
   geom_vline(xintercept = Whole_Proteome_half_life_median, linetype = 'dashed', color = 'gray') +
   annotate(
     'text', label = paste(round(Whole_Proteome_half_life_median, digits = 1), ' hr'),
-    x = 55, y = 2000, size = 3, color = 'black', 
+    x = 65, y = 760, size = 3, color = 'black', 
   ) +
   labs(x = 'Half-life (hr)', y = 'Count') +
   theme(

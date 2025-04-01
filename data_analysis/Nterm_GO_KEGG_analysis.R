@@ -5,13 +5,13 @@ library(org.Hs.eg.db)
 
 # Nterm, Fast turnover, half-life < 7 h
 Nterm_fast_turnover_protein <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
-  filter(category == 'Fast turnover') |> 
+  filter(Percentile < 0.2) |> 
   distinct(UniProt_Accession) |> 
   pull()
 
 # Nterm, Stable, half-life = 200 h
 Nterm_stable_protein <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
-  filter(category == 'Stable') |> 
+  filter(Percentile > 0.8) |> 
   distinct(UniProt_Accession) |> 
   pull()
 

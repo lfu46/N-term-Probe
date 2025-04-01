@@ -190,55 +190,36 @@ HEK_WP_deg_ratio <- bind_rows(
 
 write_csv(HEK_WP_deg_ratio, file = 'data_source/degradation_ratio/HEK_WP_deg_ratio.csv')
 
-## curve fitting models
-# non-linear model
-non_linear_model <- function(df) {
-  tryCatch({
-    # Fit the model
-    model <- nls(
-      deg_ratio_avg ~ (A - B) * exp(-Kd * timepoint) + B,
-      data = df,
-      # A refers to the maximum of the curve and should be 1 in an ideal case
-      # B accounts for a potential curve offset which ideally should be 0
-      # the initial Kd value can be fine-tuned to achieve better results
-      start = list(A = 1, B = 0, Kd = 0.015)
-    )
-    
-    # Extract coefficients
-    params <- coef(model)
-    
-    # Calculate R^2
-    fitted_values <- predict(model, df)
-    ss_total <- sum((df$deg_ratio_avg - mean(df$deg_ratio_avg))^2)
-    ss_residual <- sum((df$deg_ratio_avg - fitted_values)^2)
-    r_squared <- 1 - (ss_residual / ss_total)
-    
-    # Return coefficients and R^2
-    tibble(A = params["A"], B = params["B"], Kd = params["Kd"], RSS = ss_residual)
-  }, error = function(e) {
-    # Return NA if fitting fails
-    tibble(A = NA, B = NA, Kd = NA, RSS = NA)
-  })
-}
+## ratio normalization by LaminB and T-complex proteoforms
+HEK_WP_deg_ratio_adj <- HEK_WP_deg_ratio |> 
+  left_join(
+    ratio_norm_facs_WP, by = 'timepoint'
+  ) |> 
+  mutate(
+    deg_ratio_adj = deg_ratio_avg/ratio_norm_fac
+  )
 
+write_csv(HEK_WP_deg_ratio_adj, file = 'data_source/degradation_ratio/HEK_WP_deg_ratio_adj.csv')
+
+## curve fitting
 # linear model
 linear_model <- function(df) {
   tryCatch({
     # Fit the model
     model <- lm(
-      ln_deg_ratio_avg ~ timepoint,
+      ln_deg_ratio_adj ~ timepoint,
       data = df
     )
-    
+
     # Extract coefficients
     params <- coef(model)
-    
+
     # Calculate rss
     ss_residual <- sum(residuals(model)^2)
-    
+
     # Calculate R^2
     r_squared <- summary(model)$r.squared
-    
+
     # Return coefficients and R^2
     tibble(lnA = params["(Intercept)"], Kd = -params["timepoint"], RSS = ss_residual)
   }, error = function(e) {
@@ -247,37 +228,18 @@ linear_model <- function(df) {
   })
 }
 
-## curve fitting
-# non-linear model fitting
-HEK_WP_curve_fitting_result_1 <- HEK_WP_deg_ratio %>%
+# curve fitting
+HEK_WP_curve_fitting_result <- HEK_WP_deg_ratio_adj |> 
+  select(UniProt_Accession, Gene, Entry.Name, timepoint, deg_ratio_adj) |> 
   group_by(UniProt_Accession, Gene, Entry.Name) |> 
-  group_modify(~ non_linear_model(.x)) |> 
-  ungroup()
-
-HEK_WP_nonlinear_fitting <- HEK_WP_curve_fitting_result_1 |> 
-  filter(RSS < 0.05) |> 
-  select(UniProt_Accession, Gene, Entry.Name, A:RSS) |> 
-  pivot_longer(cols = A:RSS, names_to = 'parameters', values_to = 'values') |> 
   mutate(
-    model = 'nonlinear fitting'
-  )
-
-write_csv(HEK_WP_nonlinear_fitting, file = 'data_source/curve_fitting/HEK_WP_nonlinear_fitting.csv')
-
-# linear model fitting
-HEK_WP_curve_fitting_result_2 <- HEK_WP_curve_fitting_result_1 |> 
-  filter(is.na(A) | RSS >= 0.05) |> 
-  left_join(HEK_WP_deg_ratio, by = c('UniProt_Accession', 'Gene', 'Entry.Name')) |> 
-  select(UniProt_Accession, Gene, Entry.Name, timepoint, deg_ratio_avg) |> 
-  mutate(
-    ln_deg_ratio_avg = log(deg_ratio_avg)
+    ln_deg_ratio_adj = log(deg_ratio_adj)
   ) |> 
-  group_by(UniProt_Accession, Gene, Entry.Name) |> 
   group_modify(~ linear_model(.x)) |> 
   ungroup()
 
-HEK_WP_linear_fitting <- HEK_WP_curve_fitting_result_2 |> 
-  filter(RSS < 0.1) |> 
+HEK_WP_linear_fitting <- HEK_WP_curve_fitting_result |> 
+  filter(RSS < 0.2) |> 
   select(UniProt_Accession, Gene, Entry.Name, lnA:RSS) |> 
   pivot_longer(cols = lnA:RSS, names_to = 'parameters', values_to = 'values') |> 
   mutate(
@@ -286,10 +248,32 @@ HEK_WP_linear_fitting <- HEK_WP_curve_fitting_result_2 |>
 
 write_csv(HEK_WP_linear_fitting, file = 'data_source/curve_fitting/HEK_WP_linear_fitting.csv')
 
-# combine non-linear fitting and linear fitting result
-HEK_WP_curve_fitting_combined <- bind_rows(
-  HEK_WP_nonlinear_fitting,
-  HEK_WP_linear_fitting
-)
-
-write_csv(HEK_WP_curve_fitting_combined, file = 'data_source/curve_fitting/HEK_WP_curve_fitting_combined.csv')
+# # linear model fitting
+# HEK_WP_curve_fitting_result_2 <- HEK_WP_curve_fitting_result_1 |> 
+#   filter(is.na(A) | RSS >= 0.05) |> 
+#   left_join(HEK_WP_deg_ratio, by = c('UniProt_Accession', 'Gene', 'Entry.Name')) |> 
+#   select(UniProt_Accession, Gene, Entry.Name, timepoint, deg_ratio_avg) |> 
+#   mutate(
+#     ln_deg_ratio_avg = log(deg_ratio_avg)
+#   ) |> 
+#   group_by(UniProt_Accession, Gene, Entry.Name) |> 
+#   group_modify(~ linear_model(.x)) |> 
+#   ungroup()
+# 
+# HEK_WP_linear_fitting <- HEK_WP_curve_fitting_result_2 |> 
+#   filter(RSS < 0.1) |> 
+#   select(UniProt_Accession, Gene, Entry.Name, lnA:RSS) |> 
+#   pivot_longer(cols = lnA:RSS, names_to = 'parameters', values_to = 'values') |> 
+#   mutate(
+#     model = 'linear fitting'
+#   )
+# 
+# write_csv(HEK_WP_linear_fitting, file = 'data_source/curve_fitting/HEK_WP_linear_fitting.csv')
+# 
+# # combine non-linear fitting and linear fitting result
+# HEK_WP_curve_fitting_combined <- bind_rows(
+#   HEK_WP_nonlinear_fitting,
+#   HEK_WP_linear_fitting
+# )
+# 
+# write_csv(HEK_WP_curve_fitting_combined, file = 'data_source/curve_fitting/HEK_WP_curve_fitting_combined.csv')
