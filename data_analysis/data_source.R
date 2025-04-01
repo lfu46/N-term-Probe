@@ -195,6 +195,16 @@ ratio_norm_facs_WP <- read_csv(
   'data_source/LaminB_Tcomplex_normalization/ratio_norm_facs_WP.csv'
 )
 
+### curve fitting
+# Nterm
+HEK_Nterm_linear_fitting <- read_csv(
+  'data_source/curve_fitting/HEK_Nterm_linear_fitting.csv'
+)
+# Whole Proteome
+HEK_WP_linear_fitting <- read_csv(
+  'data_source/curve_fitting/HEK_WP_linear_fitting.csv'
+)
+
 ### half-life calculation
 # half-life for Nterm
 HEK_Nterm_Kd_half_life_LaminB_Tcomplex <- read_csv(
