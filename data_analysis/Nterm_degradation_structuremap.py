@@ -20,21 +20,21 @@ HEK_Nterm_Kd_half_life_sequence = pd.read_csv(
 Nterm_degradation_protein_list = HEK_Nterm_Kd_half_life_sequence["UniProt_Accession"].unique().tolist()
 
 # download AlphaFold data
-crystallographic information file
+# crystallographic information file
 valid_proteins_cif, invalid_proteins_cif, existing_proteins_cif = download_alphafold_cif(
     proteins = Nterm_degradation_protein_list,
-    out_folder = "data_source/Nterm_structuremap/Nterm_degradation_cif"
+    out_folder = "data_source/Nterm_degradation_structuremap/Nterm_degradation_cif"
 )
 
-predicted aligned error
+# predicted aligned error
 valid_proteins_pae, invalid_proteins_pae, existing_proteins_pae = download_alphafold_pae(
     proteins = Nterm_degradation_protein_list,
-    out_folder = "data_source/Nterm_structuremap/Nterm_degradation_pae"
+    out_folder = "data_source/Nterm_degradation_structuremap/Nterm_degradation_pae"
 )
 
 # format AlphaFold data input
 Nterm_degradation_alphafold_annotation = format_alphafold_data(
-  directory = "data_source/Nterm_structuremap/Nterm_degradation_cif",
+  directory = "data_source/Nterm_degradation_structuremap/Nterm_degradation_cif",
   protein_ids = Nterm_degradation_protein_list
 )
 
@@ -43,7 +43,7 @@ Nterm_degradation_full_sphere_exposure = annotate_accessibility(
     df = Nterm_degradation_alphafold_annotation, 
     max_dist = 24, 
     max_angle = 180, 
-    error_dir = "data_source/Nterm_structuremap/Nterm_degradation_pae"
+    error_dir = "data_source/Nterm_degradation_structuremap/Nterm_degradation_pae"
 )
 
 Nterm_degradation_alphafold_accessibility = Nterm_degradation_alphafold_annotation.merge(
@@ -56,7 +56,7 @@ Nterm_degradation_part_sphere_exposure = annotate_accessibility(
     df = Nterm_degradation_alphafold_annotation, 
     max_dist = 12, 
     max_angle = 70, 
-    error_dir = "data_source/Nterm_structuremap/Nterm_degradation_pae"
+    error_dir = "data_source/Nterm_degradation_structuremap/Nterm_degradation_pae"
 )
 
 Nterm_degradation_alphafold_accessibility = Nterm_degradation_alphafold_accessibility.merge(

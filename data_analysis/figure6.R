@@ -31,22 +31,13 @@ Nterm_degradation_alphafold_half_life_wilcox_test <- Nterm_degradation_alphafold
   group_by(property) |> 
   wilcox_test(half_life ~ category) |> 
   add_significance('p') |> 
-  filter(p.signif != 'ns')
+  filter(p.adj.signif != 'ns')
 
 # point range plot
 library(ggpubr)
 
 point_range_Nterm_degradation_alphafold_property <- Nterm_degradation_alphafold_half_life_property |> 
   ggplot() +
-  geom_point(
-    aes(
-      x = category, y = half_life
-    ),
-    position = position_jitter(width = 0.3),
-    size = 0.5,
-    color = 'black',
-    alpha = 0.3
-  ) +
   stat_summary(
     aes(
       x = category, y = half_life, colour = property
@@ -63,7 +54,7 @@ point_range_Nterm_degradation_alphafold_property <- Nterm_degradation_alphafold_
   labs(x = '', y = '') +
   stat_pvalue_manual(
     data = Nterm_degradation_alphafold_half_life_wilcox_test, label = 'p.signif', tip.length = 0,
-    size = 6, hide.ns = 'p', y.position = c(170, 160, 180, 170)
+    size = 6, hide.ns = 'p', y.position = c(20.8, 21.2, 21.6, 21.2, 20.8)
   ) +
   facet_grid(cols = vars(factor(property, levels = c(
     'structure_group', 'accessibility', 'IDR'
@@ -78,96 +69,11 @@ point_range_Nterm_degradation_alphafold_property <- Nterm_degradation_alphafold_
 ggsave(
   filename = 'figures/figure6/point_range_Nterm_degradation_alphafold_property.eps',
   plot = point_range_Nterm_degradation_alphafold_property,
-  device = cairo_ps,
-  height = 2.5, width = 4, units = 'in',
-  fallback_resolution = 1200
+  device = 'eps',
+  height = 2.5, width = 4, units = 'in'
 )
 
-### figure 6B, ubiquitination sites occurrence
-# Spearman correlation test
-cor_test_ubiquitination <- cor.test(
-  Nterm_ubiquitination_site_occurrence$half_life,
-  Nterm_ubiquitination_site_occurrence$n,
-  method = 'spearman'
-)
-
-# spearman correlation point range plot
-point_range_plot_half_life_ubi_occurence <- Nterm_ubiquitination_site_occurrence |> 
-  ggplot() +
-  geom_point(
-    aes(
-      x = category, y = n
-    ),
-    position = position_jitter(width = 0.3),
-    size = 0.5,
-    color = 'black',
-    alpha = 0.1
-  ) +
-  stat_summary(
-    aes(
-      x = category, y = n
-    ),
-    fun.data = 'mean_cl_boot', color = color_4, linewidth = 0.2, size = 0.5
-  ) +
-  labs(x = '', y = '') +
-  theme(
-    panel.grid.major = element_line(color = "gray", linewidth = 0.2),
-    panel.grid.minor = element_line(color = "gray", linewidth = 0.1),
-    axis.text.x = element_text(family = 'arial', color = 'black', angle = 30, hjust = 1),
-    axis.text.y = element_text(family = 'arial', color = 'black')
-  )
-
-ggsave(
-  filename = 'figures/figure6/point_range_plot_half_life_ubi_occurence.eps',
-  device = cairo_ps,
-  plot = point_range_plot_half_life_ubi_occurence,
-  height = 2.2, width = 1.5, units = 'in',
-  fallback_resolution = 1200
-)
-
-### figure 6C, phosphorylation sites occurrence
-# Spearman correlation test
-cor_test_phosphorylation <- cor.test(
-  Nterm_phosphorylation_site_occurrence$half_life,
-  Nterm_phosphorylation_site_occurrence$n,
-  method = 'spearman'
-)
-
-# spearman correlation point range plot
-point_range_plot_half_life_phos_occurence <- Nterm_phosphorylation_site_occurrence |> 
-  ggplot() +
-  geom_point(
-    aes(
-      x = category, y = n
-    ),
-    position = position_jitter(width = 0.3),
-    size = 0.5,
-    color = 'black',
-    alpha = 0.1
-  ) +
-  stat_summary(
-    aes(
-      x = category, y = n
-    ),
-    fun.data = 'mean_cl_boot', color = color_1, linewidth = 0.2, size = 0.5
-  ) +
-  labs(x = '', y = '') +
-  theme(
-    panel.grid.major = element_line(color = "gray", linewidth = 0.2),
-    panel.grid.minor = element_line(color = "gray", linewidth = 0.1),
-    axis.text.x = element_text(family = 'arial', color = 'black', angle = 30, hjust = 1),
-    axis.text.y = element_text(family = 'arial', color = 'black')
-  )
-
-ggsave(
-  filename = 'figures/figure6/point_range_plot_half_life_phos_occurence.eps',
-  device = cairo_ps,
-  plot = point_range_plot_half_life_phos_occurence,
-  height = 2.2, width = 1.5, units = 'in',
-  fallback_resolution = 1200
-)
-
-### figure 6D, hydropathy, NCPR and kappa of Nterm 13 mer 
+### figure 6B, hydropathy, NCPR and kappa of Nterm 13-mer 
 # import the result from localCIDER (data_analysis/Nterm_sequence_features.py)
 HEK_Nterm_13mer_sequence_features <- read_csv(
   'data_source/Nterm_13mer_sequence_features/HEK_Nterm_13mer_Kd_half_life_sequence_features.csv'
@@ -180,7 +86,7 @@ HEK_Nterm_13mer_sequence_features_selected <- HEK_Nterm_13mer_sequence_features 
 # Wilcoxon rank-sum test
 library(rstatix)
 
-HEK_Nterm_13mer_sequence_features_wilcox_test <- HEK_Nterm_13mer_sequence_features_selected |> 
+HEK_Nterm_13mer_sequence_features_wilcoxon_test <- HEK_Nterm_13mer_sequence_features_selected |> 
   group_by(features) |> 
   wilcox_test(values ~ category) |> 
   filter(p.adj.signif != "ns")
@@ -204,7 +110,7 @@ boxplot_HEK_Nterm_13mer_sequence_features <- HEK_Nterm_13mer_sequence_features_s
   ) +
   labs(x = '', y = '') +
   stat_pvalue_manual(
-    data = HEK_Nterm_13mer_sequence_features_wilcox_test, label = 'p.adj.signif', tip.length = 0,
+    data = HEK_Nterm_13mer_sequence_features_wilcoxon_test, label = 'p.adj.signif', tip.length = 0,
     size = 6, hide.ns = 'p', y.position = c(0.9, 0.7, 0.5, 7, 6.5, 6, 1.2, 1)
   ) +
   facet_grid(rows = vars(factor(features, levels = c(
@@ -222,3 +128,6 @@ ggsave(
   plot = boxplot_HEK_Nterm_13mer_sequence_features,
   height = 5, width = 1.8, units = 'in'
 )
+
+### figure 6C, D and E, heatmap of Nterm 13-mer in different categories
+
