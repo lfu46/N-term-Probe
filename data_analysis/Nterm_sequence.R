@@ -26,7 +26,8 @@ HEK_Nterm_Kd_half_life_sequence <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |>
   mutate(
     Nterm_sequence = substr(Sequence, start = Protein.Start, stop = Full_Protein_Length),
     Nterm_13mer = substr(Sequence, start = Protein.Start, stop = Protein.Start + 12),
-    Nterm_terminus = substr(Sequence, start = Protein.Start, stop = Protein.Start)
+    Nterm_terminus = substr(Sequence, start = Protein.Start, stop = Protein.Start),
+    Nterm_15mer = substr(Sequence, start = Protein.Start - 7, stop = Protein.Start + 7)
   )
 
 write_csv(HEK_Nterm_Kd_half_life_sequence, file = 'data_source/Nterm_sequence/HEK_Nterm_Kd_half_life_sequence.csv')

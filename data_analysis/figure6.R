@@ -75,6 +75,8 @@ ggsave(
 
 ### figure 6B, hydropathy, NCPR and kappa of Nterm 13-mer 
 # import the result from localCIDER (data_analysis/Nterm_sequence_features.py)
+library(tidyverse)
+
 HEK_Nterm_13mer_sequence_features <- read_csv(
   'data_source/Nterm_13mer_sequence_features/HEK_Nterm_13mer_Kd_half_life_sequence_features.csv'
 )
@@ -87,7 +89,9 @@ HEK_Nterm_13mer_sequence_features_selected <- HEK_Nterm_13mer_sequence_features 
 library(rstatix)
 
 HEK_Nterm_13mer_sequence_features_wilcoxon_test <- HEK_Nterm_13mer_sequence_features_selected |> 
-  group_by(features) |> 
+  # group_by(category, features) |> 
+  # get_summary_stats(values)
+  group_by(features) |>
   wilcox_test(values ~ category) |> 
   filter(p.adj.signif != "ns")
 
@@ -129,5 +133,123 @@ ggsave(
   height = 5, width = 1.8, units = 'in'
 )
 
-### figure 6C, D and E, heatmap of Nterm 13-mer in different categories
+### figure 6C, D and E, heatmap of 15-mer around N-terminus in different categories
+## import the result from plogo 
+## (https://plogo.uconn.edu/#, foreground: 13-mer sequence, background: protein-human)
+library(tidyverse)
+library(ComplexHeatmap)
+library(circlize)
+
+# Fast-turnover
+fast_turnover_15mer_matrix <- read_delim(
+  'figures/figure6/fast_turnover_15mer_matrix.txt',
+  col_names = FALSE, delim = '\n'
+) |> 
+  mutate(extracted = str_extract(X1, "\\[(.*?)\\]")) %>%
+  mutate(extracted = str_replace_all(extracted, "\\[|\\]", "")) %>%
+  separate(extracted, into = c("amino_acid_position", "value"), sep = "=") %>%
+  mutate(value = as.numeric(value)) |> 
+  separate(amino_acid_position, into = c("amino_acid", "position"), sep = "_") |> 
+  mutate(
+    position = as.numeric(position)
+  ) |>
+  filter(!amino_acid %in% c('U', 'Z', 'B', 'X')) |> 
+  select(!X1) |> 
+  pivot_wider(names_from = amino_acid, values_from = value)
+
+fast_turnover_15mer_matrix_data <- fast_turnover_15mer_matrix |> 
+  column_to_rownames("position") |> 
+  as.matrix()
+
+# Median
+median_15mer_matrix <- read_delim(
+  'figures/figure6/median_15mer_matrix.txt',
+  col_names = FALSE, delim = '\n'
+) |> 
+  mutate(extracted = str_extract(X1, "\\[(.*?)\\]")) %>%
+  mutate(extracted = str_replace_all(extracted, "\\[|\\]", "")) %>%
+  separate(extracted, into = c("amino_acid_position", "value"), sep = "=") %>%
+  mutate(value = as.numeric(value)) |> 
+  separate(amino_acid_position, into = c("amino_acid", "position"), sep = "_") |> 
+  mutate(
+    position = as.numeric(position)
+  ) |>
+  filter(!amino_acid %in% c('U', 'Z', 'B', 'X')) |> 
+  select(!X1) |> 
+  pivot_wider(names_from = amino_acid, values_from = value)
+
+median_15mer_matrix_data <- median_15mer_matrix |> 
+  column_to_rownames("position") |> 
+  as.matrix()
+
+# Stable
+stable_15mer_matrix <- read_delim(
+  'figures/figure6/stable_15mer_matrix.txt',
+  col_names = FALSE, delim = '\n'
+) |> 
+  mutate(extracted = str_extract(X1, "\\[(.*?)\\]")) %>%
+  mutate(extracted = str_replace_all(extracted, "\\[|\\]", "")) %>%
+  separate(extracted, into = c("amino_acid_position", "value"), sep = "=") %>%
+  mutate(value = as.numeric(value)) |> 
+  separate(amino_acid_position, into = c("amino_acid", "position"), sep = "_") |> 
+  mutate(
+    position = as.numeric(position)
+  ) |>
+  filter(!amino_acid %in% c('U', 'Z', 'B', 'X')) |> 
+  select(!X1) |> 
+  pivot_wider(names_from = amino_acid, values_from = value)
+
+stable_15mer_matrix_data <- stable_15mer_matrix |> 
+  column_to_rownames("position") |> 
+  as.matrix()
+
+# define the amino acid groups for clustering
+aa_groups <- list(
+  hydrophobic = c("L", "V", "I", "M", "C"),
+  small = c("A", "S", "G", "T", "P"),
+  aromatic = c("F", "Y", "W"),
+  acidic_amide = c("E", "D", "N", "Q"),
+  basic = c("K", "R", "H")
+)
+
+# flatten the list to get the order of all amino acids
+custom_col_order <- unlist(aa_groups)
+
+# subset and reorder the matrix based on our custom order
+stable_15mer_matrix_data <- stable_15mer_matrix_data[, custom_col_order]
+
+# create a named vector to map each amino acid to its group
+aa_to_group <- rep(names(aa_groups), sapply(aa_groups, length))
+names(aa_to_group) <- unlist(aa_groups)
+
+# create split information for columns to add borders around groups
+column_split <- factor(aa_to_group[colnames(stable_15mer_matrix_data)], 
+                       levels = names(aa_groups))
+
+# create a color scale from blue (negative values) to white (zero) to red (positive values)
+col_fun <- colorRamp2(
+  breaks = c(-50, 0, 100),
+  colors = c("blue", "white", "red")
+)
+
+# heatmap
+Heatmap(
+  stable_15mer_matrix_data,
+  name = "Z-score",
+  
+  cluster_rows = FALSE,
+  cluster_columns = FALSE,
+  
+  show_row_names = TRUE,
+  show_column_names = TRUE,
+  
+  column_split = column_split,
+  border = TRUE,
+  column_gap = unit(2, "mm"),
+  border_gp = gpar(col = "black", lwd = 1),
+  column_title_gp = gpar(fontsize = 0),
+  
+  col = col_fun,
+  rect_gp = gpar(col = "white", lwd = 0.5)
+)
 
