@@ -28,20 +28,25 @@ Nterm_phosphorylation_site_occurrence <- phosphorylation_site_human |>
     start = Protein.Start,
     end = ifelse(Protein.Start + 12 <= Full_Protein_Length, Protein.Start + 12, Full_Protein_Length)
   ) |> 
-  select(UniProt_Accession, site_position, start, end, half_life, Kd, Index, Nterm_sequence, Nterm_13mer, category) |> 
+  select(UniProt_Accession, site_position, start, end, half_life, Kd_adj, Index, Nterm_sequence, Nterm_13mer, category) |> 
   mutate(
-    occupancy = ifelse(site_position >= start & site_position <= end, 'occupied', 'unoccupied')
+    occupancy = ifelse(site_position >= start & site_position <= end, 'occupied', 'unoccupied'),
+    ST_number = str_count(Nterm_13mer, 'S|T')
   ) |> 
   filter(occupancy == 'occupied') |> 
-  group_by(Index, half_life, category) |> 
+  group_by(Index, ST_number, half_life, category) |> 
   count(occupancy) |> 
-  ungroup()
+  mutate(
+    occupancy_percentage = n / ST_number
+  ) |>
+  ungroup() |> 
+  filter(occupancy_percentage != Inf)
 
 # Wilcoxon rank-sum test
 library(rstatix)
 
 Nterm_phosphorylation_site_occurrence |> 
-  wilcox_test(n ~ category)
+  wilcox_test(occupancy_percentage ~ category)
 
 # Spearman correlation test
 cor.test(

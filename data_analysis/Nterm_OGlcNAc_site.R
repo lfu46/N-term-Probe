@@ -6,7 +6,7 @@ library(readxl)
 #   'data_source/OGlcNAc_site/OG_glycopeptide_Top_tb_HEK293T_singlesite.xlsx',
 #   col_name = TRUE,
 #   .name_repair = 'universal'
-# ) |> 
+# ) |>
 #   select(UniProt_Accession = UniprotID, site_position)
 
 OGlcNAc_site_HEK293T <- read_delim(
@@ -34,24 +34,28 @@ Nterm_OGlcNAc_site_occurrence <- OGlcNAc_site_HEK293T |>
     start = Protein.Start,
     end = ifelse(Protein.Start + 12 <= Full_Protein_Length, Protein.Start + 12, Full_Protein_Length)
   ) |> 
-  select(UniProt_Accession, site_position, start, end, half_life, Kd, Index, Nterm_sequence, Nterm_13mer, category) |> 
+  select(UniProt_Accession, site_position, start, end, half_life, Kd_adj, Index, Nterm_sequence, Nterm_13mer, category) |> 
   mutate(
-    occupancy = ifelse(site_position >= start & site_position <= end, 'occupied', 'unoccupied')
+    occupancy = ifelse(site_position >= start & site_position <= end, 'occupied', 'unoccupied'),
+    ST_number = str_count(Nterm_13mer, 'S|T')
   ) |> 
   filter(occupancy == 'occupied') |> 
-  group_by(Index, half_life, category) |> 
+  group_by(Index, ST_number, half_life, category) |> 
   count(occupancy) |> 
+  mutate(
+    occupancy_percentage = n / ST_number
+  ) |> 
   ungroup()
 
 # Wilcoxon rank-sum test
 library(rstatix)
 
 Nterm_OGlcNAc_site_occurrence |> 
-  wilcox_test(n ~ category)
+  wilcox_test(occupancy_percentage ~ category)
 
 # Spearman correlation test
 cor.test(
   Nterm_OGlcNAc_site_occurrence$half_life,
-  Nterm_OGlcNAc_site_occurrence$n,
+  Nterm_OGlcNAc_site_occurrence$occupancy_percentage,
   method = 'spearman'
 )

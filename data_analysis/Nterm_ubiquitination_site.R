@@ -28,24 +28,29 @@ Nterm_ubiquitination_site_occurrence <- ubiquitination_site_human |>
     start = Protein.Start,
     end = ifelse(Protein.Start + 12 <= Full_Protein_Length, Protein.Start + 12, Full_Protein_Length)
   ) |> 
-  select(UniProt_Accession, site_position, start, end, half_life, Kd, Index, Nterm_sequence, Nterm_13mer, category) |> 
+  select(UniProt_Accession, site_position, start, end, half_life, Kd_adj, Index, Nterm_sequence, Nterm_13mer, category) |> 
   mutate(
-    occupancy = ifelse(site_position >= start & site_position <= end, 'occupied', 'unoccupied')
+    occupancy = ifelse(site_position >= start & site_position <= end, 'occupied', 'unoccupied'),
+    Lys_number = str_count(Nterm_13mer, 'K')
   ) |> 
   filter(occupancy == 'occupied') |> 
-  group_by(Index, half_life, category) |> 
+  group_by(Index, Lys_number ,half_life, category) |> 
   count(occupancy) |> 
-  ungroup()
+  mutate(
+    occupancy_percentage = n / Lys_number
+  ) |> 
+  ungroup() |> 
+  filter(occupancy_percentage != Inf)
 
 # Wilcoxon rank-sum test
 library(rstatix)
 
 Nterm_ubiquitination_site_occurrence |> 
-  wilcox_test(n ~ category)
+  wilcox_test(occupancy_percentage ~ category)
 
 # Spearman correlation test
 cor.test(
   Nterm_ubiquitination_site_occurrence$half_life,
-  Nterm_ubiquitination_site_occurrence$n,
+  Nterm_ubiquitination_site_occurrence$occupancy_percentage,
   method = 'spearman'
 )
