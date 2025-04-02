@@ -48,19 +48,19 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 
-#Ignore DS_Store files
+# Ignore DS_Store files
 *.DS_Store
 
-#Ignore CSV, TSV, XLSX, TXT files
+# Ignore CSV, TSV, XLSX, TXT files
 *.csv
 *.tsv
 *.xlsx
 *.txt
 
-#Ignore FASTA files
+# Ignore FASTA files
 *.fasta
 
-#Ignore PNG, TIFF, EPS, SVG, AI files
+# Ignore PNG, TIFF, EPS, SVG, AI files
 *.png
 *.tif
 *.tiff
@@ -69,33 +69,37 @@ rsconnect/
 *.ai
 *.jpg
 
-#Ignore CDXML, CDS files
+# Ignore CDXML, CDS files
 *.cdxml
 *.cds
 
-#Ignore PPTX files
+# Ignore PPTX files
 *.pptx
 
-#Ingore DOC, DOCX, DOTX files
+# Ingore DOC, DOCX, DOTX files
 *.doc
 *.docx
 *.dotx
 
-#Ingore ENS, ENI, ENL files
+# Ingore ENS, ENI, ENL files
 *.ens
 *.eni
 *.enl
 
-#Ingore CYS files
+# Ingore CYS files
 *.cys
 
-#Ingore CIF, HDF, PDB, PSE files
+# Ingore CIF, HDF, PDB, PSE files
 *.cif
 *.hdf
 *.pdb
 *.pse
 
-#Ingore LOG files
+# Ingore LOG files
 *.log
+
+# Ingore PDF files
+*.pdf
+
 
 
