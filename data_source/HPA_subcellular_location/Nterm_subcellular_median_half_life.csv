@@ -1,30 +1,30 @@
 Main.location,variable,n,median
-Microtubule ends,half_life,1,200
-Lipid droplets,half_life,4,112.737
-Cytoplasmic bodies,half_life,17,31.484
-Golgi apparatus,half_life,83,23.439
-Nuclear bodies,half_life,17,21.02
-Nucleoli rim,half_life,22,18.299
-Cell Junctions,half_life,22,18.2
-Peroxisomes,half_life,13,17.918
-Vesicles,half_life,192,17.807
-Centriolar satellite,half_life,4,16.677
-Intermediate filaments,half_life,40,15.78
-Mitochondria,half_life,509,15.393
-Actin filaments,half_life,22,12.778
-Nucleoli,half_life,50,12.602
-Nuclear membrane,half_life,114,12.543
-Nucleoplasm,half_life,1432,12.071
-Mid piece,half_life,18,11.987
-Nuclear speckles,half_life,185,11.805
-Cytosol,half_life,1104,11.709
-Endoplasmic reticulum,half_life,255,11.093
-Centrosome,half_life,5,11.013
-Plasma membrane,half_life,129,10.867
-Microtubules,half_life,28,9.973
-Focal adhesion sites,half_life,21,8.727
-Nucleoli fibrillar center,half_life,35,8.293
-Endosomes,half_life,3,8.246
-Midbody ring,half_life,3,5.809
-Lysosomes,half_life,1,3.669
-Midbody,half_life,1,0.381
+Lysosomes,half_life,1,31.892
+Focal adhesion sites,half_life,21,21.864
+Mid piece,half_life,13,20.496
+Vesicles,half_life,205,20.094
+Microtubule ends,half_life,1,19.912
+Cytoplasmic bodies,half_life,20,19.743
+Midbody ring,half_life,4,19.584
+Actin filaments,half_life,28,19.304
+Lipid droplets,half_life,5,19.226
+Nucleoli fibrillar center,half_life,30,19.164
+Centrosome,half_life,5,18.915
+Mitochondria,half_life,648,18.908
+Nuclear membrane,half_life,117,18.815
+Endosomes,half_life,5,18.725
+Cytosol,half_life,1262,18.66
+Nucleoli,half_life,66,18.59
+Nucleoplasm,half_life,1610,18.538
+Peroxisomes,half_life,19,18.381
+Golgi apparatus,half_life,118,18.348
+Endoplasmic reticulum,half_life,299,18.344
+Nuclear speckles,half_life,205,18.301
+Intermediate filaments,half_life,43,18.062
+Plasma membrane,half_life,150,17.977
+Microtubules,half_life,29,17.868
+Nuclear bodies,half_life,23,17.843
+Centriolar satellite,half_life,6,17
+Cell Junctions,half_life,20,16.635
+Nucleoli rim,half_life,27,16.522
+Midbody,half_life,1,15.179

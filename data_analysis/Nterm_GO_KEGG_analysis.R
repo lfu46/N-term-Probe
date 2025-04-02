@@ -3,13 +3,13 @@ library(tidyverse)
 library(clusterProfiler)
 library(org.Hs.eg.db)
 
-# Nterm, Fast turnover, half-life < 7 h
+# Nterm, Fast turnover, Top 20%
 Nterm_fast_turnover_protein <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
   filter(Percentile < 0.2) |> 
   distinct(UniProt_Accession) |> 
   pull()
 
-# Nterm, Stable, half-life = 200 h
+# Nterm, Stable, Bottom 20%
 Nterm_stable_protein <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |> 
   filter(Percentile > 0.8) |> 
   distinct(UniProt_Accession) |> 
@@ -21,7 +21,7 @@ Nterm_protein_total <- HEK_Nterm_Kd_half_life_LaminB_Tcomplex |>
   pull()
 
 ## Gene Ontology analysis
-# Fast turnover, half-life < 7 h
+# Fast turnover, Top 20%
 Nterm_fast_turnover_GO <- enrichGO(
   gene = Nterm_fast_turnover_protein,
   OrgDb = org.Hs.eg.db,
@@ -36,7 +36,7 @@ write_csv(
   Nterm_fast_turnover_GO@result, file = 'data_source/GO_KEGG_analysis/Nterm_fast_turnover_GO.csv'
 )
 
-# Stable, half-life = 200 h
+# Stable, Bottom 20%
 Nterm_stable_GO <- enrichGO(
   gene = Nterm_stable_protein,
   OrgDb = org.Hs.eg.db,
@@ -52,7 +52,7 @@ write_csv(
 )
 
 ## KEGG analysis
-# Fast turnover, half-life < 6 h
+# Fast turnover, Top 20%
 Nterm_fast_turnover_KEGG <- enrichKEGG(
   gene = Nterm_fast_turnover_protein,
   organism = 'hsa',
@@ -66,7 +66,7 @@ write_csv(
   Nterm_fast_turnover_KEGG@result, file = 'data_source/GO_KEGG_analysis/Nterm_fast_turnover_KEGG.csv'
 )
 
-# Stable, half-life = 200 h
+# Stable, Bottom 20%
 Nterm_stable_KEGG <- enrichKEGG(
   gene = Nterm_stable_protein,
   organism = 'hsa',

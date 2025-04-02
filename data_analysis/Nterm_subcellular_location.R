@@ -32,6 +32,6 @@ write_csv(Nterm_subcellular_median_half_life, file = 'data_source/HPA_subcellula
 # Wilcoxon rank-sum test
 HEK_Nterm_Kd_half_life_subcellular |> 
   wilcox_test(half_life ~ Main.location) |> 
-  filter(p < 0.05)
+  filter(p.adj.signif != 'ns')
 
 
