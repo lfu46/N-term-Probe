@@ -96,7 +96,7 @@ write_csv(
 )
 
 ## UBR-box, N-degron example
-## Q13740_28, Q9Y4L1_33, Q92643_30, Q9NS69_106
+## Q13740_28, Q9Y4L1_33, Q92643_30, P21796_99
 # Q13740, ALCAM, Q13740_28
 Q13740_database_info <- tribble(
   ~ name, ~ start, ~ end,
@@ -265,21 +265,21 @@ ggsave(
   height = 0.2, width = 2, units = 'in'
 )
 
-# Q9NS69, TOMM22, Q9NS69_106
-Q9NS69_database_info <- tribble(
+# P21796, VDAC1, P21796_99
+P21796_database_info <- tribble(
   ~ name, ~ start, ~ end,
-  'protein', 1, 142,
-  'Tom22', 26, 117
+  'protein', 1, 283,
+  'Porin_3', 4, 276
 )
 
-Q9NS69_result <- tibble(
-  cleavage_site = c(106)
+P21796_result <- tibble(
+  cleavage_site = c(99)
 )
 
 # example plot
-Q9NS69_example <- ggplot() +
+P21796_example <- ggplot() +
   geom_rect(
-    data = Q9NS69_database_info,
+    data = P21796_database_info,
     aes(
       xmin = start,
       xmax = end,
@@ -292,8 +292,8 @@ Q9NS69_example <- ggplot() +
   ) +
   geom_segment(
     aes(
-      x = Q9NS69_result$cleavage_site, 
-      xend = Q9NS69_result$cleavage_site, 
+      x = P21796_result$cleavage_site, 
+      xend = P21796_result$cleavage_site, 
       y = 2.6, 
       yend = 2
     ),
@@ -304,19 +304,19 @@ Q9NS69_example <- ggplot() +
   scale_fill_manual(
     values = c(
       'protein' = 'grey70',
-      'Tom22' = color_5
+      'Porin_3' = color_5
     )
   ) +
   scale_color_manual(
     values = c(
       'protein' = 'black',
-      'Tom22' = 'transparent'
+      'Porin_3' = 'transparent'
     )
   ) +
   theme_void()
 
 ggsave(
-  filename = 'figures/figure7/Q9NS69_example.eps',
+  filename = 'figures/figure7/P21796_example.eps',
   height = 0.2, width = 2, units = 'in'
 )
 
@@ -383,6 +383,7 @@ ggsave(
 Q13263_database_info <- tribble(
   ~ name, ~ start, ~ end,
   'protein', 1, 835,
+  'Bromo', 697, 801,
   'PHD', 628, 669,
   'zf-B_box', 150, 194,
   'zf-B_box', 208, 243,
@@ -421,14 +422,16 @@ Q13263_example <- ggplot() +
   scale_fill_manual(
     values = c(
       'protein' = 'grey70',
-      'PHD' = color_2,
-      'zf-B_box' = color_3,
-      'zf-RING_5' = color_4
+      'Bromo' = color_2,
+      'PHD' = color_3,
+      'zf-B_box' = color_4,
+      'zf-RING_5' = color_5
     )
   ) +
   scale_color_manual(
     values = c(
       'protein' = 'black',
+      'Bromo' = 'transparent',
       'PHD' = 'transparent',
       'zf-B_box' = 'transparent',
       'zf-RING_5' = 'transparent'
