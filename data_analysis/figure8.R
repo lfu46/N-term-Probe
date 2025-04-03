@@ -24,24 +24,11 @@ top20_bottom20_comb <- bind_rows(
   top20_comparison_GO |> 
     filter(
       Description %in% c(
-        'protein folding',
-        'endoplasmic reticulum lumen',
-        'vesicle lumen',
-        'secretory granule lumen',
-        'extracellular organelle',
-        'proteasome complex',
-        'proteasome regulatory particle, base subcomplex'
-      )
-    ) |> 
-    mutate(
-      category = 'top20'
-    ),
-  
-  top20_comparison_KEGG |> 
-    filter(
-      Description %in% c(
-        'Proteasome',
-        'Protein processing in endoplasmic reticulum'
+        'Histone modifying activity',
+        'Catalytic activity, acting on RNA',
+        'Kinase activity',
+        'Transferase activity',
+        'Macromolecule modification'
       )
     ) |> 
     mutate(
@@ -51,15 +38,11 @@ top20_bottom20_comb <- bind_rows(
   bottom20_comparison_GO |> 
     filter(
       Description %in% c(
-        'nucleotide binding',
-        'anion binding',
-        'ribonucleotide binding',
-        'carbohydrate derivative binding',
-        'ATP binding',
-        'helicase activity',
-        'ATP hydrolysis activity',
-        'pyrophosphatase activity',
-        'structural constituent of ribosome'
+        'Unfolded protein binding',
+        'Protein folding chaperone',
+        'mRNA binding',
+        'Regulation of mRNA metabolic process',
+        'Catalytic step 2 spliceosome'
       )
     ) |> 
     mutate(
@@ -100,28 +83,66 @@ ggsave(
   height = 2, width = 3.5, units = 'in'
 )
 
-### figure 8B, protein complex analysis for top20% and bottom 20% proteins
-## import corum enrichment results
+### figure 8B, protein complex and domain analysis for top20% and bottom 20% proteins
+## import enrichment results
 top20_comparison_corum <- read_csv(
   'data_source/Nterm_WP_comparison/top20_comparison_corum.csv'
+)
+
+top20_comparison_pfam <- read_csv(
+  'data_source/Nterm_WP_comparison/top20_comparison_pfam.csv'
 )
 
 bottom20_comparison_corum <- read_csv(
   'data_source/Nterm_WP_comparison/bottom20_comparison_corum.csv'
 )
 
-## bar plot
+bottom20_comparison_pfam <- read_csv(
+  'data_source/Nterm_WP_comparison/bottom20_comparison_pfam.csv'
+)
+
+## combine results from corum and pfam
 # top20
-barplot_top20_corum <- top20_comparison_corum |> 
+top20_comparison_corum_pfam_comb <- top20_comparison_corum |> 
   filter(
     Description %in% c(
-      'corum_id_181',
+      'corum_id_308'
+    )
+  ) |> 
+  bind_rows(
+    top20_comparison_pfam |> 
+      filter(
+        Description %in% c(
+          'PF00595', 
+          'PF00069', 
+          'PF00271', 
+          'PF07653'
+        )
+      )
+  )
+
+# bottom20
+bottom20_comparison_corum_pfam_comb <- bottom20_comparison_corum |> 
+  filter(
+    Description %in% c(
       'corum_id_8372',
-      'corum_id_193',
-      'corum_id_5615',
+      'corum_id_1181',
+      'corum_id_3082',
       'corum_id_8391'
     )
   ) |> 
+  bind_rows(
+    bottom20_comparison_pfam |> 
+      filter(
+        Description %in% c(
+          'PF00076'
+        )
+      )
+  )
+
+## bar plot
+# top20
+barplot_top20_corum_pfam <- top20_comparison_corum_pfam_comb |> 
   ggplot() +
   geom_bar(
     aes(
@@ -137,22 +158,13 @@ barplot_top20_corum <- top20_comparison_corum |>
   )
 
 ggsave(
-  filename = 'figures/figure8/barplot_top20_corum.eps',
-  plot = barplot_top20_corum,
+  filename = 'figures/figure8/barplot_top20_corum_pfam.eps',
+  plot = barplot_top20_corum_pfam,
   height = 2, width = 2.5, units = 'in'
 )
 
 # bottom20
-barplot_bottom20_corum <- bottom20_comparison_corum |> 
-  filter(
-    Description %in% c(
-      'corum_id_3055',
-      'corum_id_306',
-      'corum_id_305',
-      'corum_id_3040',
-      'corum_id_7627'
-    )
-  ) |> 
+barplot_bottom20_corum_pfam <- bottom20_comparison_corum_pfam_comb |> 
   ggplot() +
   geom_bar(
     aes(
@@ -168,9 +180,88 @@ barplot_bottom20_corum <- bottom20_comparison_corum |>
   )
 
 ggsave(
-  filename = 'figures/figure8/barplot_bottom20_corum.eps',
-  plot = barplot_bottom20_corum,
+  filename = 'figures/figure8/barplot_bottom20_corum_pfam.eps',
+  plot = barplot_bottom20_corum_pfam,
   height = 2, width = 2.5, units = 'in'
+)
+
+### figure 8C, kinase family
+# import kinase family data
+# http://www.kinase.com./web/current/human/
+# Update: (Dec 07): An updated table (Excel) includes Gene IDs, refseq accessions, HGNC names and improved sequences for some kinases.
+library(tidyverse)
+library(readxl)
+
+kinase_family <- read_xls(
+  'data_source/Nterm_WP_comparison/Kincat_Hsap.08.02.xls',
+  col_names = TRUE
+) |> 
+  select(Entrez_Symbol, Group, Family)
+
+kinase_family_delta_half_life <- HEK_Nterm_WP_delta_half_life |> 
+  left_join(
+    kinase_family,
+    by = c('Gene' = 'Entrez_Symbol'),
+    relationship = "many-to-many"
+  ) |> 
+  filter(
+    !is.na(Group)
+  )
+
+write_csv(
+  kinase_family_delta_half_life,
+  file = 'data_source/Nterm_WP_comparison/kinase_family_delta_half_life.csv'
+)
+
+# Wilcoxon rank-sum test
+library(rstatix)
+
+kinase_family_delta_half_life |> 
+  group_by(Group) |>
+  get_summary_stats(delta_half_life)
+
+kinase_family_wilcoxon_test <- kinase_family_delta_half_life |> 
+  wilcox_test(delta_half_life ~ Group) |> 
+  filter(
+    p.adj < 0.05
+  )
+
+# point range plot
+library(ggpubr)
+
+point_range_plot_kinase_family_delta_half_life <- kinase_family_delta_half_life |> 
+  ggplot() +
+  stat_summary(
+    aes(
+      x = fct_reorder(Group, delta_half_life, .fun = mean),
+      y = delta_half_life
+    ),
+    color = color_1,
+    fun.data = 'mean_cl_boot', linewidth = 0.2, size = 0.5, show.legend = FALSE
+  ) +
+  labs(x = '', y = '') +
+  stat_pvalue_manual(
+    data = kinase_family_wilcoxon_test |> slice(2, 7, 10),
+    label = 'p.adj.signif',
+    y.position = c(0, 0, -8),
+    tip.length = 0,
+    label.size = 6
+  ) +
+  coord_cartesian(
+    ylim = c(-80, 5)
+  ) +
+  theme(
+    panel.grid.major = element_line(color = "gray", linewidth = 0.2),
+    panel.grid.minor = element_line(color = "gray", linewidth = 0.1),
+    axis.text.x = element_text(color = 'black', size = 8, family = 'arial', angle = 60, hjust = 1),
+    axis.text.y = element_text(color = 'black', size = 8, family = 'arial')
+  )
+
+ggsave(
+  filename = 'figures/figure8/point_range_plot_kinase_family_delta_half_life.eps',
+  device = 'eps',
+  plot = point_range_plot_kinase_family_delta_half_life,
+  height = 2, width = 2, units = 'in'
 )
 
 ### figure 8C, spliceosome, proteasome and ribosome
@@ -362,6 +453,8 @@ ggsave(
 
 ### figure 8E, top20 and bottom20 structure analysis
 ## import result from StructureMap
+library(tidyverse)
+
 top20_bottom20_protein_structure <- read_csv(
   'data_source/Nterm_WP_comparison/top20_bottom20_protein_structure.csv'
 )
