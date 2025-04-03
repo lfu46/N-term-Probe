@@ -96,30 +96,23 @@ write_csv(
 )
 
 ## UBR-box, N-degron example
-# Q13740_28, Q9Y4L1_33, Q92643_30, Q9NS69_106
-
-
-
-
-# O94826, TOMM70, O94826_389, O94826_414, O94826_523
-O94826_database_info <- tribble(
+## Q13740_28, Q9Y4L1_33, Q92643_30, Q9NS69_106
+# Q13740, ALCAM, Q13740_28
+Q13740_database_info <- tribble(
   ~ name, ~ start, ~ end,
-  'protein', 1, 608,
-  'TPR_1', 114, 146,
-  'TPR_8', 329, 362,
-  'TPR_8', 401, 433,
-  'TPR_8', 476, 509,
-  'TPR_8', 547, 576
+  'protein', 1, 583,
+  'C2-set_2', 137, 230,
+  'Ig_3', 254, 314
 )
 
-O94826_result <- tibble(
-  cleavage_site = c(414, 523)
+Q13740_result <- tibble(
+  cleavage_site = c(28)
 )
 
 # example plot
-O94826_example <- ggplot() +
+Q13740_example <- ggplot() +
   geom_rect(
-    data = O94826_database_info,
+    data = Q13740_database_info,
     aes(
       xmin = start,
       xmax = end,
@@ -132,8 +125,8 @@ O94826_example <- ggplot() +
   ) +
   geom_segment(
     aes(
-      x = O94826_result$cleavage_site, 
-      xend = O94826_result$cleavage_site, 
+      x = Q13740_result$cleavage_site, 
+      xend = Q13740_result$cleavage_site, 
       y = 2.6, 
       yend = 2
     ),
@@ -144,39 +137,39 @@ O94826_example <- ggplot() +
   scale_fill_manual(
     values = c(
       'protein' = 'grey70',
-      'TPR_1' = color_1,
-      'TPR_8' = color_2
+      'C2-set_2' = color_1,
+      'Ig_3' = color_2
     )
   ) +
   scale_color_manual(
     values = c(
       'protein' = 'black',
-      'TPR_1' = 'transparent',
-      'TPR_8' = 'transparent'
+      'C2-set_2' = 'transparent',
+      'Ig_3' = 'transparent'
     )
   ) +
   theme_void()
 
 ggsave(
-  filename = 'figures/figure7/O94826_example.eps',
+  filename = 'figures/figure7/Q13740_example.eps',
   height = 0.2, width = 2, units = 'in'
 )
 
-# P21796, VDAC1, P21796_99, P21796_257
-P21796_database_info <- tribble(
+# Q9Y4L1, HYOU1, Q9Y4L1_33
+Q9Y4L1_database_info <- tribble(
   ~ name, ~ start, ~ end,
-  'protein', 1, 283,
-  'Porin_3', 4, 276
+  'protein', 1, 999,
+  'HSP70', 36, 632
 )
 
-P21796_result <- tibble(
-  cleavage_site = c(99, 257)
+Q9Y4L1_result <- tibble(
+  cleavage_site = c(33)
 )
 
 # example plot
-P21796_example <- ggplot() +
+Q9Y4L1_example <- ggplot() +
   geom_rect(
-    data = P21796_database_info,
+    data = Q9Y4L1_database_info,
     aes(
       xmin = start,
       xmax = end,
@@ -189,8 +182,8 @@ P21796_example <- ggplot() +
   ) +
   geom_segment(
     aes(
-      x = P21796_result$cleavage_site, 
-      xend = P21796_result$cleavage_site, 
+      x = Q9Y4L1_result$cleavage_site, 
+      xend = Q9Y4L1_result$cleavage_site, 
       y = 2.6, 
       yend = 2
     ),
@@ -201,62 +194,7 @@ P21796_example <- ggplot() +
   scale_fill_manual(
     values = c(
       'protein' = 'grey70',
-      'Porin_3' = color_3
-    )
-  ) +
-  scale_color_manual(
-    values = c(
-      'protein' = 'black',
-      'Porin_3' = 'transparent'
-    )
-  ) +
-  theme_void()
-
-ggsave(
-  filename = 'figures/figure7/P21796_example.eps',
-  height = 0.2, width = 2, units = 'in'
-)
-
-# P11021, HSPA5, P11021_128
-P11021_database_info <- tribble(
-  ~ name, ~ start, ~ end,
-  'protein', 1, 654,
-  'HSP70', 30, 635
-)
-
-P11021_result <- tibble(
-  cleavage_site = c(128)
-)
-
-# example plot
-P11021_example <- ggplot() +
-  geom_rect(
-    data = P11021_database_info,
-    aes(
-      xmin = start,
-      xmax = end,
-      ymin = 1,
-      ymax = 2,
-      fill = name, 
-      color = name
-    ),
-    show.legend = FALSE
-  ) +
-  geom_segment(
-    aes(
-      x = P11021_result$cleavage_site, 
-      xend = P11021_result$cleavage_site, 
-      y = 2.6, 
-      yend = 2
-    ),
-    arrow = arrow(length = unit(0.04, "in")), 
-    color = "black",
-    linewidth = 0.3
-  ) +
-  scale_fill_manual(
-    values = c(
-      'protein' = 'grey70',
-      'HSP70' = color_4
+      'HSP70' = color_3
     )
   ) +
   scale_color_manual(
@@ -268,25 +206,25 @@ P11021_example <- ggplot() +
   theme_void()
 
 ggsave(
-  filename = 'figures/figure7/P11021_example.eps',
+  filename = 'figures/figure7/Q9Y4L1_example.eps',
   height = 0.2, width = 2, units = 'in'
 )
 
-# P38646, HSPA9, P38646_273
-P38646_database_info <- tribble(
+# Q92643, PIGK, Q92643_30
+Q92643_database_info <- tribble(
   ~ name, ~ start, ~ end,
-  'protein', 1, 679,
-  'HSP70', 55, 652
+  'protein', 1, 395,
+  'Peptidase_C13', 45, 277
 )
 
-P38646_result <- tibble(
-  cleavage_site = c(273)
+Q92643_result <- tibble(
+  cleavage_site = c(30)
 )
 
 # example plot
-P38646_example <- ggplot() +
+Q92643_example <- ggplot() +
   geom_rect(
-    data = P38646_database_info,
+    data = Q92643_database_info,
     aes(
       xmin = start,
       xmax = end,
@@ -299,8 +237,8 @@ P38646_example <- ggplot() +
   ) +
   geom_segment(
     aes(
-      x = P38646_result$cleavage_site, 
-      xend = P38646_result$cleavage_site, 
+      x = Q92643_result$cleavage_site, 
+      xend = Q92643_result$cleavage_site, 
       y = 2.6, 
       yend = 2
     ),
@@ -311,45 +249,96 @@ P38646_example <- ggplot() +
   scale_fill_manual(
     values = c(
       'protein' = 'grey70',
-      'HSP70' = color_5
+      'Peptidase_C13' = color_4
     )
   ) +
   scale_color_manual(
     values = c(
       'protein' = 'black',
-      'HSP70' = 'transparent'
+      'Peptidase_C13' = 'transparent'
     )
   ) +
   theme_void()
 
 ggsave(
-  filename = 'figures/figure7/P38646_example.eps',
+  filename = 'figures/figure7/Q92643_example.eps',
+  height = 0.2, width = 2, units = 'in'
+)
+
+# Q9NS69, TOMM22, Q9NS69_106
+Q9NS69_database_info <- tribble(
+  ~ name, ~ start, ~ end,
+  'protein', 1, 142,
+  'Tom22', 26, 117
+)
+
+Q9NS69_result <- tibble(
+  cleavage_site = c(106)
+)
+
+# example plot
+Q9NS69_example <- ggplot() +
+  geom_rect(
+    data = Q9NS69_database_info,
+    aes(
+      xmin = start,
+      xmax = end,
+      ymin = 1,
+      ymax = 2,
+      fill = name, 
+      color = name
+    ),
+    show.legend = FALSE
+  ) +
+  geom_segment(
+    aes(
+      x = Q9NS69_result$cleavage_site, 
+      xend = Q9NS69_result$cleavage_site, 
+      y = 2.6, 
+      yend = 2
+    ),
+    arrow = arrow(length = unit(0.04, "in")), 
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_manual(
+    values = c(
+      'protein' = 'grey70',
+      'Tom22' = color_5
+    )
+  ) +
+  scale_color_manual(
+    values = c(
+      'protein' = 'black',
+      'Tom22' = 'transparent'
+    )
+  ) +
+  theme_void()
+
+ggsave(
+  filename = 'figures/figure7/Q9NS69_example.eps',
   height = 0.2, width = 2, units = 'in'
 )
 
 ## ZER1, N-degron example
 # P26368_129, Q13263_686
-
-
-
-
-# Q14103, HNRNPD, Q14103_36, Q14103_42, Q14103_103
-Q14103_database_info <- tribble(
+# P26368, U2AF2, P26368_129
+P26368_database_info <- tribble(
   ~ name, ~ start, ~ end,
-  'protein', 1, 355,
-  'RRM_1', 100, 167,
-  'RRM_1', 184, 243,
-  'CBFNT', 1, 78
+  'protein', 1, 475,
+  'RRM_1', 151, 224,
+  'RRM_1', 261, 330,
+  'RRM_1', 400, 459
 )
 
-Q14103_result <- tibble(
-  cleavage_site = c(36, 103)
+P26368_result <- tibble(
+  cleavage_site = c(129)
 )
 
 # example plot
-Q14103_example <- ggplot() +
+P26368_example <- ggplot() +
   geom_rect(
-    data = Q14103_database_info,
+    data = P26368_database_info,
     aes(
       xmin = start,
       xmax = end,
@@ -362,8 +351,8 @@ Q14103_example <- ggplot() +
   ) +
   geom_segment(
     aes(
-      x = Q14103_result$cleavage_site, 
-      xend = Q14103_result$cleavage_site, 
+      x = P26368_result$cleavage_site, 
+      xend = P26368_result$cleavage_site, 
       y = 2.6, 
       yend = 2
     ),
@@ -374,41 +363,40 @@ Q14103_example <- ggplot() +
   scale_fill_manual(
     values = c(
       'protein' = 'grey70',
-      'RRM_1' = color_1,
-      'CBFNT' = color_2
+      'RRM_1' = color_1
     )
   ) +
   scale_color_manual(
     values = c(
       'protein' = 'black',
-      'RRM_1' = 'transparent',
-      'CBFNT' = 'transparent'
+      'RRM_1' = 'transparent'
     )
   ) +
   theme_void()
 
 ggsave(
-  filename = 'figures/figure7/Q14103_example.eps',
+  filename = 'figures/figure7/P26368_example.eps',
   height = 0.2, width = 2, units = 'in'
 )
 
-# P22626, HNRNPA2B1, P22626_214
-P22626_database_info <- tribble(
+# Q13263, TRIM28, Q13263_686
+Q13263_database_info <- tribble(
   ~ name, ~ start, ~ end,
-  'protein', 1, 353,
-  'RRM_1', 23, 88,
-  'RRM_1', 114, 172,
-  'HnRNPA1_LC', 296, 334
+  'protein', 1, 835,
+  'PHD', 628, 669,
+  'zf-B_box', 150, 194,
+  'zf-B_box', 208, 243,
+  'zf-RING_5', 64, 122
 )
 
-P22626_result <- tibble(
-  cleavage_site = c(214)
+Q13263_result <- tibble(
+  cleavage_site = c(686)
 )
 
 # example plot
-P22626_example <- ggplot() +
+Q13263_example <- ggplot() +
   geom_rect(
-    data = P22626_database_info,
+    data = Q13263_database_info,
     aes(
       xmin = start,
       xmax = end,
@@ -421,8 +409,8 @@ P22626_example <- ggplot() +
   ) +
   geom_segment(
     aes(
-      x = P22626_result$cleavage_site, 
-      xend = P22626_result$cleavage_site, 
+      x = Q13263_result$cleavage_site, 
+      xend = Q13263_result$cleavage_site, 
       y = 2.6, 
       yend = 2
     ),
@@ -433,21 +421,23 @@ P22626_example <- ggplot() +
   scale_fill_manual(
     values = c(
       'protein' = 'grey70',
-      'RRM_1' = color_3,
-      'HnRNPA1_LC' = color_4
+      'PHD' = color_2,
+      'zf-B_box' = color_3,
+      'zf-RING_5' = color_4
     )
   ) +
   scale_color_manual(
     values = c(
       'protein' = 'black',
-      'RRM_1' = 'transparent',
-      'HnRNPA1_LC' = 'transparent'
+      'PHD' = 'transparent',
+      'zf-B_box' = 'transparent',
+      'zf-RING_5' = 'transparent'
     )
   ) +
   theme_void()
 
 ggsave(
-  filename = 'figures/figure7/P22626_example.eps',
+  filename = 'figures/figure7/Q13263_example.eps',
   height = 0.2, width = 2, units = 'in'
 )
 
