@@ -682,7 +682,7 @@ ggsave(
   height = 0.2, width = 2, units = 'in'
 )
 
-### figure 8I, top20 and bottom20 structure analysis
+### figure 8H, top20 and bottom20 structure analysis
 ## import result from StructureMap
 library(tidyverse)
 
@@ -825,30 +825,25 @@ ggsave(
   height = 2, width = 2, units = 'in'
 )
 
-### figure 8J, Nucleolin example
-# P19338, NCL, Nucleolin
-P19338_database_info <- tribble(
+### figure 8I, Nucleolin example
+# P06748, NPM1, Nucleophosmin
+P06748_database_info <- tribble(
   ~ name, ~ start, ~ end,
-  'protein', 1, 710,
-  'RRM_1', 309, 377,
-  'RRM_1', 398, 459,
-  'RRM_1', 488, 554,
-  'RRM_1', 574, 640
+  'protein', 1, 294,
+  'Nucleoplasmin', 18, 117,
+  'NPM1-C', 245, 293
 )
 
-P19338_result <- tibble(
+P06748_result <- tibble(
   cleavage_site = c(
-    308, 311, 325, 332, 363, 
-    406, 411, 414, 430, 461,
-    491, 494, 526, 530, 576,
-    580
+    46, 89, 90, 91
   )
 )
 
 # example plot
-P19338_example <- ggplot() +
+P06748_example <- ggplot() +
   geom_rect(
-    data = P19338_database_info,
+    data = P06748_database_info,
     aes(
       xmin = start,
       xmax = end,
@@ -861,8 +856,8 @@ P19338_example <- ggplot() +
   ) +
   geom_segment(
     aes(
-      x = P19338_result$cleavage_site, 
-      xend = P19338_result$cleavage_site, 
+      x = P06748_result$cleavage_site, 
+      xend = P06748_result$cleavage_site, 
       y = 2.6, 
       yend = 2
     ),
@@ -873,56 +868,25 @@ P19338_example <- ggplot() +
   scale_fill_manual(
     values = c(
       'protein' = 'grey70',
-      'RRM_1' = color_1
+      'Nucleoplasmin' = color_1,
+      'NPM1-C' = color_2
     )
   ) +
   scale_color_manual(
     values = c(
       'protein' = 'black',
-      'RRM_1' = 'transparent'
+      'Nucleoplasmin' = 'transparent',
+      'NPM1-C' = 'transparent'
     )
   ) +
   theme_void()
 
 ggsave(
-  filename = 'figures/figure8/P19338_example.eps',
+  filename = 'figures/figure8/P06748_example.eps',
   height = 0.2, width = 2, units = 'in'
 )
 
-# heatmap for different protein N-termini
-library(ComplexHeatmap)
-library(circlize)
-
-P19338_N_termini <- str_c(
-  'P19338', 
-  c(
-    308, 311, 325, 332, 363, 
-    406, 411, 414, 430, 461,
-    491, 494, 526, 530, 576,
-    580
-  ),
-  sep = "_"
-)
-
-df <- HEK_Nterm_WP_delta_half_life |> 
-  filter(
-    Index %in% P19338_N_termini
-  ) |> 
-  select(Index, half_life.Nt)
-
-mat <- data.matrix(df |> select(half_life.Nt))
-rownames(mat) <- df$Index
-
-mat_color = colorRamp2(
-  breaks = c(5, 30, 55),
-  colors = c('blue', 'yellow', 'red')
-)
-
-Heatmap(
-  matrix = mat,
-  col = mat_color,
-  cluster_rows = FALSE
-)
+#
 
 # ### figure 8C, spliceosome, proteasome and ribosome
 # ## GO analysis of overlap proteins
