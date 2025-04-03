@@ -108,6 +108,167 @@ writeLines(
   'data_source/ELM_degron/Nterm_degron_GASTC_7mer.fasta'
 )
 
+### figure S4B, GO and KEGG enrichment analysis for FYLIW/N-degron and GASTC/N-degron
+library(tidyverse)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+
+## Nterm total protein
+Nterm_protein <- HEK_Nterm_ELM_N_degron |> 
+  distinct(UniProt_Accession) |> 
+  pull()
+
+## FYLIW/N-degron
+FYLIW_N_degron_protein <- HEK_Nterm_ELM_N_degron |> 
+  filter(ELM_N_degron == 'FYLIW') |> 
+  distinct(UniProt_Accession) |> 
+  pull()
+
+# GO analysis
+FYLIW_N_degron_GO <- enrichGO(
+  gene = FYLIW_N_degron_protein,
+  OrgDb = org.Hs.eg.db,
+  universe = Nterm_protein,
+  keyType = 'UNIPROT',
+  ont = 'ALL',
+  pvalueCutoff = 1,
+  qvalueCutoff = 1
+)
+
+write.csv(
+  FYLIW_N_degron_GO@result,
+  'data_source/ELM_degron/FYLIW_N_degron_GO.csv',
+)
+
+# KEGG analysis
+FYLIW_N_degron_KEGG <- enrichKEGG(
+  gene = FYLIW_N_degron_protein,
+  organism = 'hsa',
+  keyType = 'uniprot',
+  universe = Nterm_protein,
+  pvalueCutoff = 1,
+  qvalueCutoff = 1
+)
+
+write.csv(
+  FYLIW_N_degron_KEGG@result,
+  'data_source/ELM_degron/FYLIW_N_degron_KEGG.csv',
+)
+
+## GASTC/N-degron
+GASTC_N_degron_protein <- HEK_Nterm_ELM_N_degron |> 
+  filter(ELM_N_degron == 'GASTC') |> 
+  distinct(UniProt_Accession) |> 
+  pull()
+
+# GO analysis
+GASTC_N_degron_GO <- enrichGO(
+  gene = GASTC_N_degron_protein,
+  OrgDb = org.Hs.eg.db,
+  universe = Nterm_protein,
+  keyType = 'UNIPROT',
+  ont = 'ALL',
+  pvalueCutoff = 1,
+  qvalueCutoff = 1
+)
+
+write_csv(
+  GASTC_N_degron_GO@result,
+  'data_source/ELM_degron/GASTC_N_degron_GO.csv',
+)
+
+# KEGG analysis
+GASTC_N_degron_KEGG <- enrichKEGG(
+  gene = GASTC_N_degron_protein,
+  organism = 'hsa',
+  keyType = 'uniprot',
+  universe = Nterm_protein,
+  pvalueCutoff = 1,
+  qvalueCutoff = 1
+)
+
+write_csv(
+  GASTC_N_degron_KEGG@result,
+  'data_source/ELM_degron/GASTC_N_degron_KEGG.csv',
+)
+
+## bar plot
+# FWLIW/N-degron
+FYLIW_N_degron_GO <- read_csv(
+  'data_source/ELM_degron/FYLIW_N_degron_GO.csv'
+)
+
+FYLIW_N_degron_GO_KEGG <- bind_rows(
+  FYLIW_N_degron_GO |> 
+    filter(Description %in% c(
+      'Vesicle lumen',
+      'Secretory granule',
+      'ATP-dependent protein folding chaperone',
+      'Ubiquitin protein ligase binding',
+      'Ribonucleoprotein complex'
+    ))
+)
+
+barplot_FYLIW_N_degron_GO_KEGG <- FYLIW_N_degron_GO_KEGG |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = fct_reorder(Description, -log10(p.adjust)), 
+      y = -log10(p.adjust)
+    ),
+    fill = color_1, color = 'transparent', stat = 'identity'
+  ) +
+  labs(x = 'GO & KEGG', y = '-log10(adjust P value)') +
+  coord_flip() +
+  theme(
+    axis.text = element_text(size = 8, color = 'black', family = 'arial'),
+    axis.title = element_text(size = 8, color = 'black', family = 'arial')
+  )
+
+ggsave(
+  filename = 'figures/figureS4/barplot_FYLIW_N_degron_GO_KEGG.eps',
+  plot = barplot_FYLIW_N_degron_GO_KEGG,
+  height = 1.5, width = 4, units = 'in'
+)
+
+# GASTC/N-degron
+GASTC_N_degron_GO <- read_csv(
+  'data_source/ELM_degron/GASTC_N_degron_GO.csv'
+)
+
+GASTC_N_degron_GO_KEGG <- bind_rows(
+  GASTC_N_degron_GO |> 
+    filter(Description %in% c(
+      'Cell adhesion molecule binding',
+      'mRNA binding',
+      'Chromatin binding',
+      'mRNA metabolic process',
+      'Regulation of apoptotic process'
+    ))
+)
+
+barplot_GASTC_N_degron_GO_KEGG <- GASTC_N_degron_GO_KEGG |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = fct_reorder(Description, -log10(p.adjust)), 
+      y = -log10(p.adjust)
+    ),
+    fill = color_2, color = 'transparent', stat = 'identity'
+  ) +
+  labs(x = 'GO & KEGG', y = '-log10(adjust P value)') +
+  coord_flip() +
+  theme(
+    axis.text = element_text(size = 8, color = 'black', family = 'arial'),
+    axis.title = element_text(size = 8, color = 'black', family = 'arial')
+  )
+
+ggsave(
+  filename = 'figures/figureS4/barplot_GASTC_N_degron_GO_KEGG.eps',
+  plot = barplot_GASTC_N_degron_GO_KEGG,
+  height = 1.5, width = 4, units = 'in'
+)
+
 # ### figure S4A, modification-related ELM motif
 # # Wilcoxon rank-sum test
 # library(rstatix)

@@ -15,7 +15,7 @@ write_delim(topfinder_id,
 
 # import result from TopFinder
 Nterm_topfinder_result <- read_delim(
-  'data_source/Nterm_topfinder/2025_02_17_Nterm_02172025/2025_02_17_Nterm_02172025_Full_Table.txt',
+  'data_source/Nterm_topfinder/2025_04_02_Nterm_degradation_04022025_R/2025_04_02_Nterm_degradation_04022025_R_Full_Table.txt',
   col_names = TRUE,
   name_repair = 'universal'
 ) |> 
@@ -58,7 +58,7 @@ Cleaving.Proteases.List <- Nterm_degron_topfinder_cleaving_proteases |>
   filter(n > 1) |> 
   pull(Cleaving.proteases)
 
-Nterm_topfinder_cleaving_proteases |>
+Nterm_degron_topfinder_cleaving_proteases |>
   filter(Cleaving.proteases %in% Cleaving.Proteases.List) |> 
   wilcox_test(half_life ~ Cleaving.proteases) |>
   filter(p < 0.05)

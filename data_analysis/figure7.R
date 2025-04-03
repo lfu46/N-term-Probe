@@ -8,35 +8,34 @@ library(rstatix)
 HEK_Nterm_ELM_N_degron_wilcoxon_test <- HEK_Nterm_ELM_N_degron |>
   wilcox_test(half_life ~ ELM_N_degron) |> 
   add_significance('p') |> 
-  filter(p < 0.05)
+  filter(p.adj < 0.05) |> 
+  slice(1, 2, 5, 8)
 
 # point range plot
 library(ggpubr)
 
-point_range_Nterm_degron <- HEK_Nterm_ELM_N_degron |> 
+violin_boxplot_Nterm_degron <- HEK_Nterm_ELM_N_degron |> 
   ggplot() +
-  geom_point(
+  geom_violin(
     aes(
       x = fct_reorder(ELM_N_degron, half_life),
       y = half_life
     ),
-    position = position_jitter(width = 0.3),
-    color = 'black',
-    alpha = 0.1,
-    size = 0.5
+    fill = color_1, color = 'transparent'
   ) +
-  stat_summary(
+  geom_boxplot(
     aes(
       x = fct_reorder(ELM_N_degron, half_life),
-      y = half_life 
-    ),
-    fun.data = 'mean_cl_boot', color = color_1, linewidth = 0.2, size = 0.5
+      y = half_life
+    ), 
+    color = 'black', width = 0.2, outliers = FALSE
   ) +
   stat_pvalue_manual(
     data = HEK_Nterm_ELM_N_degron_wilcoxon_test, label = 'p.adj.signif', label.size = 6, hide.ns = TRUE,
-    tip.length = 0, y.position = c(150, 165, 180)
+    tip.length = 0, y.position = c(48, 42, 45, 39)
   ) +
   labs(x = '', y = '') +
+  coord_cartesian(ylim = c(0, 50)) +
   theme(
     panel.grid.major = element_line(color = "gray", linewidth = 0.2),
     panel.grid.minor = element_line(color = "gray", linewidth = 0.1),
@@ -45,11 +44,10 @@ point_range_Nterm_degron <- HEK_Nterm_ELM_N_degron |>
   )
 
 ggsave(
-  filename = 'figures/figure7/point_range_Nterm_degron.eps',
-  plot = point_range_Nterm_degron,
-  device = cairo_ps,
-  height = 2, width = 2.2, units = 'in',
-  fallback_resolution = 1200
+  filename = 'figures/figure7/violin_boxplot_Nterm_degron.eps',
+  plot = violin_boxplot_Nterm_degron,
+  device = 'eps',
+  height = 2, width = 2.2, units = 'in'
 )
 
 ### figure 7B, insights from half-life, N-degron, protease, structure, motif and domain
@@ -62,12 +60,12 @@ HEK_Nterm_ELM_N_degron <- read_csv(
 ) |> 
   select(
     Index, UniProt_Accession, Gene, Entry.Name, 
-    Kd, half_life, category, Nterm_terminus, ELM_N_degron
+    Kd_adj, half_life, category, Nterm_terminus, ELM_N_degron
   )
 
 # protease
 Nterm_topfinder_result_protease_feature <- read_delim(
-  'data_source/Nterm_topfinder/2025_02_17_Nterm_02172025/2025_02_17_Nterm_02172025_Full_Table.txt',
+  'data_source/Nterm_topfinder/2025_04_02_Nterm_degradation_04022025_R/2025_04_02_Nterm_degradation_04022025_R_Full_Table.txt',
   col_names = TRUE,
   name_repair = 'universal'
 ) |> 
@@ -98,6 +96,11 @@ write_csv(
 )
 
 ## UBR-box, N-degron example
+# Q13740_28, Q9Y4L1_33, Q92643_30, Q9NS69_106
+
+
+
+
 # O94826, TOMM70, O94826_389, O94826_414, O94826_523
 O94826_database_info <- tribble(
   ~ name, ~ start, ~ end,
@@ -325,6 +328,11 @@ ggsave(
 )
 
 ## ZER1, N-degron example
+# P26368_129, Q13263_686
+
+
+
+
 # Q14103, HNRNPD, Q14103_36, Q14103_42, Q14103_103
 Q14103_database_info <- tribble(
   ~ name, ~ start, ~ end,
@@ -487,6 +495,8 @@ write_csv(
 )
 
 # use specific vitual env
+library(reticulate)
+
 use_condaenv(
   condaenv = '/opt/anaconda3/envs/Nterm_probe',
   required = TRUE
@@ -496,6 +506,8 @@ use_condaenv(
 source_python('data_analysis/N_recognin_NCPR.py')
 
 # convert list result to tibble
+library(tidyverse)
+
 NCPR_result_tibble_list <- lapply(names(NCPR_result), function(protein_id) {
   tibble(UniProt_Accession = protein_id, NCPR = NCPR_result[[protein_id]])
 })
@@ -536,6 +548,7 @@ NCPR_UBR1 <- NCPR_result_tibble_adj |>
       )
   ) +
   labs(x = '', y = '') +
+  coord_cartesian(ylim = c(-0.8, 0.6)) +
   theme(
     panel.grid.major = element_line(color = "gray", linewidth = 0.2),
     panel.grid.minor = element_line(color = "gray", linewidth = 0.1),
@@ -569,6 +582,7 @@ NCPR_ZER1 <- NCPR_result_tibble_adj |>
     )
   ) +
   labs(x = '', y = '') +
+  coord_cartesian(ylim = c(-0.8, 0.6)) +
   theme(
     panel.grid.major = element_line(color = "gray", linewidth = 0.2),
     panel.grid.minor = element_line(color = "gray", linewidth = 0.1),
@@ -599,14 +613,19 @@ Nterm_topfiner_cleaving_proteases_wilcoxon_test <- Nterm_degron_topfinder_cleavi
   filter(p < 0.05)
 
 Nterm_cleaving_protease_list <- c(
-  'GRAB',
-  'CATL1',
   'CATS',
+  'CATB',
+  
+  'GRAB',
+  
   'MEP1A',
   'MEP1B',
-  'CATB',
-  'GRAM',
-  'MMP11'
+
+  'MMP11',
+  'HTRA2',
+  
+  'CASP1',
+  'CASP3'
 )
 
 # boxplot
@@ -615,30 +634,22 @@ library(ggpubr)
 point_range_plot_Nterm_cleaving_proteases <- Nterm_degron_topfinder_cleaving_proteases |> 
   filter(Cleaving.proteases %in% Nterm_cleaving_protease_list) |> 
   ggplot() +
-  geom_point(
-    aes(
-      x = Cleaving.proteases, y = half_life
-    ),
-    position = position_jitter(width = 0.3),
-    size = 0.5,
-    color = 'black',
-    alpha = 0.3
-  ) +
   stat_summary(
     aes(
-      x = Cleaving.proteases, 
+      x = fct_reorder(Cleaving.proteases, half_life), 
       y = half_life
     ),
     fun.data = 'mean_cl_boot', color = color_3, linewidth = 0.2, size = 0.5
   ) +
   labs(x = '', y = '') +
   stat_pvalue_manual(
-    data = Nterm_topfiner_cleaving_proteases_wilcoxon_test,
+    data = Nterm_topfiner_cleaving_proteases_wilcoxon_test |> slice(2, 4),
     label = 'p.signif',
-    y.position = c(160, 180, 170, 150),
+    y.position = c(35, 32),
     tip.length = 0,
     label.size = 6
   ) +
+  coord_cartesian(ylim = c(10, 38)) +
   theme(
     panel.grid.major = element_line(color = "gray", linewidth = 0.2),
     panel.grid.minor = element_line(color = "gray", linewidth = 0.1),
@@ -649,9 +660,8 @@ point_range_plot_Nterm_cleaving_proteases <- Nterm_degron_topfinder_cleaving_pro
 ggsave(
   filename = 'figures/figure7/point_range_plot_Nterm_cleaving_proteases.eps',
   plot = point_range_plot_Nterm_cleaving_proteases,
-  device = cairo_ps,
-  height = 2, width = 2.2, units = 'in',
-  fallback_resolution = 1200
+  device = 'eps',
+  height = 2, width = 2.2, units = 'in'
 )
 
 ### figure 7D, ELM motifs

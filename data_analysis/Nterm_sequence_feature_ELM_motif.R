@@ -47,15 +47,15 @@ ELM_motif_database <- HEK_Nterm_sequence_ELM_motif |>
   distinct()
 
 # genelist descending Kd
-geneList_des_Kd <- HEK_Nterm_Kd_half_life_sequence$Kd
-names(geneList_des_Kd) <- HEK_Nterm_Kd_half_life_sequence$Index
-geneList_des_Kd <- sort(geneList_des_Kd, decreasing = TRUE)
+geneList_des_Kd_adj <- HEK_Nterm_Kd_half_life_sequence$Kd_adj
+names(geneList_des_Kd_adj) <- HEK_Nterm_Kd_half_life_sequence$Index
+geneList_des_Kd_adj <- sort(geneList_des_Kd_adj, decreasing = TRUE)
 
 # GSEA
 library(clusterProfiler)
 
 Nterm_ELM_motif_GSEA_des_Kd <- GSEA(
-  geneList = geneList_des_Kd,
+  geneList = geneList_des_Kd_adj,
   TERM2GENE = ELM_motif_database,
   pvalueCutoff = 1,
   scoreType = 'pos'
