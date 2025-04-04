@@ -1058,7 +1058,7 @@ ggsave(
   height = 1, width = 2, units = 'in'
 )
 
-### figure 8G,  Q14103_99 example plot
+### figure 8H,  Q14103_99 example plot
 ## Q14103, HNRNPD, Heterogeneous nuclear ribonucleoprotein D0
 Q14103_database_info <- tribble(
   ~ name, ~ start, ~ end,
@@ -1227,7 +1227,7 @@ ggsave(
   height = 1, width = 2, units = 'in'
 )
 
-### figure 8H, top20 and bottom20 structure analysis
+### figure 8I, top20 and bottom20 structure analysis
 ## import result from StructureMap
 library(tidyverse)
 
@@ -1256,6 +1256,11 @@ bottom20_secondary_structure <- top20_bottom20_protein_structure |>
 top20_bottom20_secondary_structure_comb <- bind_rows(
   top20_secondary_structure,
   bottom20_secondary_structure
+)
+
+write_csv(
+  top20_bottom20_secondary_structure_comb,
+  file = 'data_source/Nterm_WP_comparison/top20_bottom20_secondary_structure_comb.csv'
 )
 
 # ANOVA test/Turkey HSD
